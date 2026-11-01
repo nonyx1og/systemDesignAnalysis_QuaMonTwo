@@ -1,0 +1,344 @@
+/* /Dat/Theo/{ma}: theo dõi đơn, đặt cọc. Hợp đồng ở docs/design-khach.md, mục 11. */
+
+.theo-h2 {
+  font-size: var(--dat-fs-lead);
+  margin: 0 0 1rem;
+}
+.theo-h3 {
+  font-size: var(--dat-fs-body);
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* Đầu trang: mã đơn, trạng thái bằng chữ, mốc thời gian */
+.theo-head {
+  margin-bottom: 1.5rem;
+}
+.theo-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--dat-control-h);
+  color: var(--dat-text-secondary);
+}
+.theo-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.theo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  margin: 0.5rem 0 0;
+  color: var(--dat-text-secondary);
+}
+.theo-meta strong {
+  color: var(--dat-text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Nhãn trạng thái: luôn có chữ, màu là phụ */
+.theo-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--dat-radius-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+}
+.theo-chip--cho { background: var(--dat-warning-bg); color: var(--dat-warning); }
+.theo-chip--loi { background: var(--dat-danger-bg); color: var(--dat-danger); }
+.theo-chip--tin { background: var(--dat-info-bg); color: var(--dat-info); }
+.theo-chip--xong { background: var(--dat-success-bg); color: var(--dat-success); }
+
+/* Bốn chặng của đơn: thanh phẳng 4px và chữ */
+.theo-steps {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 768px) {
+  .theo-steps { gap: 1rem; }
+}
+.theo-step {
+  padding-top: 0.5rem;
+  border-top: 4px solid var(--dat-bg-accent-soft);
+  color: var(--dat-text-secondary);
+}
+.theo-step--xong { border-top-color: var(--dat-text-main); }
+.theo-step--nay {
+  border-top-color: var(--dat-text-main);
+  color: var(--dat-text-main);
+}
+.theo-step-ten {
+  display: block;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.theo-step--nay .theo-step-ten { font-family: var(--dat-font-display); }
+@media (max-width: 479.98px) {
+  .theo-step-ten { font-size: var(--dat-fs-small); }
+}
+.theo-step-tt {
+  display: block;
+  font-size: var(--dat-fs-small);
+}
+
+/* Thân trang: lưới theo vùng. Trên mobile, thứ tự là thứ tự trong HTML (phiếu cọc lên trước). */
+.theo-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .theo-body {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-areas:
+      "notice phieu"
+      "chitiet phieu";
+    gap: 1.5rem;
+  }
+  .theo-body--coc {
+    grid-template-areas:
+      "notice coc"
+      "chitiet coc"
+      "phieu coc";
+  }
+  .theo-notice { grid-area: notice; }
+  .theo-chitiet { grid-area: chitiet; }
+  .theo-phieu { grid-area: phieu; }
+  .theo-coc {
+    grid-area: coc;
+    position: sticky;
+    top: calc(var(--dat-header-h) + 1rem);
+  }
+}
+
+/* Khối thông báo theo trạng thái: nền màu trạng thái, chữ đậm cùng tông */
+.theo-notice {
+  padding: 1rem;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+}
+@media (min-width: 768px) {
+  .theo-notice { padding: 1.5rem; }
+}
+.theo-notice--cho { background: var(--dat-warning-bg); color: var(--dat-warning); }
+.theo-notice--loi { background: var(--dat-danger-bg); color: var(--dat-danger); }
+.theo-notice--tin { background: var(--dat-info-bg); color: var(--dat-info); }
+.theo-notice--xong { background: var(--dat-success-bg); color: var(--dat-success); }
+.theo-notice-title {
+  font-size: var(--dat-fs-lead);
+  margin: 0;
+  color: inherit;
+}
+.theo-notice p {
+  margin: 0.5rem 0 0;
+  max-width: 60ch;
+}
+.theo-notice strong {
+  font-variant-numeric: tabular-nums;
+}
+.theo-note {
+  padding-top: 0.75rem;
+}
+.theo-note-nhan {
+  display: block;
+  font-size: var(--dat-fs-small);
+  font-weight: 600;
+}
+.theo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.theo-actions form { margin: 0; }
+@media (max-width: 479.98px) {
+  .theo-actions > *,
+  .theo-actions .dat-btn { width: 100%; }
+}
+
+/* Tờ cọc */
+.theo-coc-nhan {
+  margin: 0;
+  color: var(--dat-text-secondary);
+}
+.theo-coc-so {
+  margin: 0.25rem 0 0;
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  font-size: var(--dat-fs-head);
+  line-height: 1.15;
+}
+.theo-coc-khoang {
+  margin: 0.5rem 0 0;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.theo-qr {
+  margin: 1.5rem auto 0.5rem;
+  padding: 0.75rem;
+  width: fit-content;
+  max-width: 100%;
+  background: #fff; /* nền trắng cho máy quét */
+  border-radius: var(--dat-radius-sm);
+}
+.theo-qr img {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+}
+.theo-qr-ghichu {
+  margin: 0;
+  text-align: center;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.theo-ck {
+  margin: 1.5rem 0 0;
+  padding: 0.75rem 1rem;
+  background: var(--dat-bg-muted);
+  border-radius: var(--dat-radius-sm);
+  display: grid;
+  gap: 0.75rem;
+}
+.theo-ck dt {
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+  font-weight: 400;
+}
+.theo-ck dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.theo-ck-noidung {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: var(--dat-fs-lead);
+  color: var(--dat-text-main);
+  background: none;
+  padding: 0;
+}
+.theo-coc-sau {
+  margin: 1rem 0 0;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+
+/* Chi tiết thiết kế */
+.theo-anh {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 1.5rem;
+}
+.theo-anh--doi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.theo-anh figure { margin: 0; }
+.theo-anh img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: var(--dat-bg-canvas);
+  border-radius: var(--dat-radius-sm);
+}
+.theo-anh:not(.theo-anh--doi) img { max-width: 360px; }
+.theo-anh figcaption {
+  margin-top: 0.5rem;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+
+.theo-dl { margin: 0; display: grid; gap: 0.75rem; }
+.theo-dl > div {
+  display: grid;
+  gap: 0.125rem 1rem;
+}
+@media (min-width: 560px) {
+  .theo-dl > div { grid-template-columns: 9.5rem minmax(0, 1fr); }
+}
+.theo-dl dt {
+  font-weight: 400;
+  color: var(--dat-text-secondary);
+}
+.theo-dl dd { margin: 0; overflow-wrap: anywhere; }
+
+.theo-trong { margin: 0; color: var(--dat-text-secondary); }
+.theo-tp { list-style: none; margin: 0; padding: 0; }
+.theo-tp li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+.theo-tp li > span:last-child { color: var(--dat-text-secondary); }
+
+.theo-huy {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+}
+.theo-btn-huy {
+  background: var(--dat-bg-surface);
+  border-color: var(--dat-danger);
+  color: var(--dat-danger);
+}
+.theo-btn-huy:hover:not(:disabled) {
+  background: var(--dat-danger-bg);
+  color: var(--dat-danger);
+}
+
+/* Phiếu giá và cuống */
+.theo-gia { margin: 0; display: grid; gap: 0.5rem; }
+.theo-gia > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.theo-gia dt { font-weight: 400; color: var(--dat-text-secondary); }
+.theo-gia dd { margin: 0; text-align: right; }
+.theo-gia .theo-gia-lydo dd {
+  text-align: left;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.theo-gia-cuoi {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+.theo-gia-cuoi > span:last-child {
+  font-family: var(--dat-font-display);
+  font-size: var(--dat-fs-lead);
+}
+.theo-gia-cho {
+  margin: 1rem 0 0;
+  color: var(--dat-text-secondary);
+}
+.theo-phieu .dat-perf { margin: 1.5rem 0 1rem; }
+.theo-cuong-nhan {
+  margin: 0;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.theo-cuong-ma {
+  margin: 0.25rem 0 0;
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  font-size: var(--dat-fs-lead);
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}

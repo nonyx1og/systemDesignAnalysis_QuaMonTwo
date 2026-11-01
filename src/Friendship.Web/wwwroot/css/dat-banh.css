@@ -1,0 +1,886 @@
+/* ==========================================================================
+   nongnongBakery - trang khách /Dat/*
+   Hướng thiết kế: "phiếu đặt bánh". Hợp đồng đầy đủ ở docs/design-khach.md.
+   Font tự host (SIL OFL) trong wwwroot/fonts, license đi kèm.
+   ========================================================================== */
+
+/* Fraunces: tiêu đề. Tập vietnamese là bắt buộc, Young Serif không có nên không dùng. */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/fraunces-vietnamese-wght-normal.woff2") format("woff2");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/fraunces-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/fraunces-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Source Serif 4: chữ thường, form, nút */
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("../fonts/source-serif-4-vietnamese-wght-normal.woff2") format("woff2");
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("../fonts/source-serif-4-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("../fonts/source-serif-4-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* 1. Nền và tờ giấy. Tách nhau bằng bậc màu, không bằng viền hay bóng. */
+  --dat-bg: #F6E4DA;
+  --dat-bg-surface: #FFF8F4;
+  --dat-bg-muted: #EFD2C4;
+  --dat-bg-accent-soft: #E8C6B7;
+  --dat-bg-canvas: #FBEEE6;
+
+  /* 2. Chữ (ink mận-nâu, không dùng đen thuần) */
+  --dat-text-main: #3A1B26;
+  --dat-text-secondary: #68414F;
+  --dat-text-muted: #7A5260;
+  --dat-text-inverse: #FFF8F4;
+
+  /* 3. Hành động: nút chính là khối ink đặc */
+  --dat-accent: #3A1B26;
+  --dat-accent-hover: #55303D;
+  --dat-accent-active: #28101A;
+  --dat-accent-rgb: 58, 27, 38;
+
+  /* 4. Màu nhấn duy nhất: số tiền cọc, tối đa một chỗ mỗi màn hình */
+  --dat-berry: #A3194A;
+  --dat-berry-light: #F6D3DC;
+  --dat-berry-hover: #84123A;
+
+  /* 5. Giữ tên cũ. Không còn vàng riêng, chuyển về tông chữ phụ. */
+  --dat-gold: #7A5260;
+  --dat-gold-hover: #68414F;
+  --dat-gold-light: #EFD2C4;
+  --dat-gold-rgb: 122, 82, 96;
+  --dat-champagne: #DDB9AA;
+
+  /* 6. Dải tối (chân trang, lời mời cuối) */
+  --dat-field: #3A1B26;
+  --dat-field-ink: #F6E4DA;
+  --dat-field-muted: #D9B9AE;
+
+  /* 7. Trạng thái. Luôn đi kèm chữ. */
+  --dat-success: #1E6A43;
+  --dat-success-bg: #DDEFE3;
+  --dat-warning: #7A4700;
+  --dat-warning-bg: #FBE8C6;
+  --dat-danger: #A3202B;
+  --dat-danger-bg: #FADAD6;
+  --dat-info: #25587F;
+  --dat-info-bg: #DCE8F2;
+
+  /* 8. Viền. --dat-border chỉ là mép giấy (1,5:1); --dat-border-strong cho ô nhập và nút (>= 3:1). */
+  --dat-border: #E3C6B9;
+  --dat-border-subtle: #EBD5CA;
+  --dat-border-strong: #8C6572;
+  --dat-border-focus: #3A1B26;
+
+  /* 9. Bóng: không có cho thứ nằm yên. Chỉ --dat-shadow-lg cho thứ nổi (menu mở, toast). */
+  --dat-shadow-xs: none;
+  --dat-shadow-sm: none;
+  --dat-shadow-md: none;
+  --dat-shadow-clay: none;
+  --dat-shadow-turntable: none;
+  --dat-shadow-lg: 0 8px 24px rgba(58, 27, 38, 0.18);
+  --dat-shadow-focus: 0 0 0 2px var(--dat-bg-surface), 0 0 0 4px var(--dat-text-main);
+  --dat-shadow-gold: var(--dat-shadow-focus);
+
+  /* 10. Bo góc: một giá trị 4px cho mọi thứ. Tròn chỉ cho ô màu và chấm. */
+  --dat-radius-xs: 2px;
+  --dat-radius-sm: 4px;
+  --dat-radius-md: 4px;
+  --dat-radius-lg: 4px;
+  --dat-radius-xl: 4px;
+  --dat-radius-full: 9999px;
+
+  /* 11. Chữ: hai font, năm bậc */
+  --dat-font: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --dat-font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --dat-fs-small: 0.8125rem;
+  --dat-fs-body: 1rem;
+  --dat-fs-lead: 1.25rem;
+  --dat-fs-head: 1.75rem;
+  --dat-fs-display: clamp(2.25rem, 1.4rem + 3.6vw, 4rem);
+
+  /* 12. Khuôn */
+  --dat-control-h: 44px;
+  --dat-container: 1200px;
+  --dat-header-h: 60px;
+
+  /* 13. Chuyển động: ngắn, không nảy */
+  --dat-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --dat-spring-smooth: cubic-bezier(0.2, 0, 0, 1);
+  --dat-spring-bounce: cubic-bezier(0.2, 0, 0, 1);
+  --dat-duration-fast: 150ms;
+  --dat-duration-normal: 240ms;
+  --dat-duration-slow: 360ms;
+}
+
+/* ==========================================================================
+   NỀN TỐI THIỂU (thay cho bootstrap reboot, chỉ phần trang khách cần)
+   ========================================================================== */
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+}
+[hidden] {
+  display: none !important;
+}
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+ul, ol, dl {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+ul, ol {
+  padding-left: 2rem;
+}
+dt {
+  font-weight: 700;
+}
+dd {
+  margin-bottom: 0.5rem;
+  margin-left: 0;
+}
+strong, b {
+  font-weight: bolder;
+}
+img, svg {
+  vertical-align: middle;
+}
+table {
+  caption-side: bottom;
+  border-collapse: collapse;
+}
+th {
+  text-align: inherit;
+}
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  line-height: inherit;
+}
+legend + * {
+  clear: left;
+}
+label {
+  display: inline-block;
+}
+button, input, select, textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+button, select {
+  text-transform: none;
+}
+button {
+  border-radius: 0;
+}
+button:not(:disabled) {
+  cursor: pointer;
+}
+textarea {
+  resize: vertical;
+}
+summary {
+  cursor: pointer;
+}
+a {
+  color: var(--dat-accent);
+  text-decoration: underline;
+}
+a:hover {
+  color: var(--dat-accent-hover);
+}
+
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  max-width: calc(var(--dat-container) + 2rem);
+}
+@media (min-width: 768px) {
+  .container {
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    max-width: calc(var(--dat-container) + 3rem);
+  }
+}
+.d-none {
+  display: none !important;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ==========================================================================
+   NỀN CHUNG
+   ========================================================================== */
+
+body.dat-body {
+  background-color: var(--dat-bg);
+  color: var(--dat-text-main);
+  font-family: var(--dat-font);
+  font-size: var(--dat-fs-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+body.dat-body main {
+  flex: 1 0 auto;
+}
+
+body.dat-body h1,
+body.dat-body h2,
+body.dat-body h3,
+body.dat-body h4,
+body.dat-body h5,
+body.dat-body h6 {
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--dat-text-main);
+}
+body.dat-body .num,
+body.dat-body .text-end,
+body.dat-body td {
+  font-variant-numeric: tabular-nums;
+}
+body.dat-body small,
+body.dat-body .small {
+  font-size: var(--dat-fs-small);
+}
+body.dat-body a {
+  text-underline-offset: 0.18em;
+}
+
+/* Skip to main content */
+.dat-skip-link {
+  position: absolute;
+  top: -48px;
+  left: 1rem;
+  background: var(--dat-accent);
+  color: var(--dat-text-inverse);
+  padding: 0.75rem 1rem;
+  z-index: 9999;
+  border-radius: var(--dat-radius-sm);
+  text-decoration: none;
+  font-weight: 600;
+  transition: top var(--dat-duration-fast);
+}
+.dat-skip-link:focus {
+  top: 1rem;
+  outline: 2px solid var(--dat-bg-surface);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--dat-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dat-border-strong);
+  border-radius: var(--dat-radius-full);
+}
+
+::selection {
+  background-color: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--dat-text-main);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   FORM VÀ THÔNG BÁO: chỉ những class mà trang khách còn dùng
+   (form-label, form-control, form-select, form-text, alert, text-danger)
+   ========================================================================== */
+
+.form-label {
+  display: inline-block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--dat-text-main);
+}
+.form-control,
+.form-select {
+  display: block;
+  width: 100%;
+  min-height: var(--dat-control-h);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--dat-font);
+  font-size: var(--dat-fs-body);
+  line-height: 1.5;
+  color: var(--dat-text-main);
+  background-color: var(--dat-bg-surface);
+  background-clip: padding-box;
+  border: 1px solid var(--dat-border-strong);
+  border-radius: var(--dat-radius-sm);
+  appearance: none;
+  transition: border-color var(--dat-duration-fast) var(--dat-ease), box-shadow var(--dat-duration-fast) var(--dat-ease);
+}
+.form-select {
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%233A1B26' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+}
+textarea.form-control {
+  min-height: calc(var(--dat-control-h) * 2);
+}
+.form-control::placeholder {
+  color: var(--dat-text-muted);
+  opacity: 1;
+}
+.form-control:focus,
+.form-select:focus {
+  outline: 0;
+  border-color: var(--dat-text-main);
+  box-shadow: var(--dat-shadow-focus);
+}
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: var(--dat-bg-muted);
+  color: var(--dat-text-secondary);
+}
+.form-text {
+  margin-top: 0.25rem;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.text-danger,
+.field-validation-error {
+  color: var(--dat-danger);
+  font-size: var(--dat-fs-small);
+}
+
+.alert {
+  position: relative;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--dat-radius-sm);
+  color: var(--dat-text-main);
+  background: var(--dat-bg-surface);
+}
+.alert-danger {
+  color: var(--dat-danger);
+  background: var(--dat-danger-bg);
+}
+
+
+/* ==========================================================================
+   THÀNH PHẦN CỦA PHIẾU (dùng ở mọi trang)
+   ========================================================================== */
+
+/* Tờ giấy: nền bậc sáng, không viền, không bóng */
+.dat-paper {
+  background: var(--dat-bg-surface);
+  border-radius: var(--dat-radius-sm);
+  padding: 1rem;
+}
+@media (min-width: 768px) {
+  .dat-paper {
+    padding: 1.5rem;
+  }
+}
+
+/* Đường đục lỗ giữa thân phiếu và cuống: chấm tròn 4px */
+.dat-perf {
+  border: 0;
+  border-top: 4px dotted var(--dat-border-strong);
+  margin: 1rem 0;
+  opacity: 1;
+}
+
+/* Dải tối cắt trang: nền ink, chữ sáng */
+.dat-band {
+  background: var(--dat-field);
+  color: var(--dat-field-ink);
+  border-radius: var(--dat-radius-sm);
+}
+.dat-band h1,
+.dat-band h2,
+.dat-band h3,
+.dat-band a:not(.dat-btn) {
+  color: var(--dat-field-ink);
+}
+.dat-band .dat-btn-primary {
+  background: var(--dat-field-ink);
+  color: var(--dat-field);
+}
+.dat-band .dat-btn-primary:hover:not(:disabled) {
+  background: var(--dat-bg-surface);
+}
+.dat-band :focus-visible {
+  outline-color: var(--dat-field-ink);
+}
+
+.dat-display {
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  font-size: var(--dat-fs-display);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+.dat-h1 {
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  font-size: var(--dat-fs-head);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0;
+}
+.dat-lead {
+  font-size: var(--dat-fs-lead);
+  line-height: 1.5;
+  color: var(--dat-text-secondary);
+  max-width: 46ch;
+}
+.dat-money {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dat-money-deposit {
+  color: var(--dat-berry);
+}
+
+/* ==========================================================================
+   HEADER, MENU MOBILE, CHÂN TRANG, THÔNG BÁO
+   Thanh phẳng: tên thương hiệu, hai liên kết, một nút. Không kính mờ, không viên thuốc.
+   ========================================================================== */
+
+.dat-header {
+  background: var(--dat-bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+.dat-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--dat-header-h);
+}
+
+.dat-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--dat-control-h);
+  text-decoration: none;
+  color: var(--dat-text-main);
+}
+.dat-brand:hover {
+  color: var(--dat-text-main);
+}
+.dat-brand-name {
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* Desktop: từ 768px */
+.dat-nav {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+}
+.dat-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--dat-control-h);
+  padding: 0 0.75rem;
+  border-radius: var(--dat-radius-sm);
+  color: var(--dat-text-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-nav-link:hover {
+  color: var(--dat-text-main);
+  background: var(--dat-bg-muted);
+}
+.dat-nav-link[aria-current="page"] {
+  color: var(--dat-text-main);
+  background: var(--dat-bg-muted);
+}
+.dat-nav .dat-btn {
+  margin-left: 0.5rem;
+}
+
+/* Mobile: nút Menu mở bảng liên kết, không cần JS */
+.dat-menu {
+  display: block;
+}
+.dat-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--dat-control-h);
+  padding: 0 0.875rem;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.dat-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.dat-menu[open] > summary {
+  background: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+.dat-menu-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1rem 1rem;
+  background: var(--dat-bg-surface);
+  box-shadow: var(--dat-shadow-lg);
+}
+.dat-menu-panel a:not(.dat-btn) {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--dat-text-main);
+  font-size: var(--dat-fs-lead);
+  text-decoration: none;
+}
+.dat-menu-panel a[aria-current="page"] {
+  font-weight: 600;
+}
+.dat-menu-panel .dat-btn {
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .dat-nav {
+    display: flex;
+  }
+  .dat-menu {
+    display: none;
+  }
+  .dat-brand-name {
+    font-size: 1.25rem;
+  }
+}
+
+/* Nội dung chính */
+.dat-main {
+  padding-top: 1.5rem;
+  padding-bottom: 4rem;
+}
+
+/* Thông báo TempData */
+.dat-flash {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--dat-radius-sm);
+}
+.dat-flash-ok {
+  background: var(--dat-success-bg);
+  color: var(--dat-success);
+}
+.dat-flash-err {
+  background: var(--dat-danger-bg);
+  color: var(--dat-danger);
+}
+
+/* Chân trang: dải tối, tên thương hiệu cỡ vừa (cao tối đa 5rem) */
+.dat-footer {
+  background: var(--dat-field);
+  color: var(--dat-field-ink);
+  margin-top: 4rem;
+  padding: 2.5rem 0 1.5rem;
+}
+.dat-footer-top {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 1.5rem;
+}
+.dat-footer-about {
+  grid-column: 1 / -1;
+  max-width: 34ch;
+  color: var(--dat-field-muted);
+}
+.dat-footer-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--dat-font);
+  font-weight: 400;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-field-muted);
+  letter-spacing: 0;
+}
+.dat-footer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dat-footer-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--dat-control-h);
+  color: var(--dat-field-ink);
+  text-decoration: none;
+}
+.dat-footer-list a:hover {
+  text-decoration: underline;
+}
+.dat-footer :focus-visible {
+  outline-color: var(--dat-field-ink);
+}
+.dat-footer-mark {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 5rem;
+  margin-top: 2.5rem;
+  fill: var(--dat-field-ink);
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+}
+.dat-footer-legal {
+  margin: 1rem 0 0;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-field-muted);
+}
+@media (min-width: 768px) {
+  .dat-footer {
+    margin-top: 6rem;
+    padding-top: 3rem;
+  }
+  .dat-footer-top {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+  .dat-footer-about {
+    grid-column: auto;
+  }
+}
+
+.dat-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--dat-control-h);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--dat-radius-sm);
+  font-family: var(--dat-font);
+  font-weight: 600;
+  font-size: var(--dat-fs-body);
+  line-height: 1.25;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease), border-color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--dat-shadow-focus);
+}
+.dat-btn-lg {
+  min-height: 48px;
+  padding: 0.65rem 1.75rem;
+}
+.dat-btn-primary {
+  background: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+.dat-btn-primary:hover:not(:disabled) {
+  background: var(--dat-accent-hover);
+  color: var(--dat-text-inverse);
+}
+.dat-btn-primary:active:not(:disabled) {
+  background: var(--dat-accent-active);
+}
+.dat-btn-secondary {
+  background: var(--dat-bg-surface);
+  border-color: var(--dat-border-strong);
+  color: var(--dat-text-main);
+}
+.dat-btn-secondary:hover:not(:disabled) {
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+}
+.dat-btn:disabled,
+.dat-btn[aria-disabled="true"] {
+  background: var(--dat-bg-muted);
+  border-color: var(--dat-bg-muted);
+  color: var(--dat-text-muted);
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   TOAST NOTIFICATION COMPONENT
+   ========================================================================== */
+
+.dat-toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+.dat-toast {
+  background: var(--dat-text-main);
+  color: var(--dat-text-inverse);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--dat-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: var(--dat-shadow-lg);
+  pointer-events: auto;
+  animation: datToastIn var(--dat-duration-normal) var(--dat-ease);
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.dat-toast.warning {
+  background: var(--dat-warning);
+}
+.dat-toast.success {
+  background: var(--dat-success);
+}
+.dat-toast.danger {
+  background: var(--dat-danger);
+}
+
+.dat-toast-nhap button {
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  border-radius: var(--dat-radius-md);
+  padding: 0.25rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dat-toast-nhap button:hover {
+  background: var(--dat-accent-hover);
+}
+
+@keyframes datToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   PREFERS REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thẻ chọn cũ: Index còn dùng tạm, trang ThietKe có kiểu riêng trong dat-thietke.css */
+.dat-option-card {
+  background: var(--dat-bg-surface);
+  border: 1px solid var(--dat-border-strong);
+  border-radius: var(--dat-radius-sm);
+}

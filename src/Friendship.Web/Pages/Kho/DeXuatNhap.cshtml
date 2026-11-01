@@ -1,0 +1,65 @@
+@page
+@model Friendship.Web.Pages.Kho.DeXuatNhapModel
+@{
+    ViewData["Title"] = "Đề xuất nhập hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="page-title mb-0">Đề xuất nhập hàng</h1>
+    <button type="button" class="btn btn-outline-secondary btn-sm d-print-none" onclick="window.print()">In / Xuất</button>
+</div>
+
+@if (Model.Bang.Dong.Count == 0)
+{
+    <div class="card-f text-center">Tất cả nguyên liệu đều đang đủ tồn kho an toàn.</div>
+}
+else
+{
+    <div class="card-f mb-3 d-flex justify-content-between align-items-center">
+        <div>Có <strong>@Model.Bang.Dong.Count</strong> nguyên liệu dưới mức cảnh báo tồn.</div>
+        <div>Tổng tiền ước tính: <strong class="text-primary fs-5">@Fmt.Tien(Model.Bang.TongTienUocTinh)</strong></div>
+    </div>
+
+    <div class="card-f p-0">
+    <table class="table table-cards align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Nguyên liệu</th>
+                <th>Đơn vị</th>
+                <th class="text-end">Tồn hiện tại</th>
+                <th class="text-end">Mức cảnh báo</th>
+                <th class="text-end">Đề xuất nhập</th>
+                <th class="text-end">Đơn giá gần nhất</th>
+                <th class="text-end">Thành tiền ước tính</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var d in Model.Bang.Dong)
+        {
+            <tr>
+                <td data-label="Nguyên liệu"><strong>@d.TenGoi</strong></td>
+                <td data-label="Đơn vị">@d.DonViTinh</td>
+                <td data-label="Tồn hiện tại" class="text-end">@Fmt.So(d.TonHienTai)</td>
+                <td data-label="Mức cảnh báo" class="text-end">@Fmt.So(d.MucCanhBaoTon)</td>
+                <td data-label="Đề xuất nhập" class="text-end"><span class="badge-f warn fw-bold">@Fmt.So(d.SoLuongDeXuat)</span></td>
+                <td data-label="Đơn giá gần nhất" class="text-end">@(d.DonGiaNhapGanNhat.HasValue ? Fmt.Tien(d.DonGiaNhapGanNhat.Value) : "—")</td>
+                <td data-label="Thành tiền ước tính" class="text-end">@(d.ThanhTienUocTinh.HasValue ? Fmt.Tien(d.ThanhTienUocTinh.Value) : "—")</td>
+            </tr>
+        }
+        </tbody>
+        <tfoot>
+            <tr class="table-light fw-bold">
+                <td colspan="6" class="text-end">Tổng tiền ước tính:</td>
+                <td class="text-end text-primary">@Fmt.Tien(Model.Bang.TongTienUocTinh)</td>
+            </tr>
+        </tfoot>
+    </table>
+    </div>
+}
+
+<style>
+    @@media print {
+        .navbar, .btn, .d-print-none { display: none !important; }
+        .card-f { border: 1px solid #ccc !important; box-shadow: none !important; }
+    }
+</style>

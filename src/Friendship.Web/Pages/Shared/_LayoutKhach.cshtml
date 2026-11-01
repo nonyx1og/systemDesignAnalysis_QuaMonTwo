@@ -1,0 +1,88 @@
+@{
+    // Trang đang mở, để đánh dấu aria-current trên liên kết điều hướng
+    var duong = (Context.Request.Path.Value ?? "").TrimEnd('/');
+    string? Hien(string href) => string.Equals(duong, href, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+    var dangTim = duong.StartsWith("/Dat/Tim", StringComparison.OrdinalIgnoreCase)
+               || duong.StartsWith("/Dat/Theo", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#FFF8F4" />
+    <title>@ViewData["Title"] – nongnongBakery</title>
+    <link rel="preload" href="~/fonts/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="~/fonts/source-serif-4-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="~/css/dat-banh.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dat-body">
+    <a href="#main-content" class="dat-skip-link">Chuyển đến nội dung chính</a>
+
+    <header class="dat-header">
+        <div class="container dat-header-inner">
+            <a class="dat-brand" href="/Dat" aria-label="nongnongBakery, trang chủ">
+                @Icons.Logo(28)
+                <span class="dat-brand-name">nongnongBakery</span>
+            </a>
+
+            <nav class="dat-nav" aria-label="Điều hướng khách hàng">
+                <a class="dat-nav-link" href="/Dat" aria-current="@Hien("/Dat")">Trang chủ</a>
+                <a class="dat-nav-link" href="/Dat/Tim" aria-current="@(dangTim ? "page" : null)">Tra cứu đơn</a>
+                <a class="dat-btn dat-btn-primary" href="/Dat/ThietKe" aria-current="@Hien("/Dat/ThietKe")">Thiết kế bánh</a>
+            </nav>
+
+            <details class="dat-menu">
+                <summary>@Icons.Svg("menu", 18)<span>Menu</span></summary>
+                <div class="dat-menu-panel">
+                    <a href="/Dat" aria-current="@Hien("/Dat")">Trang chủ</a>
+                    <a href="/Dat/Tim" aria-current="@(dangTim ? "page" : null)">Tra cứu đơn</a>
+                    <a class="dat-btn dat-btn-primary" href="/Dat/ThietKe" aria-current="@Hien("/Dat/ThietKe")">Thiết kế bánh</a>
+                </div>
+            </details>
+        </div>
+    </header>
+
+    <main id="main-content" class="container dat-main">
+        @if (TempData["Message"] is string ok) {
+            <div class="dat-flash dat-flash-ok" role="status"><strong>Đã xong.</strong> <span>@ok</span></div>
+        }
+        @if (TempData["Error"] is string loi) {
+            <div class="dat-flash dat-flash-err" role="alert"><strong>Lưu ý.</strong> <span>@loi</span></div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="dat-footer">
+        <div class="container">
+            <div class="dat-footer-top">
+                <p class="dat-footer-about">Bánh kem làm theo yêu cầu. Bạn tự thiết kế, đặt cọc qua VietQR và theo dõi đơn bằng mã tra cứu.</p>
+                <nav aria-label="Liên kết chân trang">
+                    <p class="dat-footer-title">Đặt bánh</p>
+                    <ul class="dat-footer-list">
+                        <li><a href="/Dat">Trang chủ</a></li>
+                        <li><a href="/Dat/ThietKe">Thiết kế bánh</a></li>
+                        <li><a href="/Dat/Tim">Tra cứu đơn</a></li>
+                    </ul>
+                </nav>
+                <div>
+                    <p class="dat-footer-title">Nhân viên</p>
+                    <ul class="dat-footer-list">
+                        <li><a href="/Account/Login">Đăng nhập</a></li>
+                    </ul>
+                </div>
+            </div>
+            <svg class="dat-footer-mark" viewBox="0 0 1000 140" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
+                <text x="0" y="98" font-size="119" textLength="1000" lengthAdjust="spacing">nongnongBakery</text>
+            </svg>
+            <p class="dat-footer-legal">© 2026 nongnongBakery</p>
+        </div>
+    </footer>
+
+    <!-- Toast: thông báo ngắn do thiet-ke.js ghi vào -->
+    <div id="dat-toast-container" class="dat-toast-container" aria-live="polite"></div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

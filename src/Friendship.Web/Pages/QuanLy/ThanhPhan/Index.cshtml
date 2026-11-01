@@ -1,0 +1,92 @@
+@page
+@model Friendship.Web.Pages.QuanLy.ThanhPhan.IndexModel
+@using Friendship.Domain
+@{ ViewData["Title"] = "Thành phần bánh"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">Thành phần trang trí bánh</h1>
+    <a asp-page="Edit" class="btn btn-primary">+ Thêm thành phần</a>
+</div>
+<partial name="_TabsDanhMuc" model="@("thanhphan")" />
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-12 col-md-5">
+        <select name="Nhom" class="form-select" aria-label="Lọc theo nhóm">
+            <option value="">Tất cả nhóm</option>
+            <option value="COT" selected="@(Model.Nhom == NhomThanhPhan.COT)">Cốt bánh</option>
+            <option value="VIEN" selected="@(Model.Nhom == NhomThanhPhan.VIEN)">Viền bánh</option>
+            <option value="TOPPING" selected="@(Model.Nhom == NhomThanhPhan.TOPPING)">Topping</option>
+            <option value="IN_AN" selected="@(Model.Nhom == NhomThanhPhan.IN_AN)">In ảnh</option>
+        </select>
+    </div>
+    <div class="col-8 col-md-4">
+        <select name="KinhDoanh" class="form-select" aria-label="Lọc trạng thái">
+            <option value="">Tất cả trạng thái</option>
+            <option value="true" selected="@(Model.KinhDoanh == true)">Đang kinh doanh</option>
+            <option value="false" selected="@(Model.KinhDoanh == false)">Đã ngừng bán</option>
+        </select>
+    </div>
+    <div class="col-4 col-md-3"><button class="btn btn-outline-primary w-100" type="submit">Lọc</button></div>
+</form>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="card-f text-center">Chưa có thành phần phù hợp. <a asp-page="Edit">Thêm thành phần</a></div>
+}
+else
+{
+    <div class="card-f p-0">
+    <table class="table table-cards align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Nhóm</th>
+                <th>Thành phần</th>
+                <th>Bánh nền</th>
+                <th class="text-end">Giá bán</th>
+                <th class="text-end">Giá vốn</th>
+                <th class="text-end">Tối đa</th>
+                <th>Trạng thái</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var tp in Model.Items)
+        {
+            var gv = Model.GiaVons.GetValueOrDefault(tp.Id, 0m);
+            <tr>
+                <td data-label="Nhóm">
+                    <span class="badge bg-light text-dark border">@tp.Nhom</span>
+                </td>
+                <td data-label="Thành phần">
+                    <div class="d-flex align-items-center gap-2">
+                        @if (!string.IsNullOrWhiteSpace(tp.AnhMinhHoa))
+                        {
+                            <img src="~/img/thanh-phan/@tp.AnhMinhHoa" alt="" width="24" height="24" style="object-fit:contain" />
+                        }
+                        <strong>@tp.Ten</strong>
+                    </div>
+                </td>
+                <td data-label="Bánh nền">
+                    @(tp.SanPhamNen != null ? $"{tp.SanPhamNen.TenBanh} ({tp.SanPhamNen.KichThuoc})" : "—")
+                </td>
+                <td data-label="Giá bán" class="text-end">@Fmt.Tien(tp.GiaBan)</td>
+                <td data-label="Giá vốn" class="text-end">@Fmt.Tien(gv)</td>
+                <td data-label="Tối đa" class="text-end">@tp.SoLuongToiDa</td>
+                <td data-label="Trạng thái">
+                    <span class="badge-f @(tp.DangKinhDoanh ? "ok" : "danger")">
+                        @(tp.DangKinhDoanh ? "Đang kinh doanh" : "Đã ngừng bán")
+                    </span>
+                </td>
+                <td class="text-end">
+                    <a asp-page="Edit" asp-route-id="@tp.Id" class="btn btn-outline-primary btn-sm">Sửa</a>
+                    <form method="post" asp-page-handler="Toggle" class="d-inline">
+                        <input type="hidden" name="id" value="@tp.Id" />
+                        <input type="hidden" name="kinhDoanh" value="@((!tp.DangKinhDoanh).ToString().ToLower())" />
+                        <button type="submit" class="btn btn-outline-primary btn-sm">@(tp.DangKinhDoanh ? "Ngừng bán" : "Bán lại")</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}

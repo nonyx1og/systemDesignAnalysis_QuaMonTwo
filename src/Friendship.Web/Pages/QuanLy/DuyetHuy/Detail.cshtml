@@ -1,0 +1,58 @@
+@page "{id:int}"
+@model Friendship.Web.Pages.QuanLy.DuyetHuy.DetailModel
+@{
+    var p = Model.Phieu!;
+    var (nhan, css) = Fmt.Phieu(p.TrangThai);
+    ViewData["Title"] = "Duyệt phiếu " + p.Ma;
+    var chong = "document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">Phiếu @p.Ma <span class="badge-f @css">@nhan</span></h1>
+    <a asp-page="Index" class="btn btn-outline-primary">Quay lại</a>
+</div>
+<p class="text-secondary">Lập lúc @Fmt.NgayGio(p.NgayLap) bởi @p.NguoiLap.HoTen.
+    @if (!string.IsNullOrEmpty(p.LyDoTuChoi)) { <span>Lý do từ chối: <strong>@p.LyDoTuChoi</strong>.</span> }</p>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="card-f p-0 mb-3">
+<table class="table table-cards align-middle mb-0">
+    <thead><tr><th>Đối tượng</th><th class="text-end">Số lượng</th><th class="text-end">Tồn hiện tại</th><th class="text-end">Đơn giá vốn</th><th class="text-end">Tổn thất</th><th>Lý do</th></tr></thead>
+    <tbody>
+    @foreach (var c in p.ChiTiets)
+    {
+        var ton = c.LoNguyenLieu is { } nl ? Fmt.So(nl.SoLuongCon) + " " + nl.NguyenLieu.DonViTinh : c.LoSanPham is { } sp ? sp.SoLuongTon.ToString() : "—";
+        <tr>
+            <td data-label="Đối tượng">@Fmt.DoiTuongHuy(c)</td>
+            <td data-label="Số lượng" class="text-end">@Fmt.So(c.SoLuongHuy)</td>
+            <td data-label="Tồn hiện tại" class="text-end">@ton</td>
+            <td data-label="Đơn giá vốn" class="text-end">@Fmt.Tien(c.DonGiaVon)</td>
+            <td data-label="Tổn thất" class="text-end">@Fmt.Tien(c.SoLuongHuy * c.DonGiaVon)</td>
+            <td data-label="Lý do">@Fmt.LyDoHuy(c.LyDo)</td>
+        </tr>
+    }
+    </tbody>
+    <tfoot><tr><th colspan="4" class="text-end">Tổng tổn thất</th><th class="text-end">@Fmt.Tien(HuyHangService.TongTonThat(p))</th><th></th></tr></tfoot>
+</table>
+</div>
+
+@if (p.TrangThai == TrangThaiPhieu.CHO_DUYET)
+{
+    <div class="row g-3">
+        <div class="col-12 col-md-5">
+            <form method="post" asp-page-handler="Duyet" class="card-f" onsubmit="@chong">
+                <h2 class="h5">Duyệt</h2>
+                <p class="small text-secondary">Hệ thống kiểm tồn hiện tại rồi trừ kho và ghi chi phí hao hụt.</p>
+                <button type="submit" class="btn btn-primary">Duyệt phiếu</button>
+            </form>
+        </div>
+        <div class="col-12 col-md-7">
+            <form method="post" asp-page-handler="TuChoi" class="card-f" onsubmit="@chong">
+                <h2 class="h5">Từ chối</h2>
+                <label class="form-label" for="lyDo">Lý do từ chối</label>
+                <textarea id="lyDo" name="lyDo" rows="2" maxlength="500" class="form-control mb-2"></textarea>
+                <button type="submit" class="btn btn-outline-danger">Từ chối</button>
+            </form>
+        </div>
+    </div>
+}

@@ -1,0 +1,104 @@
+@model Friendship.Web.Pages.Bep.IndexModel
+@if (Model.Dons.Count == 0)
+{
+    <div class="card-f empty-f"><strong>@(Model.TrangThai == "CHO_GIAO" ? "Chưa có đơn chờ giao." : "Chưa có đơn cần làm.")</strong>@(Model.TrangThai == "CHO_GIAO" ? "Đơn làm xong sẽ chuyển sang đây để chờ khách nhận." : "Đơn xuất hiện ở đây sau khi thu ngân nhận cọc.")</div>
+}
+else
+{
+    foreach (var x in Model.Dons)
+    {
+        var d = x.Don;
+        var (nhan, css) = Fmt.Don(d.TrangThai);
+        var tkDon = d.ChiTiets.FirstOrDefault(c => c.ThietKeBanh != null)?.ThietKeBanh;
+        <div class="bep-card @(x.KhanCap ? "gap" : "") @(d.TrangThai == TrangThaiDon.DANG_LAM ? "dang-lam" : "")">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <div class="gio">@d.NgayGioLay!.Value.ToString("HH:mm") <span class="fs-6 fw-normal text-secondary">@d.NgayGioLay.Value.ToString("dd/MM")</span></div>
+                    <div class="@(x.KhanCap ? "text-danger fw-bold" : "text-secondary")">@Fmt.KhoangGio(d.NgayGioLay.Value - Model.BayGio)@(x.KhanCap ? " · GẤP" : "")</div>
+                </div>
+                <div class="text-end">
+                    <div><strong>@d.Ma</strong> · @x.TongBanh bánh</div>
+                    <span class="badge-f @css">@nhan</span>
+                </div>
+            </div>
+
+            @if (tkDon != null)
+            {
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    <a href="/dat/anh/@tkDon.MaTraCuu/thiet-ke" target="_blank" title="Xem ảnh lớn">
+                        <img src="/dat/anh/@tkDon.MaTraCuu/thiet-ke" alt="Mẫu bánh thiết kế" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;" />
+                    </a>
+                    <span class="badge bg-primary">Bánh tùy chỉnh</span>
+                </div>
+            }
+
+            <details class="mt-2" data-don="@d.Id">
+                <summary>Xem chi tiết từng bánh</summary>
+                <ul class="mb-0 mt-2 list-unstyled">
+                    @foreach (var c in d.ChiTiets)
+                    {
+                        <li class="fs-5 mb-2">
+                            @if (c.ThietKeBanh != null)
+                            {
+                                <div class="d-flex gap-2 align-items-start">
+                                    <a href="/dat/anh/@c.ThietKeBanh.MaTraCuu/thiet-ke" target="_blank" title="Xem ảnh lớn">
+                                        <img src="/dat/anh/@c.ThietKeBanh.MaTraCuu/thiet-ke" alt="Mẫu bánh" class="rounded border" style="width: 70px; height: 70px; object-fit: cover;" />
+                                    </a>
+                                    <div>
+                                        <div>@c.SanPham.TenBanh (@c.SanPham.KichThuoc) × @c.SoLuong</div>
+                                        @if (!string.IsNullOrEmpty(c.LoiChuc)) { <div class="fs-6 text-secondary">Lời chúc: “@c.LoiChuc”</div> }
+                                        @if (c.ThietKeBanh.ThanhPhans.Count > 0)
+                                        {
+                                            <div class="fs-6 text-secondary mt-1">
+                                                Thành phần: @string.Join(", ", c.ThietKeBanh.ThanhPhans.Select(tp => $"{tp.ThanhPhan?.Ten ?? $"#{tp.ThanhPhanId}"} (×{tp.SoLuong})"))
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>@c.SanPham.TenBanh (@c.SanPham.KichThuoc) × @c.SoLuong</div>
+                                @if (!string.IsNullOrEmpty(c.LoiChuc)) { <div class="fs-6 text-secondary">Lời chúc: “@c.LoiChuc”</div> }
+                            }
+                        </li>
+                    }
+                </ul>
+            </details>
+
+            @if (d.TrangThai is TrangThaiDon.DA_COC or TrangThaiDon.DANG_LAM)
+            {
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    @if (d.TrangThai == TrangThaiDon.DA_COC)
+                    {
+                        <form method="post" asp-page-handler="BatDau" asp-route-id="@d.Id" asp-route-ngay="@Model.Ngay?.ToString("yyyy-MM-dd")" asp-route-trangThai="@Model.TrangThai">
+                            <button type="submit" class="btn btn-primary btn-bep">Bắt đầu làm</button>
+                        </form>
+                    }
+                    <form method="post" asp-page-handler="ChoGiao" asp-route-id="@d.Id" asp-route-ngay="@Model.Ngay?.ToString("yyyy-MM-dd")" asp-route-trangThai="@Model.TrangThai">
+                        <button type="submit" class="btn @(d.TrangThai == TrangThaiDon.DANG_LAM ? "btn-primary" : "btn-outline-primary") btn-bep">Chờ giao</button>
+                    </form>
+                </div>
+            }
+            else if (d.TrangThai == TrangThaiDon.CHO_GIAO && tkDon != null)
+            {
+                <div class="mt-3 p-2 bg-light rounded border">
+                    <div class="fw-semibold small mb-2">Ảnh thành phẩm từ bếp:</div>
+                    @if (!string.IsNullOrEmpty(tkDon.AnhThanhPham))
+                    {
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <a href="/dat/anh/@tkDon.MaTraCuu/thanh-pham" target="_blank">
+                                <img src="/dat/anh/@tkDon.MaTraCuu/thanh-pham" alt="Ảnh thành phẩm" class="rounded border" style="width: 60px; height: 60px; object-fit: cover;" />
+                            </a>
+                            <span class="badge bg-success">Đã có ảnh thành phẩm</span>
+                        </div>
+                    }
+                    <form method="post" enctype="multipart/form-data" asp-page-handler="TaiAnhThanhPham" asp-route-donHangId="@d.Id" asp-route-ngay="@Model.Ngay?.ToString("yyyy-MM-dd")" asp-route-trangThai="@Model.TrangThai" class="d-flex gap-2">
+                        <input type="file" name="anhFile" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" required />
+                        <button type="submit" class="btn btn-sm btn-outline-success text-nowrap">Tải ảnh</button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+}

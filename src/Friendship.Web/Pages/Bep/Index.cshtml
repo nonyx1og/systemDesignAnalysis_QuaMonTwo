@@ -1,0 +1,48 @@
+@page
+@model Friendship.Web.Pages.Bep.IndexModel
+@{ ViewData["Title"] = Model.TrangThai == "CHO_GIAO" ? "Đơn chờ giao" : "Đơn cần làm"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div class="d-flex align-items-center gap-3">
+        <h1 class="page-title mb-0">@(Model.TrangThai == "CHO_GIAO" ? "Đơn chờ giao" : "Đơn cần làm")</h1>
+        <div class="btn-group">
+            <a asp-page="Index" asp-route-ngay="@Model.Ngay?.ToString("yyyy-MM-dd")" class="btn btn-outline-primary @(Model.TrangThai != "CHO_GIAO" ? "active" : "")">Cần làm</a>
+            <a asp-page="Index" asp-route-trangThai="CHO_GIAO" asp-route-ngay="@Model.Ngay?.ToString("yyyy-MM-dd")" class="btn btn-outline-primary @(Model.TrangThai == "CHO_GIAO" ? "active" : "")">Chờ giao</a>
+        </div>
+    </div>
+    <form method="get" class="d-flex gap-2 align-items-center">
+        @if (Model.TrangThai is not null) { <input type="hidden" name="TrangThai" value="@Model.TrangThai" /> }
+        <label for="ngay" class="visually-hidden">Xem theo ngày</label>
+        <input id="ngay" name="Ngay" type="date" value="@Model.Ngay?.ToString("yyyy-MM-dd")" class="form-control" />
+        <button type="submit" class="btn btn-outline-primary">Xem</button>
+        @if (Model.Ngay is not null) { <a asp-page="Index" asp-route-trangThai="@Model.TrangThai" class="btn btn-outline-primary">Tất cả</a> }
+    </form>
+</div>
+
+<div id="mat-ket-noi" class="alert alert-warning" role="status" hidden>Dữ liệu chưa cập nhật (mất kết nối). Danh sách bên dưới là lần tải gần nhất.</div>
+<div id="ds">
+    <partial name="_DanhSach" model="Model" />
+</div>
+
+@section Scripts {
+<script>
+    // Tự làm mới danh sách mỗi 30 giây; mất kết nối thì giữ nguyên danh sách và báo "Dữ liệu chưa cập nhật".
+    (function () {
+        var ngay = '@Model.Ngay?.ToString("yyyy-MM-dd")';
+        var tt = '@Model.TrangThai';
+        var url = '?handler=DanhSach' + (ngay ? '&ngay=' + ngay : '') + (tt ? '&trangThai=' + encodeURIComponent(tt) : '');
+        setInterval(function () {
+            if (document.hidden) return;
+            fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })   // hết phiên → 401 thay vì trang đăng nhập
+                .then(function (r) { if (r.status === 401) { location.reload(); throw new Error('het phien'); } if (!r.ok) throw new Error(r.status); return r.text(); })
+                .then(function (html) {
+                    // Giữ các phần "Xem chi tiết từng bánh" đang mở qua lần làm mới.
+                    var mo = Array.from(document.querySelectorAll('#ds details[open]')).map(function (x) { return x.dataset.don; });
+                    document.getElementById('ds').innerHTML = html;
+                    mo.forEach(function (id) { var el = document.querySelector('#ds details[data-don="' + id + '"]'); if (el) el.open = true; });
+                    document.getElementById('mat-ket-noi').hidden = true;
+                })
+                .catch(function () { document.getElementById('mat-ket-noi').hidden = false; });
+        }, 30000);
+    })();
+</script>
+}

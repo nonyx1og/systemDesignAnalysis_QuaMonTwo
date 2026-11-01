@@ -1,0 +1,96 @@
+@page
+@model Friendship.Web.Pages.QuanLy.BaoCao.DoanhThuModel
+@{ ViewData["Title"] = "Báo cáo doanh thu"; var chuoiKy = $"Tu={Model.Tu:yyyy-MM-dd}&Den={Model.Den:yyyy-MM-dd}"; }
+<h1 class="page-title">Báo cáo</h1>
+<partial name="_TabsBaoCao" model="@("doanhthu")" />
+
+<form method="get" class="row g-2 mb-3 no-print">
+    @if (Model.TabCa) { <input type="hidden" name="Tab" value="ca" /> }
+    <div class="col-6 col-md-3"><label class="form-label" for="tu">Từ ngày</label><input id="tu" name="Tu" type="date" value="@Model.Tu?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+    <div class="col-6 col-md-3"><label class="form-label" for="den">Đến ngày</label><input id="den" name="Den" type="date" value="@Model.Den?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+    <div class="col-12 col-md-2 d-flex align-items-end"><button class="btn btn-primary w-100" type="submit">Xem</button></div>
+    <div class="col-12 col-md-4 d-flex align-items-end gap-2">
+        <a class="btn btn-outline-primary @(Model.TabCa ? "" : "active")" href="?@chuoiKy">Doanh thu</a>
+        <a class="btn btn-outline-primary @(Model.TabCa ? "active" : "")" href="?Tab=ca&@chuoiKy">Ca thu ngân</a>
+    </div>
+</form>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+@if (Model.Bao is { } b)
+{
+    var max = b.TheoNgay.Count == 0 ? 0 : b.TheoNgay.Max(x => x.DoanhThu);
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so">@Fmt.Tien(b.DoanhThu)</div><div class="nhan">Doanh thu (theo thời điểm thu tiền)</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so">@Fmt.Tien(b.GiaVon)</div><div class="nhan">Giá vốn ước tính</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so">@Fmt.Tien(b.ChiPhiHuy)</div><div class="nhan">Chi phí hủy (phiếu đã duyệt)</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so @(b.LoiNhuanGop < 0 ? "text-danger" : "")">@Fmt.Tien(b.LoiNhuanGop)</div><div class="nhan">Lợi nhuận gộp ước tính</div></div></div>
+    </div>
+
+    @if (Model.TuyChinh is { } tc)
+    {
+        <div class="card-f mb-3">
+            <h2 class="h6 text-muted mb-2">Bánh tùy chỉnh</h2>
+            <div class="row g-3">
+                <div class="col-4"><span class="text-secondary small">Số đơn</span><div class="fs-5 fw-bold">@tc.SoDon đơn</div></div>
+                <div class="col-4"><span class="text-secondary small">Doanh thu</span><div class="fs-5 fw-bold">@Fmt.Tien(tc.DoanhThu)</div></div>
+                <div class="col-4"><span class="text-secondary small">Tỷ lệ lợi nhuận</span><div class="fs-5 fw-bold text-success">@((tc.TyLeLoiNhuan * 100).ToString("0.#"))%</div></div>
+            </div>
+        </div>
+    }
+
+    <p class="text-secondary">Tiền mặt @Fmt.Tien(b.TienMat) · Chuyển khoản @Fmt.Tien(b.ChuyenKhoan). Hoàn cọc đã được trừ khỏi doanh thu. Giá vốn và lợi nhuận là <strong>ước tính</strong>: giá vốn tính theo công thức BOM và giá nhập gần nhất, không theo lượng nguyên liệu xuất thực tế.</p>
+
+    <div class="card-f p-0">
+    <table class="table table-cards align-middle mb-0">
+        <thead><tr><th>Ngày</th><th class="text-end">Doanh thu</th><th style="width:30%"></th><th class="text-end">Giá vốn</th><th class="text-end">Chi phí hủy</th><th class="text-end">Lợi nhuận gộp</th></tr></thead>
+        <tbody>
+        @foreach (var x in b.TheoNgay)
+        {
+            var pct = max > 0 && x.DoanhThu > 0 ? Math.Round(x.DoanhThu / max * 100) : 0;
+            <tr>
+                <td data-label="Ngày">@Fmt.Ngay(x.Ngay)</td>
+                <td data-label="Doanh thu" class="text-end">@Fmt.Tien(x.DoanhThu)</td>
+                <td class="d-none d-md-table-cell"><div class="bar-wrap" aria-hidden="true"><div class="bar" style="width:@pct.ToString(System.Globalization.CultureInfo.InvariantCulture)%"></div></div></td>
+                <td data-label="Giá vốn" class="text-end">@Fmt.Tien(x.GiaVon)</td>
+                <td data-label="Chi phí hủy" class="text-end">@Fmt.Tien(x.ChiPhiHuy)</td>
+                <td data-label="Lợi nhuận gộp" class="text-end @(x.LoiNhuanGop < 0 ? "text-danger" : "")">@Fmt.Tien(x.LoiNhuanGop)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}
+else if (Model.TabCa)
+{
+    @if (Model.Cas.Count == 0)
+    {
+        <div class="card-f text-center">Không có ca nào mở trong kỳ này.</div>
+    }
+    else
+    {
+        <div class="card-f p-0 table-responsive">
+        <table class="table table-cards align-middle mb-0">
+            <thead><tr><th>Ca</th><th>Người phụ trách</th><th>Mở / đóng</th><th class="text-end">Tiền mặt HT</th><th class="text-end">Tiền mặt TT</th><th class="text-end">Chênh lệch TM</th><th class="text-end">CK HT</th><th class="text-end">CK TT</th><th class="text-end">Chênh lệch CK</th><th>Giải trình</th></tr></thead>
+            <tbody>
+            @foreach (var c in Model.Cas)
+            {
+                var chot = c.TrangThai == TrangThaiCa.DA_CHOT;
+                <tr>
+                    <td data-label="Ca">@c.Ma</td>
+                    <td data-label="Người phụ trách">@c.NhanVien.HoTen</td>
+                    <td data-label="Mở / đóng">@Fmt.NgayGio(c.GioMoCa) – @(c.GioDongCa is { } d ? Fmt.NgayGio(d) : "đang mở")</td>
+                    <td data-label="Tiền mặt HT" class="text-end">@(chot ? Fmt.Tien(c.TienMatHeThong) : "—")</td>
+                    <td data-label="Tiền mặt TT" class="text-end">@(chot ? Fmt.Tien(c.TienMatThucTe!.Value) : "—")</td>
+                    <td data-label="Chênh lệch TM" class="text-end @(c.ChenhLechTienMat is { } a && a != 0 ? "text-danger" : "")">@(chot ? Fmt.Tien(c.ChenhLechTienMat!.Value) : "—")</td>
+                    <td data-label="CK HT" class="text-end">@(chot ? Fmt.Tien(c.ChuyenKhoanHeThong) : "—")</td>
+                    <td data-label="CK TT" class="text-end">@(chot ? Fmt.Tien(c.ChuyenKhoanThucTe!.Value) : "—")</td>
+                    <td data-label="Chênh lệch CK" class="text-end @(c.ChenhLechChuyenKhoan is { } k && k != 0 ? "text-danger" : "")">@(chot ? Fmt.Tien(c.ChenhLechChuyenKhoan!.Value) : "—")</td>
+                    <td data-label="Giải trình">@c.GhiChuChenhLech</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+    }
+}

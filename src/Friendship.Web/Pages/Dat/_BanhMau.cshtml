@@ -1,0 +1,41 @@
+@model Friendship.Web.Pages.Dat.MauGoiY
+@using System.Globalization
+@{
+    // Hình bánh vẽ bằng màu phẳng, màu lấy từ lớp .di-banh-N trong dat-index.css.
+    string N(double v) => v.ToString("0.#", CultureInfo.InvariantCulture);
+    var dau = Enumerable.Range(0, Model.SoDau)
+        .Select(i => 2 * Math.PI * i / Math.Max(Model.SoDau, 1) + 0.5)
+        .Select(a => (X: 120 + 54 * Math.Cos(a), Y: 62 + 11 * Math.Sin(a)))
+        .OrderBy(p => p.Y)
+        .ToList();
+}
+<svg class="di-banh di-banh-@Model.Id" viewBox="0 0 240 150" role="img" aria-label="Hình minh họa bánh @Model.Ten">
+    <ellipse class="di-dia" cx="120" cy="130" rx="106" ry="12" />
+    <rect class="di-cot" x="36" y="62" width="168" height="66" />
+    <ellipse class="di-cot" cx="120" cy="128" rx="84" ry="20" />
+    <rect class="di-kem" x="36" y="62" width="168" height="34" />
+    <ellipse class="di-kem" cx="120" cy="96" rx="84" ry="20" />
+    <ellipse class="di-mat" cx="120" cy="62" rx="84" ry="20" />
+    @if (Model.TuKhoaVien is not null)
+    {
+        for (var i = 0; i <= 12; i++)
+        {
+            var t = Math.PI * i / 12;
+            <circle class="di-vien" cx="@N(120 + 84 * Math.Cos(t))" cy="@N(62 + 20 * Math.Sin(t))" r="7" />
+        }
+    }
+    @if (Model.CoAnhIn)
+    {
+        <ellipse class="di-anh" cx="120" cy="62" rx="44" ry="10" />
+        <circle class="di-anh-nang" cx="136" cy="60" r="3" />
+        <path class="di-anh-nui" d="M92 65 L108 57 L118 62 L126 59 L148 66 Z" />
+    }
+    @foreach (var p in dau)
+    {
+        <g transform="translate(@N(p.X) @N(p.Y - 3))">
+            <circle class="di-dau" r="6.5" />
+            <path class="di-la" d="M-4.5 -5.5 L0 -9.5 L4.5 -5.5 Z" />
+        </g>
+    }
+    <text class="di-chu" x="120" y="108" text-anchor="middle" aria-hidden="true">@Model.Chu</text>
+</svg>

@@ -1,0 +1,83 @@
+@page
+@model Friendship.Web.Pages.QuanLy.BaoCao.HuyBanChayModel
+@{ ViewData["Title"] = "Hàng hủy và bán chạy"; }
+<h1 class="page-title">Báo cáo</h1>
+<partial name="_TabsBaoCao" model="@("huy")" />
+
+<form method="get" class="row g-2 mb-3 no-print">
+    <div class="col-6 col-md-2"><label class="form-label" for="tu">Từ ngày</label><input id="tu" name="Tu" type="date" value="@Model.Tu?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+    <div class="col-6 col-md-2"><label class="form-label" for="den">Đến ngày</label><input id="den" name="Den" type="date" value="@Model.Den?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+    <div class="col-6 col-md-2">
+        <label class="form-label" for="top">Số mục</label>
+        <select id="top" name="Top" class="form-select">
+            @foreach (var n in new[] { 5, 10, 20 }.Append(Model.Top ?? 5).Distinct().Order()) { <option value="@n" selected="@(Model.Top == n)">Top @n</option> }
+        </select>
+    </div>
+    <div class="col-6 col-md-3">
+        <label class="form-label" for="loc">Hàng hủy</label>
+        <select id="loc" name="Loc" class="form-select">
+            <option value="TatCa" selected="@(Model.Loc == LocHuy.TatCa)">Tất cả</option>
+            <option value="Banh" selected="@(Model.Loc == LocHuy.Banh)">Chỉ bánh</option>
+            <option value="NguyenLieu" selected="@(Model.Loc == LocHuy.NguyenLieu)">Chỉ nguyên liệu</option>
+        </select>
+    </div>
+    <div class="col-12 col-md-3 d-flex align-items-end"><button class="btn btn-primary w-100" type="submit">Xem</button></div>
+</form>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+@if (Model.Bao is { } b)
+{
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-4"><div class="stat-card"><div class="so">@Fmt.Tien(b.TongTonThat)</div><div class="nhan">Tổng tổn thất (phiếu đã duyệt)</div></div></div>
+        <div class="col-6 col-lg-4"><div class="stat-card"><div class="so">@Fmt.Tien(b.DoanhThu)</div><div class="nhan">Doanh thu cùng kỳ</div></div></div>
+        <div class="col-12 col-lg-4"><div class="stat-card"><div class="so">@(b.TyLeTonThat is { } t ? Fmt.So(Math.Round(t * 100, 1)) + "%" : "Không xác định")</div><div class="nhan">Tỷ lệ tổn thất (hủy / doanh thu)</div></div></div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <h2 class="h5">Bán chạy</h2>
+            @if (b.BanChay.Count == 0) { <div class="card-f text-center">Không có đơn bán trong kỳ.</div> }
+            else
+            {
+                <div class="card-f p-0">
+                <table class="table table-cards align-middle mb-0">
+                    <thead><tr><th>Bánh</th><th class="text-end">Số lượng</th><th class="text-end">Doanh số</th></tr></thead>
+                    <tbody>
+                    @foreach (var x in b.BanChay)
+                    {
+                        <tr><td data-label="Bánh">@x.TenBanh</td><td data-label="Số lượng" class="text-end">@x.SoLuong</td><td data-label="Doanh số" class="text-end">@Fmt.Tien(x.DoanhSo)</td></tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+                <p class="small text-secondary mt-1">Doanh số là giá trị dòng hàng trước voucher và điểm.</p>
+            }
+        </div>
+        <div class="col-12 col-lg-6">
+            <h2 class="h5">Hủy nhiều nhất</h2>
+            @if (b.TopHuy.Count == 0) { <div class="card-f text-center">Không có phiếu hủy đã duyệt trong kỳ.</div> }
+            else
+            {
+                <div class="card-f p-0 mb-3">
+                <table class="table table-cards align-middle mb-0">
+                    <thead><tr><th>Đối tượng</th><th class="text-end">Số lượng</th><th class="text-end">Thiệt hại</th></tr></thead>
+                    <tbody>
+                    @foreach (var x in b.TopHuy)
+                    {
+                        <tr><td data-label="Đối tượng">@x.DoiTuong</td><td data-label="Số lượng" class="text-end">@Fmt.So(x.SoLuong)</td><td data-label="Thiệt hại" class="text-end">@Fmt.Tien(x.TonThat)</td></tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+                <h3 class="h6">Theo lý do</h3>
+                <ul class="list-unstyled">
+                    @foreach (var ly in Enum.GetValues<LyDoHuy>().Where(l => b.TonThatTheoLyDo.ContainsKey(l)))
+                    {
+                        <li>@Fmt.LyDoHuy(ly): <strong>@Fmt.Tien(b.TonThatTheoLyDo[ly])</strong></li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+}

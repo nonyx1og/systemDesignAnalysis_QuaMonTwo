@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <filter id="cherryShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="3.5" stdDeviation="3" flood-color="#30030B" flood-opacity="0.35"/>
+    </filter>
+    <radialGradient id="cherryBallGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#FF5271"/>
+      <stop offset="40%" stop-color="#C20E32"/>
+      <stop offset="85%" stop-color="#700418"/>
+      <stop offset="100%" stop-color="#3D010B"/>
+    </radialGradient>
+    <linearGradient id="stemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#81C784"/>
+      <stop offset="70%" stop-color="#2E7D32"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#cherryShadow)">
+    <!-- Quả cherry trái -->
+    <circle cx="34" cy="64" r="22" fill="url(#cherryBallGrad)"/>
+    <!-- Vệt sáng bóng quả trái -->
+    <ellipse cx="28" cy="54" rx="6" ry="10" transform="rotate(-30 28 54)" fill="#FFFFFF" opacity="0.75"/>
+    <circle cx="36" cy="50" r="2.5" fill="#FFFFFF" opacity="0.5"/>
+
+    <!-- Quả cherry phải -->
+    <circle cx="68" cy="68" r="21" fill="url(#cherryBallGrad)"/>
+    <!-- Vệt sáng bóng quả phải -->
+    <ellipse cx="62" cy="58" rx="5.5" ry="9" transform="rotate(-30 62 58)" fill="#FFFFFF" opacity="0.75"/>
+    <circle cx="70" cy="54" r="2.3" fill="#FFFFFF" opacity="0.5"/>
+
+    <!-- Cuống cuộn cong thanh mảnh -->
+    <path d="M34 45 C32 25, 45 10, 56 8" stroke="url(#stemGrad)" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+    <path d="M68 50 C65 28, 56 12, 56 8" stroke="url(#stemGrad)" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+
+    <!-- Cuống kết nối chung phía trên -->
+    <ellipse cx="56" cy="8" rx="2.5" ry="3.5" fill="#1B5E20"/>
+  </g>
+</svg>

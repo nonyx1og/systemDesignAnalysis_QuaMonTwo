@@ -1,0 +1,35 @@
+@page
+@model Friendship.Web.Pages.Huy.IndexModel
+@using Friendship.Infrastructure.Services
+@{ ViewData["Title"] = "Phiếu hủy"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">Phiếu hủy của tôi</h1>
+    <a asp-page="Tao" class="btn btn-primary">+ Lập phiếu hủy</a>
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="card-f text-center">Bạn chưa lập phiếu hủy nào. <a asp-page="Tao">Lập phiếu hủy</a></div>
+}
+else
+{
+    <div class="card-f p-0">
+    <table class="table table-cards align-middle mb-0">
+        <thead><tr><th>Phiếu</th><th>Ngày lập</th><th class="text-end">Số dòng</th><th class="text-end">Tổn thất</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var p in Model.Items)
+        {
+            var (nhan, css) = Fmt.Phieu(p.TrangThai);
+            <tr>
+                <td data-label="Phiếu"><strong>@p.Ma</strong></td>
+                <td data-label="Ngày lập">@Fmt.NgayGio(p.NgayLap)</td>
+                <td data-label="Số dòng" class="text-end">@p.ChiTiets.Count</td>
+                <td data-label="Tổn thất" class="text-end">@Fmt.Tien(HuyHangService.TongTonThat(p))</td>
+                <td data-label="Trạng thái"><span class="badge-f @css">@nhan</span></td>
+                <td class="text-end"><a asp-page="Details" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm">Xem</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}

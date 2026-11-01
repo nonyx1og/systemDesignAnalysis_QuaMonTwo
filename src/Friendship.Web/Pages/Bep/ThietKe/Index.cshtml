@@ -1,0 +1,90 @@
+@page
+@model Friendship.Web.Pages.Bep.ThietKe.IndexModel
+@using Friendship.Domain
+@{
+    ViewData["Title"] = "Duyệt thiết kế bánh";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold mb-0">🎂 Danh sách thiết kế chờ duyệt</h2>
+        <span class="text-muted small">Các thiết kế tùy chỉnh từ khách hàng gửi về bếp</span>
+    </div>
+    <span class="badge bg-warning text-dark fs-6 px-3 py-2">@Model.Items.Count thiết kế</span>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (Model.Items.Count == 0)
+{
+    <div class="card border-0 shadow-sm p-5 text-center text-muted">
+        <div class="display-6 mb-2">🎉</div>
+        <h5>Hiện không có thiết kế nào đang chờ duyệt.</h5>
+        <p class="small mb-0">Các yêu cầu đặt bánh tùy chỉnh mới sẽ xuất hiện tại đây.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive bg-white rounded shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 80px;">Ảnh</th>
+                    <th>Mã tra cứu</th>
+                    <th>Khách hàng</th>
+                    <th>Bánh nền</th>
+                    <th>Hẹn lấy bánh</th>
+                    <th class="text-end">Giá tạm tính</th>
+                    <th class="text-center" style="width: 140px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tk in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <img src="/dat/anh/@tk.MaTraCuu/thiet-ke" alt="Mẫu bánh" class="rounded border" style="width: 60px; height: 60px; object-fit: cover;" />
+                        </td>
+                        <td>
+                            <span class="font-monospace fw-bold text-primary">@tk.MaTraCuu</span>
+                            <div class="small text-muted">Mã: @tk.Ma</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@tk.KhachHang.TenKhachHang</div>
+                            <div class="small text-muted font-monospace">@tk.KhachHang.SoDienThoai</div>
+                        </td>
+                        <td>
+                            <div>@tk.SanPhamNen.TenBanh</div>
+                            <div class="small text-muted">@tk.SanPhamNen.KichThuoc</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-danger">@tk.NgayGioLay.ToString("dd/MM/yyyy HH:mm")</div>
+                            <div class="small text-muted">Gửi lúc: @(tk.NgayGui?.ToString("dd/MM HH:mm") ?? "-")</div>
+                        </td>
+                        <td class="text-end fw-bold text-success">
+                            @tk.GiaTamTinh.ToString("N0") đ
+                        </td>
+                        <td class="text-center">
+                            <a href="/Bep/ThietKe/ChiTiet?id=@tk.Id" class="btn btn-sm btn-primary">
+                                Chi tiết &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

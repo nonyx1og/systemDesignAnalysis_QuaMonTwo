@@ -1,0 +1,52 @@
+@page "{id:int}"
+@model Friendship.Web.Pages.BanHang.Ca.BienBanModel
+@{
+    var th = Model.Tong;
+    var c = th.Ca;
+    var chot = c.TrangThai == TrangThaiCa.DA_CHOT;
+    ViewData["Title"] = "Biên bản " + c.Ma;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">Biên bản chốt ca @c.Ma</h1>
+    <div class="no-print d-flex gap-2">
+        <button type="button" class="btn btn-outline-primary" onclick="window.print()">In biên bản</button>
+        <a asp-page="Index" class="btn btn-outline-primary">Quay lại</a>
+    </div>
+</div>
+
+<div class="card-f mb-3">
+    <p class="mb-1">Người phụ trách: <strong>@User.Identity!.Name</strong></p>
+    <p class="mb-1">Mở ca: <strong>@Fmt.NgayGio(c.GioMoCa)</strong> · Đóng ca: <strong>@(c.GioDongCa is { } d ? Fmt.NgayGio(d) : "chưa chốt (số liệu tạm tính)")</strong></p>
+    <p class="mb-0">Số giao dịch: <strong>@th.SoGiaoDich</strong></p>
+</div>
+
+<div class="card-f p-0 mb-3">
+<table class="table align-middle mb-0">
+    <thead><tr><th></th><th class="text-end">Hệ thống</th><th class="text-end">Thực tế</th><th class="text-end">Chênh lệch</th></tr></thead>
+    <tbody>
+        <tr><td>Tiền quỹ đầu ca</td><td class="text-end">@Fmt.Tien(c.TienDauCa)</td><td></td><td></td></tr>
+        <tr><td>Thu tiền mặt</td><td class="text-end">@Fmt.Tien(th.ThuTienMat)</td><td></td><td></td></tr>
+        <tr><td>Hoàn tiền mặt</td><td class="text-end">− @Fmt.Tien(th.HoanTienMat)</td><td></td><td></td></tr>
+        <tr class="fw-bold">
+            <td>Tiền mặt</td><td class="text-end">@Fmt.Tien(th.TienMatHeThong)</td>
+            <td class="text-end">@(chot ? Fmt.Tien(c.TienMatThucTe!.Value) : "—")</td>
+            <td class="text-end @(c.ChenhLechTienMat is { } a && a != 0 ? "text-danger" : "")">@(chot ? Fmt.Tien(c.ChenhLechTienMat!.Value) : "—")</td>
+        </tr>
+        <tr class="fw-bold">
+            <td>Chuyển khoản</td><td class="text-end">@Fmt.Tien(th.ChuyenKhoanHeThong)</td>
+            <td class="text-end">@(chot ? Fmt.Tien(c.ChuyenKhoanThucTe!.Value) : "—")</td>
+            <td class="text-end @(c.ChenhLechChuyenKhoan is { } b && b != 0 ? "text-danger" : "")">@(chot ? Fmt.Tien(c.ChenhLechChuyenKhoan!.Value) : "—")</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+@if (!string.IsNullOrEmpty(c.GhiChuChenhLech))
+{
+    <div class="card-f mb-3"><strong>Giải trình chênh lệch:</strong> @c.GhiChuChenhLech</div>
+}
+
+<div class="row mt-5 text-center d-none d-print-flex">
+    <div class="col-6">Người phụ trách ca<br /><br /><br />(ký, ghi họ tên)</div>
+    <div class="col-6">Quản lý xác nhận<br /><br /><br />(ký, ghi họ tên)</div>
+</div>

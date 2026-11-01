@@ -1,0 +1,57 @@
+@page
+@model Friendship.Web.Pages.QuanLy.DuyetKiemKe.IndexModel
+@{ ViewData["Title"] = "Duyệt kiểm kê"; }
+<h1 class="page-title">Duyệt kiểm kê</h1>
+
+<h2 class="h5">Chờ duyệt (@Model.ChoDuyet.Count)</h2>
+@if (Model.ChoDuyet.Count == 0)
+{
+    <div class="card-f text-center mb-4">Không có phiếu nào chờ duyệt.</div>
+}
+else
+{
+    <div class="card-f p-0 mb-4">
+    <table class="table table-cards align-middle mb-0">
+        <thead><tr><th>Phiếu</th><th>Ngày</th><th>Người thực hiện</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var x in Model.ChoDuyet)
+        {
+            <tr>
+                <td data-label="Phiếu">@x.Ma</td>
+                <td data-label="Ngày">@Fmt.NgayGio(x.NgayKiemKe)</td>
+                <td data-label="Người thực hiện">@x.NguoiThucHien.HoTen</td>
+                <td class="text-end"><a asp-page="Detail" asp-route-id="@x.Id" class="btn btn-primary btn-sm">Xem và duyệt</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}
+
+<h2 class="h5">Đã xử lý gần đây</h2>
+@if (Model.DaXuLy.Count == 0)
+{
+    <div class="card-f text-center">Chưa có phiếu nào được xử lý.</div>
+}
+else
+{
+    <div class="card-f p-0">
+    <table class="table table-cards align-middle mb-0">
+        <thead><tr><th>Phiếu</th><th>Người thực hiện</th><th>Người duyệt</th><th>Ngày duyệt</th><th>Kết quả</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var x in Model.DaXuLy)
+        {
+            var (nhan, css) = Fmt.Phieu(x.TrangThai);
+            <tr>
+                <td data-label="Phiếu">@x.Ma</td>
+                <td data-label="Người thực hiện">@x.NguoiThucHien.HoTen</td>
+                <td data-label="Người duyệt">@(x.NguoiDuyet?.HoTen ?? "—")</td>
+                <td data-label="Ngày duyệt">@(x.NgayDuyet is { } d ? Fmt.NgayGio(d) : "—")</td>
+                <td data-label="Kết quả"><span class="badge-f @css">@nhan</span></td>
+                <td class="text-end"><a asp-page="Detail" asp-route-id="@x.Id" class="btn btn-outline-primary btn-sm">Xem</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}

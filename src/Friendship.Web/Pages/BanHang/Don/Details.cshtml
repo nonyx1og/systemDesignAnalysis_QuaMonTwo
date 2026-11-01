@@ -1,0 +1,159 @@
+@page "{id:int}"
+@model Friendship.Web.Pages.BanHang.Don.DetailsModel
+@{
+    var d = Model.Don;
+    ViewData["Title"] = d.Ma;
+    var (nhan, css) = Fmt.Don(d.TrangThai);
+    var chong = "document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">@d.Ma <span class="badge-f @css">@nhan</span></h1>
+    <div class="no-print d-flex gap-2">
+        <button type="button" class="btn btn-outline-primary" onclick="window.print()">In hóa đơn</button>
+        <a asp-page="Index" class="btn btn-outline-primary">Danh sách đơn</a>
+    </div>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger no-print" role="alert"></div>
+@if (!Model.CoCa && ((Model.DatTruoc && d.TrangThai is TrangThaiDon.CHO_COC or TrangThaiDon.CHO_GIAO or TrangThaiDon.DA_COC or TrangThaiDon.DANG_LAM) || Model.ChoPhepTraHang))
+{
+    <div class="alert alert-warning no-print">Bạn chưa mở ca nên chưa thu hoặc hoàn tiền được. <a asp-page="/BanHang/Ca/Index">Mở ca</a></div>
+}
+
+<div class="row g-3">
+    <div class="col-12 col-lg-7">
+        <div class="card-f mb-3">
+            <p class="mb-1">Loại: <strong>@(d.LoaiDon == LoaiDon.DAT_TRUOC ? "Đặt trước" : "Bán lẻ")</strong> · lập lúc @Fmt.NgayGio(d.NgayLap) bởi @d.NhanVien.HoTen</p>
+            @if (d.KhachHang is { } kh) { <p class="mb-1">Khách: <strong>@kh.TenKhachHang</strong> · @kh.SoDienThoai · @kh.DiemTichLuy điểm</p> }
+            @if (d.NgayGioLay is { } hen) { <p class="mb-0">Giờ hẹn lấy: <strong>@Fmt.NgayGio(hen)</strong></p> }
+            @if (!string.IsNullOrEmpty(d.LyDoTra)) { <p class="mb-0 text-danger">Lý do trả hàng: <strong>@d.LyDoTra</strong></p> }
+        </div>
+        <div class="card-f p-0 mb-3">
+            <table class="table table-cards align-middle mb-0">
+                <thead><tr><th>Bánh</th><th class="text-end">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th></tr></thead>
+                <tbody>
+                @foreach (var c in d.ChiTiets)
+                {
+                    <tr>
+                        <td data-label="Bánh">
+                            @if (c.ThietKeBanh != null)
+                            {
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <img src="/dat/anh/@c.ThietKeBanh.MaTraCuu/thiet-ke" alt="Mẫu thiết kế" class="rounded border" style="width: 48px; height: 48px; object-fit: cover;" />
+                                    <div>
+                                        <div>@c.SanPham.TenBanh (@c.SanPham.KichThuoc)</div>
+                                        <a href="/Dat/Theo/@c.ThietKeBanh.MaTraCuu" target="_blank" class="small">Xem thiết kế #@c.ThietKeBanh.Ma</a>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <span>@c.SanPham.TenBanh (@c.SanPham.KichThuoc)</span>
+                            }
+                            @if (c.TienGiam > 0) { <span class="badge-f warn">Xả hàng</span> }
+                            @if (!string.IsNullOrEmpty(c.LoiChuc)) { <div class="small text-secondary">Lời chúc: @c.LoiChuc</div> }
+                        </td>
+                        <td data-label="SL" class="text-end">@c.SoLuong</td>
+                        <td data-label="Đơn giá" class="text-end">@Fmt.Tien(c.DonGia)</td>
+                        <td data-label="Thành tiền" class="text-end">@Fmt.Tien(c.ThanhTien)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-f">
+            <div class="d-flex justify-content-between"><span>Tổng tiền hàng</span><span>@Fmt.Tien(d.TongTienHang)</span></div>
+            @if (d.TienGiamGia > 0) { <div class="d-flex justify-content-between"><span>Voucher @d.KhuyenMai?.MaKhuyenMai</span><span>− @Fmt.Tien(d.TienGiamGia)</span></div> }
+            @if (d.DiemSuDung > 0) { <div class="d-flex justify-content-between"><span>Đổi @d.DiemSuDung điểm</span><span>− @Fmt.Tien(DiemRule.TienGiam(d.DiemSuDung))</span></div> }
+            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2"><span>Tổng thanh toán</span><span>@Fmt.Tien(d.TongThanhToan)</span></div>
+            <div class="d-flex justify-content-between"><span>Đã thu</span><span>@Fmt.Tien(d.DaThanhToan)</span></div>
+            <div class="d-flex justify-content-between"><span>Còn lại</span><strong>@Fmt.Tien(d.ConLai)</strong></div>
+        </div>
+        @if (d.ThanhToans.Count > 0)
+        {
+            <h2 class="h6 mt-3">Các khoản thanh toán</h2>
+            <ul class="list-unstyled">
+                @foreach (var t in d.ThanhToans.OrderBy(t => t.ThoiGian))
+                {
+                    <li>@Fmt.NgayGio(t.ThoiGian) · @Fmt.LoaiTT(t.Loai) · @Fmt.PhuongThuc(t.PhuongThuc) · <strong>@Fmt.Tien(t.SoTien)</strong></li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="col-12 col-lg-5 no-print">
+        @if (d.TrangThai == TrangThaiDon.CHO_COC)
+        {
+            var (min, max) = CocRule.Khoang(d.TongThanhToan);
+            <form method="post" asp-page-handler="Coc" asp-route-id="@d.Id" class="card-f mb-3" onsubmit="@chong">
+                <h2 class="h5">Ghi nhận cọc</h2>
+                <p class="text-secondary small">Cọc hợp lệ từ @Fmt.Tien(min) đến @Fmt.Tien(max) (30%–50%).</p>
+                <label class="form-label" for="coc-tien">Số tiền cọc (₫)</label>
+                <input id="coc-tien" name="TienCoc" type="number" step="1" min="0" class="form-control mb-2" inputmode="numeric" />
+                <label class="form-label" for="coc-pt">Phương thức</label>
+                <select id="coc-pt" name="PhuongThuc" class="form-select mb-2">
+                    <option value="TIEN_MAT">Tiền mặt</option><option value="CHUYEN_KHOAN">Chuyển khoản</option>
+                </select>
+                <label class="form-label" for="coc-dua">Tiền khách đưa (tiền mặt)</label>
+                <input id="coc-dua" name="TienKhachDua" type="number" step="1" min="0" class="form-control mb-3" inputmode="numeric" />
+                <button type="submit" class="btn btn-primary">Ghi nhận cọc</button>
+            </form>
+        }
+        @if (d.TrangThai == TrangThaiDon.CHO_GIAO)
+        {
+            <form method="post" asp-page-handler="Giao" asp-route-id="@d.Id" class="card-f mb-3" onsubmit="@chong">
+                <h2 class="h5">Giao bánh và tất toán</h2>
+                <p class="mb-2">Cần thu: <strong>@Fmt.Tien(d.ConLai)</strong></p>
+                @if (d.ConLai > 0)
+                {
+                    <label class="form-label" for="giao-pt">Phương thức</label>
+                    <select id="giao-pt" name="PhuongThuc" class="form-select mb-2">
+                        <option value="TIEN_MAT">Tiền mặt</option><option value="CHUYEN_KHOAN">Chuyển khoản (đã nhận tiền)</option>
+                    </select>
+                    <label class="form-label" for="giao-dua">Tiền khách đưa (tiền mặt)</label>
+                    <input id="giao-dua" name="TienKhachDua" type="number" step="1" min="0" class="form-control mb-3" inputmode="numeric" />
+                }
+                else
+                {
+                    <p class="text-secondary">Đơn đã thanh toán đủ trước đó.</p>
+                }
+                <button type="submit" class="btn btn-primary">Giao bánh</button>
+            </form>
+        }
+        @if (Model.ChoPhepHuy)
+        {
+            <form method="post" asp-page-handler="Huy" asp-route-id="@d.Id" class="card-f" onsubmit="@chong">
+                <h2 class="h5">Hủy đơn</h2>
+                <p class="text-secondary small">@Model.ChinhSachHuy</p>
+                @if (Model.ChoPhepBungCoc)
+                {
+                    <p class="small">Khách đã quá 24 giờ sau giờ hẹn chưa nhận bánh.</p>
+                    <input type="hidden" name="Kieu" value="BUNG_COC" />
+                    <button type="submit" class="btn btn-outline-danger">Tính bùng cọc (mất cọc, lập phiếu hủy bánh)</button>
+                }
+                else
+                {
+                    <input type="hidden" name="Kieu" value="KHACH_HUY" />
+                    @if (d.TrangThai == TrangThaiDon.DANG_LAM)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="XacNhanDangLam" value="true" id="xn" />
+                            <label class="form-check-label" for="xn">Bếp đang làm đơn này. Tôi xác nhận vẫn hủy.</label>
+                        </div>
+                    }
+                    <button type="submit" class="btn btn-outline-danger">Hủy đơn</button>
+                }
+            </form>
+        }
+        @if (Model.ChoPhepTraHang)
+        {
+            <form method="post" asp-page-handler="TraHang" asp-route-id="@d.Id" class="card-f mb-3" onsubmit="@chong">
+                <h2 class="h5">Trả hàng</h2>
+                <p class="text-secondary small">Trả toàn bộ đơn bán lẻ và hoàn tiền trong ca đang mở.</p>
+                <label class="form-label" for="tra-lydo">Lý do trả hàng <span class="text-danger">*</span></label>
+                <textarea id="tra-lydo" name="LyDoTra" rows="3" maxlength="500" class="form-control mb-3" placeholder="Nhập lý do khách trả hàng..." required>@Model.LyDoTra</textarea>
+                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn trả toàn bộ đơn hàng này và hoàn tiền?');">Trả hàng</button>
+            </form>
+        }
+    </div>
+</div>

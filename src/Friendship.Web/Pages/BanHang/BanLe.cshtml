@@ -1,0 +1,250 @@
+@page
+@model Friendship.Web.Pages.BanHang.BanLeModel
+@{ ViewData["Title"] = "Bán lẻ"; }
+<h1 class="page-title">Bán lẻ tại quầy</h1>
+
+@if (!Model.CoCa)
+{
+    <div class="alert alert-warning">Bạn chưa mở ca nên chưa thu tiền được. <a asp-page="/BanHang/Ca/Index">Mở ca</a></div>
+}
+
+<form method="post" onsubmit="document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <div class="row g-3 align-items-start">
+        <div class="col-lg-8 d-flex flex-column gap-3">
+            <section class="card-f" aria-labelledby="h-sp">
+                <h2 class="h5" id="h-sp">Sản phẩm</h2>
+                <table class="table align-middle">
+                    <thead><tr><th>Bánh</th><th style="width:150px">Số lượng</th><th style="width:52px"><span class="visually-hidden">Xóa</span></th></tr></thead>
+                    <tbody id="dong" data-rows="Lines">
+                    @for (var i = 0; i < Model.Lines.Count; i++)
+                    {
+                        var l = Model.Lines[i];
+                        <tr data-row>
+                            <td>
+                                <select name="Lines[@i].SanPhamId" class="form-select" aria-label="Bánh">
+                                    <option value="0">— Chọn bánh —</option>
+                                    @foreach (var sp in Model.SanPhams)
+                                    {
+                                        <option value="@sp.Id" selected="@(l.SanPhamId == sp.Id)">@sp.TenBanh (@sp.KichThuoc) — @Fmt.Tien(sp.DonGia)</option>
+                                    }
+                                </select>
+                            </td>
+                            <td><input name="Lines[@i].SoLuong" type="number" step="1" min="1" value="@(l.SoLuong is null or 0 ? "" : l.SoLuong.ToString())" class="form-control" aria-label="Số lượng" inputmode="numeric" /></td>
+                            <td><button type="button" class="btn btn-outline-secondary btn-sm px-2" data-del-row aria-label="Xóa dòng">@Icons.Svg("trash", 16)</button></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                <div class="pt-3"><button type="button" class="btn btn-outline-primary btn-sm" data-add-row="#dong">+ Thêm bánh</button></div>
+            </section>
+
+            @if (Model.Xem is { } d)
+            {
+                <input type="hidden" name="PreviewToken" value="@Model.PreviewToken" />
+                <input type="hidden" name="Nonce" value="@Model.Nonce" />
+                <section class="card-f" aria-labelledby="h-ct">
+                    <h2 class="h5" id="h-ct">Chi tiết đơn</h2>
+                    <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th>Bánh</th><th class="text-end">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th><th>Lô xuất (FEFO)</th></tr></thead>
+                        <tbody>
+                        @foreach (var c in d.ChiTiets)
+                        {
+                            <tr>
+                                <td>@c.SanPham.TenBanh @if (c.TienGiam > 0) { <span class="badge-f warn">Xả hàng</span> }</td>
+                                <td class="text-end">@c.SoLuong</td>
+                                <td class="text-end">@Fmt.Tien(c.DonGia)</td>
+                                <td class="text-end">@Fmt.Tien(c.ThanhTien)</td>
+                                <td class="small text-secondary">#@c.LoSanPhamId · HSD @Fmt.NgayGio(c.LoSanPham!.HanSuDung)</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                    </div>
+                </section>
+
+                <section class="card-f" aria-labelledby="h-tt">
+                    <h2 class="h5" id="h-tt">Phương thức thanh toán</h2>
+                    <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="min-width:180px">Phương thức</th>
+                                <th style="width:170px">Số tiền</th>
+                                <th style="width:170px">Tiền khách đưa (TM)</th>
+                                <th style="width:52px"><span class="visually-hidden">Xóa</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="dong-tt" data-rows="ThanhToanLines">
+                        @for (var j = 0; j < Model.ThanhToanLines.Count; j++)
+                        {
+                            var tt = Model.ThanhToanLines[j];
+                            <tr data-row>
+                                <td>
+                                    <select name="ThanhToanLines[@j].PhuongThuc" class="form-select pt-select" aria-label="Phương thức">
+                                        <option value="TIEN_MAT" selected="@(tt.PhuongThuc == PhuongThucTT.TIEN_MAT)">Tiền mặt</option>
+                                        <option value="CHUYEN_KHOAN" selected="@(tt.PhuongThuc == PhuongThucTT.CHUYEN_KHOAN)">Chuyển khoản</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input name="ThanhToanLines[@j].SoTien" type="number" step="1" min="0" value="@(tt.SoTien is null or 0 ? "" : tt.SoTien.ToString())" class="form-control tt-sotien" placeholder="Số tiền" inputmode="numeric" aria-label="Số tiền" />
+                                </td>
+                                <td>
+                                    <input name="ThanhToanLines[@j].TienKhachDua" type="number" step="1" min="0" value="@(tt.TienKhachDua is null or 0 ? "" : tt.TienKhachDua.ToString())" class="form-control tt-khachdua" placeholder="Khách đưa" inputmode="numeric" aria-label="Tiền khách đưa" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm px-2" data-del-row aria-label="Xóa dòng">@Icons.Svg("trash", 16)</button>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                    </div>
+                    <div class="pt-3"><button type="button" class="btn btn-outline-primary btn-sm" data-add-row="#dong-tt">+ Thêm phương thức</button></div>
+                </section>
+            }
+        </div>
+
+        <div class="col-lg-4 d-flex flex-column gap-3 pos-side">
+            <section class="card-f" aria-labelledby="h-khach">
+                <h2 class="h5" id="h-khach">Khách hàng</h2>
+                <div class="mb-3">
+                    <label class="form-label" for="sdt">Số điện thoại khách (tùy chọn)</label>
+                    <input id="sdt" name="SoDienThoai" value="@Model.SoDienThoai" class="form-control" inputmode="tel" data-sdt />
+                    <div class="small text-secondary mt-1" data-khach-info></div>
+                </div>
+                <div>
+                    <label class="form-label" for="ten">Tên khách (nếu là khách mới)</label>
+                    <input id="ten" name="TenKhach" value="@Model.TenKhach" class="form-control" />
+                </div>
+            </section>
+
+            <section class="card-f" aria-labelledby="h-giam">
+                <h2 class="h5" id="h-giam">Giảm giá</h2>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label" for="vc">Mã voucher</label>
+                        <input id="vc" name="MaVoucher" value="@Model.MaVoucher" class="form-control text-uppercase" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="diem">Dùng điểm</label>
+                        <input id="diem" name="DiemSuDung" type="number" step="1" min="0" value="@(Model.DiemSuDung is null or 0 ? "" : Model.DiemSuDung.ToString())" class="form-control" inputmode="numeric" />
+                    </div>
+                </div>
+                <p class="form-text mb-0 mt-2">Tối đa 1 voucher, dùng cùng điểm được. 1 điểm = 1.000 ₫.</p>
+            </section>
+
+            <section class="card-f" aria-labelledby="h-tom-tat">
+                <h2 class="h5" id="h-tom-tat">Tóm tắt</h2>
+                @if (Model.Xem is { } x)
+                {
+                    <dl class="sum-list">
+                        <div><dt>Tổng tiền hàng</dt><dd>@Fmt.Tien(x.TongTienHang)</dd></div>
+                        @if (x.TienGiamGia > 0) { <div><dt>Voucher</dt><dd>− @Fmt.Tien(x.TienGiamGia)</dd></div> }
+                        @if (x.DiemSuDung > 0) { <div><dt>Đổi @x.DiemSuDung điểm</dt><dd>− @Fmt.Tien(DiemRule.TienGiam(x.DiemSuDung))</dd></div> }
+                        <div class="sum-total"><dt>Tổng thanh toán</dt><dd>@Fmt.Tien(x.TongThanhToan)</dd></div>
+                    </dl>
+                    <div id="tt-tong-hop" class="sum-list sum-pay" data-tong-can-thu="@x.TongThanhToan">
+                        <div class="d-flex justify-content-between"><span>Cần thanh toán</span><strong>@Fmt.Tien(x.TongThanhToan)</strong></div>
+                        <div class="d-flex justify-content-between"><span>Đã nhập</span><span id="tt-da-nhap">0 ₫</span></div>
+                        <div id="tt-trang-thai-dong" class="d-flex justify-content-between fw-semibold"></div>
+                        <div id="tt-thoi-lai-dong" class="d-flex justify-content-between text-success fw-semibold" style="display:none !important;"><span>Tiền thối lại</span><span id="tt-thoi-lai">0 ₫</span></div>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button type="submit" asp-page-handler="Ban" class="btn btn-primary btn-lg">Xác nhận bán</button>
+                        <button type="submit" asp-page-handler="Preview" class="btn btn-outline-primary">Xem trước lại</button>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-secondary mb-3">Chọn bánh và số lượng, rồi bấm Xem trước để tính tiền và chọn lô theo hạn sử dụng.</p>
+                    <div class="d-grid"><button type="submit" asp-page-handler="Preview" class="btn btn-primary">Xem trước</button></div>
+                }
+            </section>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/khach.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            function f(n) { return (Math.round(n)).toLocaleString('vi-VN') + ' ₫'; }
+            function tinh() {
+                var tongHop = document.getElementById('tt-tong-hop');
+                if (!tongHop) return;
+                var canThu = Number(tongHop.dataset.tongCanThu || 0);
+                var daNhap = 0;
+                var thoi = 0;
+                var tbody = document.getElementById('dong-tt');
+                if (!tbody) return;
+
+                tbody.querySelectorAll('tr[data-row]').forEach(function (tr) {
+                    var pt = tr.querySelector('.pt-select')?.value;
+                    var soTienInput = tr.querySelector('.tt-sotien');
+                    var khachDuaInput = tr.querySelector('.tt-khachdua');
+
+                    var soTien = Number(soTienInput?.value || 0);
+                    var khachDua = Number(khachDuaInput?.value || 0);
+
+                    if (soTien > 0) daNhap += soTien;
+
+                    if (pt === 'CHUYEN_KHOAN') {
+                        if (khachDuaInput) {
+                            khachDuaInput.disabled = true;
+                            khachDuaInput.placeholder = '—';
+                        }
+                    } else {
+                        if (khachDuaInput) {
+                            khachDuaInput.disabled = false;
+                            khachDuaInput.placeholder = 'Khách đưa';
+                        }
+                        if (khachDua > soTien) {
+                            thoi += (khachDua - soTien);
+                        }
+                    }
+                });
+
+                var daNhapEl = document.getElementById('tt-da-nhap');
+                if (daNhapEl) daNhapEl.textContent = f(daNhap);
+
+                var ttTrangThai = document.getElementById('tt-trang-thai-dong');
+                if (ttTrangThai) {
+                    var chenh = canThu - daNhap;
+                    if (chenh > 0) {
+                        ttTrangThai.innerHTML = '<span>Còn thiếu</span><span class="text-danger">' + f(chenh) + '</span>';
+                    } else if (chenh < 0) {
+                        ttTrangThai.innerHTML = '<span>Vượt quá</span><span class="text-danger">' + f(-chenh) + '</span>';
+                    } else {
+                        ttTrangThai.innerHTML = '<span>Trạng thái</span><span class="text-success">Đã đủ tổng thanh toán</span>';
+                    }
+                }
+
+                var thoiDong = document.getElementById('tt-thoi-lai-dong');
+                var thoiEl = document.getElementById('tt-thoi-lai');
+                if (thoiDong && thoiEl) {
+                    if (thoi > 0) {
+                        thoiDong.style.setProperty('display', 'flex', 'important');
+                        thoiEl.textContent = f(thoi);
+                    } else {
+                        thoiDong.style.setProperty('display', 'none', 'important');
+                    }
+                }
+            }
+
+            document.addEventListener('input', function (e) {
+                if (e.target.closest('#dong-tt')) tinh();
+            });
+            document.addEventListener('change', function (e) {
+                if (e.target.closest('#dong-tt')) tinh();
+            });
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('[data-add-row="#dong-tt"]') || e.target.closest('#dong-tt [data-del-row]')) {
+                    setTimeout(tinh, 0);
+                }
+            });
+            tinh();
+        })();
+    </script>
+}

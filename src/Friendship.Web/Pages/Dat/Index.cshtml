@@ -1,0 +1,139 @@
+@page
+@model Friendship.Web.Pages.Dat.IndexModel
+@using Friendship.Domain
+@using Friendship.Web
+@{
+    ViewData["Title"] = "Thiết kế bánh kem theo ý bạn";
+    var cocMin = (int)(CocRule.TiLeToiThieu * 100);
+    var cocMax = (int)(CocRule.TiLeToiDa * 100);
+    var phuPhi = (int)(ThietKeRule.PhuPhiToiDa * 100);
+    const string maMau = "pQ4xV7mK-2LtA_8RwZ0cNe";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dat-index.css" asp-append-version="true" />
+}
+
+<section class="di-hero" aria-labelledby="di-tieu-de">
+    <div class="di-hero-chu">
+        <h1 id="di-tieu-de" class="dat-display">Tự thiết kế chiếc bánh của bạn</h1>
+        <p class="dat-lead">Chọn bánh nền, cốt, kem và topping, xem bản 2D hoặc 3D. Giá cập nhật khi bạn chọn. Bếp xem lại trước khi báo giá.</p>
+        <div class="di-hero-nut">
+            <a class="dat-btn dat-btn-primary dat-btn-lg" href="/Dat/ThietKe">Bắt đầu thiết kế</a>
+            <a class="di-lien-ket" href="/Dat/Tim">Tra cứu đơn</a>
+        </div>
+    </div>
+
+    <aside class="dat-paper di-phieu" aria-label="Phiếu đặt bánh ví dụ">
+        <div class="di-phieu-dau">
+            <p class="di-phieu-ten">Phiếu đặt bánh</p>
+            <p class="di-vd">Ví dụ</p>
+        </div>
+        <dl class="di-dong">
+            @if (Model.PhieuCoBanh is not null)
+            {
+                <div><dt>Kích cỡ</dt><dd>@Model.PhieuCoBanh</dd></div>
+            }
+            <div><dt>Cốt</dt><dd>Vani</dd></div>
+            <div><dt>Kem</dt><dd>Kem vani, viền xoắn</dd></div>
+            <div><dt>Topping</dt><dd>6 quả dâu tây</dd></div>
+            <div><dt>Lời chúc</dt><dd>Happy Day</dd></div>
+            @if (Model.PhieuTong is { } tong && Model.PhieuCoc is { } coc)
+            {
+                <div><dt>Tổng tạm tính</dt><dd class="dat-money">@Fmt.Tien(tong)</dd></div>
+                <div class="di-coc"><dt>Cọc từ @cocMin%</dt><dd class="dat-money dat-money-deposit">@Fmt.Tien(coc)</dd></div>
+            }
+        </dl>
+        <hr class="dat-perf" />
+        <div class="di-cuong">
+            <p class="di-cuong-nhan">Cuống phiếu, bạn giữ lại</p>
+            <p class="di-ma">@maMau</p>
+            <p class="di-ghi">Mã mẫu. Mã thật hiện sau khi bạn gửi thiết kế. Tra cứu cần số điện thoại và 4 ký tự cuối của mã.</p>
+        </div>
+    </aside>
+</section>
+
+<section class="di-khoi" id="cach-dat" aria-labelledby="di-cach-dat">
+    <div class="di-khoi-dau">
+        <h2 id="di-cach-dat" class="di-h2">Cách đặt bánh</h2>
+        <p class="di-khoi-mota">Bốn bước, theo đúng thứ tự hệ thống xử lý đơn của bạn.</p>
+    </div>
+    <ol class="di-buoc" tabindex="0" aria-label="Bốn bước đặt bánh">
+        <li>
+            <h3>Thiết kế</h3>
+            <p>Chọn kích cỡ, cốt, màu kem, viền, topping, chữ và ảnh in. Giá hiện ngay và được tính lại ở máy chủ khi bạn gửi.</p>
+        </li>
+        <li>
+            <h3>Gửi cho bếp</h3>
+            <p>Nhập tên, số điện thoại và ngày lấy bánh, cách thời điểm gửi ít nhất @ThietKeRule.GioDatTruocToiThieu giờ. Bạn nhận mã tra cứu.</p>
+        </li>
+        <li>
+            <h3>Bếp báo giá</h3>
+            <p>Bếp xem thiết kế, rồi báo giá hoặc nhờ bạn sửa. Báo giá có hiệu lực @ThietKeRule.GioHanBaoGia giờ.</p>
+        </li>
+        <li>
+            <h3>Đặt cọc</h3>
+            <p>Cọc @cocMin% đến @cocMax% qua VietQR. Thu ngân xác nhận chuyển khoản, đơn chuyển sang bếp làm.</p>
+        </li>
+    </ol>
+</section>
+
+<section class="di-khoi" id="mau" aria-labelledby="di-mau">
+    <div class="di-khoi-dau">
+        <h2 id="di-mau" class="di-h2">Bắt đầu từ một mẫu</h2>
+        <p class="di-khoi-mota">Mẫu mở sẵn trong trình thiết kế. Bạn đổi lại bất cứ chi tiết nào.</p>
+    </div>
+    <div class="di-mau-luoi">
+        @foreach (var m in Model.Maus)
+        {
+            <article class="dat-paper di-mau">
+                <div class="di-mau-hinh"><partial name="_BanhMau" model="m" /></div>
+                <h3 class="di-mau-ten">@m.Ten</h3>
+                <p>@m.MoTa</p>
+                <p class="di-mau-tp">@m.TomTat</p>
+                <div class="di-mau-cuoi">
+                    @if (m.GiaTu is { } gia)
+                    {
+                        <p class="di-mau-gia">Từ <span class="dat-money">@Fmt.Tien(gia)</span><span class="di-mau-co"> bánh @m.CoGiaTu</span></p>
+                    }
+                    <a class="di-lien-ket di-mau-link" href="/Dat/ThietKe?mau=@m.Id">Dùng mẫu này<span class="visually-hidden">: @m.Ten</span></a>
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
+<section class="di-khoi di-hoi" id="cau-hoi" aria-labelledby="di-cau-hoi">
+    <div class="di-khoi-dau">
+        <h2 id="di-cau-hoi" class="di-h2">Câu hỏi thường gặp</h2>
+        <p class="di-khoi-mota">Chỉ gồm điều hệ thống làm thật.</p>
+        <a class="di-lien-ket" href="/Dat/Tim">Tra cứu đơn</a>
+    </div>
+    <div class="di-hoi-ds">
+        <details open>
+            <summary>Giá có thay đổi sau khi tôi gửi không?</summary>
+            <p>Giá trong trình thiết kế là giá tạm tính, và máy chủ tính lại khi bạn gửi. Sau khi xem thiết kế, bếp báo giá chính thức và có thể cộng phụ phí, tối đa @phuPhi% giá tạm tính.</p>
+        </details>
+        <details>
+            <summary>Đặt cọc bao nhiêu, trả thế nào?</summary>
+            <p>Cọc từ @cocMin% đến @cocMax% tổng thanh toán. Khi bếp báo giá, trang theo dõi hiện mã VietQR để bạn chuyển khoản. Thu ngân đối chiếu và xác nhận, sau đó đơn chuyển sang bếp.</p>
+        </details>
+        <details>
+            <summary>Cần đặt trước bao lâu?</summary>
+            <p>Ngày giờ lấy bánh phải cách thời điểm gửi ít nhất @ThietKeRule.GioDatTruocToiThieu giờ. Báo giá có hiệu lực @ThietKeRule.GioHanBaoGia giờ, quá hạn thì bạn cần thiết kế và gửi lại.</p>
+        </details>
+        <details>
+            <summary>Tra cứu đơn bằng gì?</summary>
+            <p>Bằng số điện thoại đã dùng khi gửi và 4 ký tự cuối của mã tra cứu. Mã hiện ngay sau khi bạn gửi thiết kế, hãy lưu lại.</p>
+        </details>
+        <details>
+            <summary>Bếp yêu cầu sửa hoặc từ chối thì sao?</summary>
+            <p>Ghi chú của bếp hiện ở trang theo dõi. Nếu bếp nhờ sửa, bạn chỉnh thiết kế ngay tại đó rồi gửi lại. Bạn cũng hủy được thiết kế ở trang này khi chưa đặt cọc.</p>
+        </details>
+    </div>
+</section>
+
+<section class="dat-band di-moi" aria-labelledby="di-moi">
+    <h2 id="di-moi" class="di-moi-cau">Thiết kế xong, bếp sẽ xem và báo giá.</h2>
+    <a class="dat-btn dat-btn-primary dat-btn-lg" href="/Dat/ThietKe">Bắt đầu thiết kế</a>
+</section>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – nongnongBakery</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var vaiTro = User.VaiTroHienTai();
+    var menu = Menu.For(vaiTro).ToList();
+    var ten = User.Identity!.Name ?? "";
+    var chuDau = ten.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpperInvariant() ?? "?";
+    var coCanhBao = menu.Any(m => m.Page == "/CanhBao/Index");
+    <header class="topbar">
+        <button class="topbar-btn d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#nav" aria-controls="nav" aria-label="Mở menu">@Icons.Svg("menu")</button>
+        <a class="brand" href="/">@Icons.Logo()<span>nongnongBakery</span></a>
+        <label class="topbar-search d-none d-md-flex">
+            @Icons.Svg("search", 18)
+            <input type="search" id="tim-menu" placeholder="Tìm chức năng" autocomplete="off" aria-label="Tìm chức năng trong menu" />
+            <kbd>Ctrl K</kbd>
+        </label>
+        <div class="topbar-right">
+            @if (coCanhBao)
+            {
+                <a class="topbar-btn" asp-page="/CanhBao/Index" aria-label="Cảnh báo hạn sử dụng">@Icons.Svg("bell")@await Component.InvokeAsync("CanhBaoBadge")</a>
+            }
+            <div class="dropdown">
+                <button class="user-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="avatar" aria-hidden="true">@chuDau</span>
+                    <span class="d-none d-sm-inline">@ten</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end user-menu">
+                    <div class="px-3 py-2">
+                        <div class="fw-semibold">@ten</div>
+                        <div class="text-subdued small">@vaiTro.TenHienThi()</div>
+                    </div>
+                    <hr class="dropdown-divider" />
+                    <a class="dropdown-item" asp-page="/Account/ChangePassword">@Icons.Svg("key", 18) Đổi mật khẩu</a>
+                    <form method="post" asp-page="/Account/Logout">
+                        <button type="submit" class="dropdown-item">@Icons.Svg("logout", 18) Đăng xuất</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="shell">
+        <nav id="nav" class="sidebar offcanvas-md offcanvas-start" tabindex="-1" aria-label="Menu chính">
+            @foreach (var nhom in menu.GroupBy(m => m.Nhom))
+            {
+                <div class="nav-group">
+                    @if (nhom.Key != "") { <div class="nav-heading">@nhom.Key</div> }
+                    <ul class="nav-list">
+                        @foreach (var m in nhom)
+                        {
+                            var url = Url.Page(m.Page);
+                            if (url is null) { continue; }
+                            var active = url == "/" ? Context.Request.Path == "/" : Context.Request.Path.StartsWithSegments(url);
+                            <li><a class="nav-link-f @(active ? "active" : "")" href="@url" aria-current="@(active ? "page" : null)">@Icons.Svg(m.Icon)<span>@m.Text</span>
+                                @if (m.Page == "/CanhBao/Index") { @await Component.InvokeAsync("CanhBaoBadge") }
+                            </a></li>
+                        }
+                    </ul>
+                </div>
+            }
+            <p class="nav-empty" hidden>Không có chức năng phù hợp.</p>
+        </nav>
+        <main class="content">
+            @if (TempData["Message"] is string ok) { <div class="alert alert-success" role="status">@ok</div> }
+            @if (TempData["Error"] is string loi) { <div class="alert alert-danger" role="alert">@loi</div> }
+            @RenderBody()
+        </main>
+    </div>
+}
+else
+{
+    <main class="auth">@RenderBody()</main>
+}
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/rows.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

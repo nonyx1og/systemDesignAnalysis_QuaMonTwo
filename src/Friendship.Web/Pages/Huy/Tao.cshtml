@@ -1,0 +1,64 @@
+@page
+@model Friendship.Web.Pages.Huy.TaoModel
+@{ ViewData["Title"] = "Lập phiếu hủy"; }
+<h1 class="page-title">Lập phiếu hủy</h1>
+<p class="text-secondary">Phiếu sẽ chờ quản lý duyệt; kho chỉ bị trừ sau khi được duyệt. Với đơn bùng cọc, phiếu hủy trọn đơn (không cần nhập số lượng).</p>
+
+<form method="post" class="card-f mb-4" onsubmit="document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <table class="table align-middle">
+        <thead><tr><th>Đối tượng cần hủy</th><th style="width:130px">Số lượng</th><th style="width:190px">Lý do</th><th style="width:60px"></th></tr></thead>
+        <tbody id="dong" data-rows="Lines">
+        @for (var i = 0; i < Model.Lines.Count; i++)
+        {
+            var l = Model.Lines[i];
+            <tr data-row>
+                <td>
+                    <select name="Lines[@i].Target" class="form-select" aria-label="Đối tượng">
+                        <option value="">— Chọn lô hoặc đơn —</option>
+                        @if (Model.Chon.LoNguyenLieu.Count > 0)
+                        {
+                            <optgroup label="Lô nguyên liệu">
+                                @foreach (var x in Model.Chon.LoNguyenLieu)
+                                {
+                                    <option value="NL:@x.Id" selected="@(l.Target == "NL:" + x.Id)">@x.NguyenLieu.TenGoi · lô #@x.Id · HSD @Fmt.Ngay(x.HanSuDung) · còn @Fmt.So(x.SoLuongCon) @x.NguyenLieu.DonViTinh</option>
+                                }
+                            </optgroup>
+                        }
+                        @if (Model.Chon.LoBanh.Count > 0)
+                        {
+                            <optgroup label="Lô bánh">
+                                @foreach (var x in Model.Chon.LoBanh)
+                                {
+                                    <option value="BANH:@x.Id" selected="@(l.Target == "BANH:" + x.Id)">@x.SanPham.TenBanh · lô #@x.Id · HSD @Fmt.NgayGio(x.HanSuDung) · còn @x.SoLuongTon</option>
+                                }
+                            </optgroup>
+                        }
+                        @if (Model.Chon.DonBungCoc.Count > 0)
+                        {
+                            <optgroup label="Đơn bùng cọc">
+                                @foreach (var x in Model.Chon.DonBungCoc)
+                                {
+                                    <option value="DON:@x.Id" selected="@(l.Target == "DON:" + x.Id)">@x.Ma · hẹn @(x.NgayGioLay is { } g ? Fmt.NgayGio(g) : "—")</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </td>
+                <td><input name="Lines[@i].SoLuong" type="number" step="any" min="0" value="@l.SoLuong" class="form-control" aria-label="Số lượng" inputmode="decimal" /></td>
+                <td>
+                    <select name="Lines[@i].LyDo" class="form-select" aria-label="Lý do">
+                        @foreach (var ly in Enum.GetValues<LyDoHuy>().Where(l => l != LyDoHuy.KHACH_TRA_HANG))
+                        {
+                            <option value="@ly" selected="@(l.LyDo == ly)">@Fmt.LyDoHuy(ly)</option>
+                        }
+                    </select>
+                </td>
+                <td><button type="button" class="btn btn-outline-primary btn-sm" data-del-row aria-label="Xóa dòng">✕</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-outline-primary btn-sm mb-3" data-add-row="#dong">+ Thêm dòng</button>
+    <div><button type="submit" class="btn btn-primary">Lập phiếu và gửi duyệt</button></div>
+</form>

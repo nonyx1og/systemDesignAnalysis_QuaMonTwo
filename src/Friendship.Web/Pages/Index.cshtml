@@ -1,0 +1,70 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Tổng quan";
+    var vaiTro = User.VaiTroHienTai();
+    var homNay = DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
+    // (icon, tông, tiêu đề, mô tả, số/nhãn, url). Tông "danger"/"warn" chỉ khi có việc thật sự cần xử lý.
+    var viec = new List<(string Icon, string Tong, string TieuDe, string MoTa, string Nhan, string? Url)>();
+    if (Model.LaBanHang)
+    {
+        viec.Add(("wallet", Model.CoCa ? "ok" : "warn", "Ca thu ngân", Model.CoCa ? "Đang thu tiền trong ca của bạn" : "Mở ca trước khi bán lẻ hoặc nhận cọc",
+                  Model.CoCa ? "Ca đang mở" : "Chưa mở ca", Url.Page("/BanHang/Ca/Index")));
+        viec.Add(("receipt", Model.DonChoGiao > 0 ? "warn" : "", "Đơn chờ giao", "Đơn đặt đã làm xong, chờ khách nhận và tất toán",
+                  $"{Model.DonChoGiao} đơn", Url.Page("/BanHang/Don/Index", new { TrangThai = "CHO_GIAO" })));
+    }
+    if (Model.LaSanXuat)
+        viec.Add(("pot", Model.DonCanLam > 0 ? "warn" : "", "Đơn cần làm", "Đơn đã cọc, xếp theo giờ hẹn lấy bánh", $"{Model.DonCanLam} đơn", Url.Page("/Bep/Index")));
+    if (Model.LaKho || Model.LaQuanLy)
+    {
+        viec.Add(("alert", Model.LoHetHan > 0 ? "danger" : "", "Lô hết hạn", "Không bán, không xuất; cần lập phiếu hủy", $"{Model.LoHetHan} lô", Url.Page("/CanhBao/Index")));
+        viec.Add(("alert", Model.LoCanDate > 0 ? "warn" : "", "Lô cận date", "Nguyên liệu còn ≤ 3 ngày, bánh còn ≤ 6 giờ", $"{Model.LoCanDate} lô", Url.Page("/CanhBao/Index")));
+    }
+    if (Model.LaKho)
+        viec.Add(("list", Model.NguyenLieuDuoiMuc > 0 ? "warn" : "", "Nguyên liệu dưới mức tồn", "Xem đề xuất nhập hàng theo mức cảnh báo", $"{Model.NguyenLieuDuoiMuc} loại", Url.Page("/Kho/DeXuatNhap")));
+    if (Model.LaQuanLy)
+    {
+        viec.Add(("check", Model.PhieuChoDuyet > 0 ? "warn" : "", "Phiếu kiểm kê chờ duyệt", "Tồn lô chỉ cập nhật sau khi bạn duyệt", $"{Model.PhieuChoDuyet} phiếu", Url.Page("/QuanLy/DuyetKiemKe/Index")));
+        viec.Add(("check-file", Model.PhieuHuyChoDuyet > 0 ? "warn" : "", "Phiếu hủy chờ duyệt", "Chỉ trừ kho và ghi chi phí sau khi duyệt", $"{Model.PhieuHuyChoDuyet} phiếu", Url.Page("/QuanLy/DuyetHuy/Index")));
+    }
+    var loiTat = Menu.For(vaiTro).Where(m => m.Page != "/Index").Take(6).ToList();
+}
+<h1 class="page-title">Xin chào, @User.Identity!.Name</h1>
+<p class="text-secondary mb-3">@vaiTro.TenHienThi() · @homNay</p>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <section class="card-f p-0" aria-labelledby="viec-can-lam">
+            <h2 class="card-title-f" id="viec-can-lam">Việc cần làm</h2>
+            @if (viec.Count == 0)
+            {
+                <p class="text-secondary px-3 pb-3 mb-0">Vai trò của bạn không có việc chờ xử lý. Dùng menu bên trái để mở chức năng.</p>
+            }
+            else
+            {
+                <ul class="task-list">
+                    @foreach (var v in viec)
+                    {
+                        <li><a class="task" href="@v.Url">
+                            <span class="task-ico @v.Tong">@Icons.Svg(v.Icon, 18)</span>
+                            <span class="task-text"><strong>@v.TieuDe</strong><span>@v.MoTa</span></span>
+                            <span class="badge-f @v.Tong">@v.Nhan</span>
+                            @Icons.Svg("chevron", 16)
+                        </a></li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+    <div class="col-lg-4">
+        <section class="card-f p-0" aria-labelledby="truy-cap-nhanh">
+            <h2 class="card-title-f" id="truy-cap-nhanh">Truy cập nhanh</h2>
+            <ul class="task-list">
+                @foreach (var m in loiTat)
+                {
+                    <li><a class="task py-2" href="@Url.Page(m.Page)"><span class="task-ico">@Icons.Svg(m.Icon, 18)</span><span class="task-text"><strong class="fw-semibold">@m.Text</strong></span>@Icons.Svg("chevron", 16)</a></li>
+                }
+            </ul>
+        </section>
+    </div>
+</div>

@@ -1,0 +1,168 @@
+/* /Dat/Tim: tra cứu đơn. Hợp đồng ở docs/design-khach.md, mục 11. */
+
+.tim-head {
+  margin-bottom: 1.5rem;
+}
+.tim-head .dat-lead {
+  margin: 0.5rem 0 0;
+  max-width: 56ch;
+}
+.tim-h2 {
+  font-size: var(--dat-fs-lead);
+  margin: 0 0 1rem;
+}
+
+.tim-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .tim-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Form */
+.tim-fields {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .tim-fields {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+.tim-fields .form-text {
+  margin: 0.5rem 0 0;
+}
+.tim-loi {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-danger-bg);
+  color: var(--dat-danger);
+}
+.tim-loi a {
+  color: inherit;
+  font-weight: 600;
+}
+.tim-submit {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+@media (min-width: 640px) {
+  .tim-submit {
+    width: auto;
+    min-width: 160px;
+  }
+}
+
+/* Cuống phiếu: giải thích chỗ lấy mã */
+.tim-stub p {
+  margin: 0;
+  max-width: 60ch;
+}
+.tim-stub .dat-perf {
+  margin: 1.5rem 0 1rem;
+}
+.tim-stub-label {
+  color: var(--dat-text-secondary);
+  font-size: var(--dat-fs-small);
+}
+.tim-stub .tim-stub-code {
+  margin-top: 0.5rem;
+  font-family: var(--dat-font-display);
+  font-weight: 600;
+  font-size: var(--dat-fs-lead);
+  letter-spacing: 0.04em;
+  color: var(--dat-text-secondary);
+  overflow-wrap: anywhere;
+}
+.tim-stub-code mark {
+  background: var(--dat-bg-accent-soft);
+  color: var(--dat-text-main);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--dat-radius-xs);
+  letter-spacing: 0.06em;
+}
+
+/* Kết quả: các hàng của một tờ giấy, bấm cả hàng */
+.tim-ketqua {
+  margin-top: 2rem;
+}
+.tim-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  border-radius: var(--dat-radius-sm);
+  overflow: hidden;
+}
+.tim-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "ma chip"
+    "banh banh"
+    "hen tien"
+    "go go";
+  gap: 0.5rem 1rem;
+  align-items: center;
+  min-height: 64px;
+  padding: 1rem;
+  background: var(--dat-bg-surface);
+  color: var(--dat-text-main);
+  text-decoration: none;
+}
+.tim-row:hover {
+  background: var(--dat-bg-muted);
+}
+.tim-row:focus-visible {
+  outline-offset: -2px;
+}
+.tim-ma { grid-area: ma; font-family: var(--dat-font-display); font-weight: 600; font-size: var(--dat-fs-lead); line-height: 1.15; }
+.tim-chip { grid-area: chip; justify-self: end; }
+.tim-banh { grid-area: banh; font-weight: 600; }
+.tim-hen { grid-area: hen; font-variant-numeric: tabular-nums; }
+.tim-tien { grid-area: tien; justify-self: end; text-align: right; font-weight: 600; }
+.tim-go { grid-area: go; font-weight: 600; text-decoration: underline; text-underline-offset: 0.18em; }
+.tim-row:hover .tim-go { text-decoration-thickness: 2px; }
+.tim-sub {
+  display: block;
+  font-size: var(--dat-fs-small);
+  font-weight: 400;
+  color: var(--dat-text-secondary);
+}
+
+@media (min-width: 900px) {
+  .tim-row {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.4fr) minmax(0, 1.2fr) auto minmax(0, 1fr) auto;
+    grid-template-areas: "ma banh hen chip tien go";
+    gap: 1rem 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+  .tim-chip { justify-self: start; }
+  .tim-go { text-align: right; }
+}
+
+/* Nhãn trạng thái: luôn có chữ, màu là phụ */
+.tim-chip {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--dat-radius-sm);
+  font-size: var(--dat-fs-small);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+}
+.tim-chip--cho { background: var(--dat-warning-bg); color: var(--dat-warning); }
+.tim-chip--loi { background: var(--dat-danger-bg); color: var(--dat-danger); }
+.tim-chip--tin { background: var(--dat-info-bg); color: var(--dat-info); }
+.tim-chip--xong { background: var(--dat-success-bg); color: var(--dat-success); }

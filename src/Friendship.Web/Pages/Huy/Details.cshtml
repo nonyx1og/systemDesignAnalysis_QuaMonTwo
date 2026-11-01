@@ -1,0 +1,44 @@
+@page "{id:int}"
+@model Friendship.Web.Pages.Huy.DetailsModel
+@using Friendship.Infrastructure.Services
+@{
+    var p = Model.Phieu;
+    var (nhan, css) = Fmt.Phieu(p.TrangThai);
+    ViewData["Title"] = "Phiếu " + p.Ma;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">Phiếu @p.Ma <span class="badge-f @css">@nhan</span></h1>
+    <a asp-page="Index" class="btn btn-outline-primary">Quay lại</a>
+</div>
+<p class="text-secondary">Lập lúc @Fmt.NgayGio(p.NgayLap) bởi @p.NguoiLap.HoTen.
+    @if (p.NguoiDuyet is { } nd && p.NgayDuyet is { } ngay) { <span>Xử lý bởi @nd.HoTen lúc @Fmt.NgayGio(ngay).</span> }
+    @if (!string.IsNullOrEmpty(p.LyDoTuChoi)) { <span>Lý do từ chối: <strong>@p.LyDoTuChoi</strong>.</span> }</p>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="card-f p-0 mb-3">
+<table class="table table-cards align-middle mb-0">
+    <thead><tr><th>Đối tượng</th><th class="text-end">Số lượng</th><th class="text-end">Đơn giá vốn</th><th class="text-end">Tổn thất</th><th>Lý do</th></tr></thead>
+    <tbody>
+    @foreach (var c in p.ChiTiets)
+    {
+        <tr>
+            <td data-label="Đối tượng">@Fmt.DoiTuongHuy(c)</td>
+            <td data-label="Số lượng" class="text-end">@Fmt.So(c.SoLuongHuy)</td>
+            <td data-label="Đơn giá vốn" class="text-end">@Fmt.Tien(c.DonGiaVon)</td>
+            <td data-label="Tổn thất" class="text-end">@Fmt.Tien(c.SoLuongHuy * c.DonGiaVon)</td>
+            <td data-label="Lý do">@Fmt.LyDoHuy(c.LyDo)</td>
+        </tr>
+    }
+    </tbody>
+    <tfoot><tr><th colspan="3" class="text-end">Tổng tổn thất</th><th class="text-end">@Fmt.Tien(HuyHangService.TongTonThat(p))</th><th></th></tr></tfoot>
+</table>
+</div>
+
+@if (p.TrangThai == TrangThaiPhieu.NHAP && Model.LaNguoiLap)
+{
+    <div class="d-flex gap-2">
+        <form method="post" asp-page-handler="GuiDuyet" asp-route-id="@p.Id"><button type="submit" class="btn btn-primary">Gửi duyệt</button></form>
+        <form method="post" asp-page-handler="XoaNhap" asp-route-id="@p.Id"><button type="submit" class="btn btn-outline-danger">Xóa nháp</button></form>
+    </div>
+}

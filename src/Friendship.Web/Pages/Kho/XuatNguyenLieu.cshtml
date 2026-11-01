@@ -1,0 +1,100 @@
+@page
+@model Friendship.Web.Pages.Kho.XuatNguyenLieuModel
+@{ ViewData["Title"] = "Xuất nguyên liệu"; var homNay = DateOnly.FromDateTime(DateTime.Today); }
+<h1 class="page-title">Xuất nguyên liệu cho sản xuất</h1>
+
+
+@if (Model.DonCho.Count > 0)
+{
+    <form method="get" class="card-f mb-3 d-flex flex-wrap gap-2 align-items-end">
+        <div class="flex-grow-1">
+            <label class="form-label" for="donId">Nạp từ đơn đang chờ làm (tùy chọn)</label>
+            <select id="donId" name="DonId" class="form-select">
+                <option value="">— Chọn đơn —</option>
+                @foreach (var x in Model.DonCho)
+                {
+                    <option value="@x.Don.Id" selected="@(Model.DonId == x.Don.Id)">@x.Don.Ma · @Fmt.NgayGio(x.Don.NgayGioLay!.Value) · @x.TongBanh bánh</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Nạp đơn</button>
+    </form>
+}
+
+<form method="post" class="card-f mb-4" onsubmit="document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <table class="table align-middle">
+        <thead><tr><th>Sản phẩm / Thành phần</th><th style="width:170px">Số lượng bánh</th><th style="width:60px"></th></tr></thead>
+        <tbody id="dong" data-rows="Lines">
+        @for (var i = 0; i < Model.Lines.Count; i++)
+        {
+            var l = Model.Lines[i];
+            <tr data-row>
+                <td>
+                    @if (l.ThanhPhanId.HasValue)
+                    {
+                        <input type="hidden" name="Lines[@i].SanPhamId" value="0" />
+                        <input type="hidden" name="Lines[@i].ThanhPhanId" value="@l.ThanhPhanId" />
+                        <input type="hidden" name="Lines[@i].TenHienThi" value="@l.TenHienThi" />
+                        <span class="badge bg-info text-dark me-1">Thành phần</span>
+                        <strong>@(l.TenHienThi ?? $"Thành phần #{l.ThanhPhanId}")</strong>
+                    }
+                    else
+                    {
+                        <select name="Lines[@i].SanPhamId" class="form-select" aria-label="Sản phẩm">
+                            <option value="0">— Chọn sản phẩm —</option>
+                            @foreach (var sp in Model.SanPhams)
+                            {
+                                <option value="@sp.Id" selected="@(l.SanPhamId == sp.Id)">@sp.TenBanh (@sp.KichThuoc)</option>
+                            }
+                        </select>
+                    }
+                </td>
+                <td><input name="Lines[@i].SoLuongBanh" type="number" step="1" min="1" value="@(l.SoLuongBanh is null or 0 ? "" : l.SoLuongBanh.ToString())" class="form-control" aria-label="Số lượng bánh" /></td>
+                <td><button type="button" class="btn btn-outline-primary btn-sm" data-del-row aria-label="Xóa dòng">✕</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-add-row="#dong">+ Thêm sản phẩm</button>
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" asp-page-handler="Preview" class="btn btn-outline-primary">Xem nguyên liệu cần lấy</button>
+    </div>
+
+    @if (Model.KeHoach is { } kh)
+    {
+        <input type="hidden" name="PreviewToken" value="@Model.PreviewToken" />
+        <h2 class="h5 mt-4">Nguyên liệu cần lấy</h2>
+        <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Nguyên liệu</th><th class="text-end">Cần</th><th>Lấy từ lô (hết hạn trước lấy trước)</th></tr></thead>
+            <tbody>
+            @foreach (var d in kh.Dong)
+            {
+                <tr class="@(d.Thieu > 0 ? "table-danger" : "")">
+                    <td>@d.NguyenLieu.TenGoi</td>
+                    <td class="text-end">@Fmt.So(d.Can) @d.NguyenLieu.DonViTinh</td>
+                    <td>
+                        @foreach (var l in d.Lay)
+                        {
+                            var (nhan, css) = Fmt.Date(l.Lo.TrangThaiDate(homNay));
+                            <div>Lô #@l.Lo.Id · HSD @Fmt.Ngay(l.Lo.HanSuDung) · lấy <strong>@Fmt.So(l.SoLuong)</strong> <span class="badge-f @css">@nhan</span></div>
+                        }
+                        @if (d.Thieu > 0) { <div class="text-danger"><strong>Thiếu @Fmt.So(d.Thieu) @d.NguyenLieu.DonViTinh nguyên liệu còn hạn</strong></div> }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+        @if (kh.DuHang)
+        {
+            <button type="submit" asp-page-handler="Xuat" class="btn btn-primary">Xác nhận xuất</button>
+            <span class="text-secondary small ms-2">Hệ thống tính lại tồn kho ngay khi bạn xác nhận.</span>
+        }
+        else
+        {
+            <div class="alert alert-danger mb-0">Không đủ nguyên liệu còn hạn nên không thể xuất. Báo quản lý hoặc nhập thêm kho.</div>
+        }
+    }
+</form>

@@ -1,0 +1,44 @@
+@page
+@model Friendship.Web.Pages.QuanLy.XaHang.IndexModel
+@{ ViewData["Title"] = "Xả hàng"; }
+<h1 class="page-title">Xả hàng cận date</h1>
+<p class="text-secondary">Các lô bánh còn hạn không quá 6 giờ và còn tồn. Voucher không áp dụng cho bánh đang xả hàng.</p>
+
+<form method="post" onsubmit="document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    @if (Model.Los.Count == 0)
+    {
+        <div class="card-f text-center">Không có lô bánh nào cận date.</div>
+    }
+    else
+    {
+        <div class="card-f p-0 mb-3">
+        <table class="table table-cards align-middle mb-0">
+            <thead><tr><th style="width:48px"></th><th>Bánh</th><th>Lô</th><th class="text-end">Tồn</th><th>Còn lại</th><th class="text-end">Giá gốc</th><th class="text-end">Mức giảm</th><th class="text-end">Giá bán</th></tr></thead>
+            <tbody>
+            @foreach (var x in Model.Los)
+            {
+                <tr>
+                    <td><input type="checkbox" class="form-check-input" name="Ids" value="@x.Lo.Id" aria-label="Chọn lô @x.Lo.Id" /></td>
+                    <td data-label="Bánh">@x.Lo.SanPham.TenBanh (@x.Lo.SanPham.KichThuoc)</td>
+                    <td data-label="Lô">#@x.Lo.Id</td>
+                    <td data-label="Tồn" class="text-end">@x.Lo.SoLuongTon</td>
+                    <td data-label="Còn lại"><span class="badge-f warn">@Fmt.KhoangGio(x.ConLai)</span></td>
+                    <td data-label="Giá gốc" class="text-end">@Fmt.Tien(x.GiaGoc)</td>
+                    <td data-label="Mức giảm" class="text-end">@(x.Lo.TyLeGiamXaHang == 0 ? "—" : Fmt.So(x.Lo.TyLeGiamXaHang * 100) + "%")</td>
+                    <td data-label="Giá bán" class="text-end"><strong>@Fmt.Tien(x.GiaSauGiam)</strong></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+        <div class="card-f d-flex flex-wrap gap-2 align-items-end" style="max-width:520px">
+            <div>
+                <label class="form-label" for="pt">Mức giảm (%)</label>
+                <input id="pt" name="PhanTram" type="number" step="0.1" min="0" max="100" class="form-control" inputmode="decimal" />
+            </div>
+            <button type="submit" class="btn btn-primary">Áp dụng cho các lô đã chọn</button>
+        </div>
+        <p class="small text-secondary mt-2">Nhập 0 để bỏ xả hàng, lô trở lại giá gốc.</p>
+    }
+</form>

@@ -1,0 +1,141 @@
+@page
+@model Friendship.Web.Pages.QuanLy.BaoCao.GiaTriTonKhoModel
+@{ ViewData["Title"] = "Báo cáo giá trị tồn kho"; }
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h1 class="page-title mb-0">Báo cáo</h1>
+    <button class="btn btn-outline-secondary no-print" onclick="window.print()">In báo cáo</button>
+</div>
+<partial name="_TabsBaoCao" model="@("giatritonkho")" />
+
+<form method="get" class="row g-2 mb-3 no-print">
+    <div class="col-12 col-md-5">
+        <label class="form-label" for="tuKhoa">Tìm kiếm theo tên</label>
+        <input id="tuKhoa" name="TuKhoa" type="text" value="@Model.TuKhoa" class="form-control" placeholder="Tên nguyên liệu hoặc bánh..." />
+    </div>
+    <div class="col-6 col-md-2 d-flex align-items-end">
+        <button class="btn btn-primary w-100" type="submit">Lọc</button>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.TuKhoa))
+    {
+        <div class="col-6 col-md-2 d-flex align-items-end">
+            <a class="btn btn-outline-secondary w-100" href="/QuanLy/BaoCao/GiaTriTonKho">Xóa lọc</a>
+        </div>
+    }
+</form>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+@if (Model.Bao is { } b)
+{
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so">@Fmt.Tien(b.TongGiaTriTonKho)</div><div class="nhan">Tổng giá trị tồn kho (còn hạn)</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so">@Fmt.Tien(b.TongGiaTriNguyenLieuConHan)</div><div class="nhan">Giá trị nguyên liệu còn hạn</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so">@Fmt.Tien(b.TongGiaTriThanhPhamConHan)</div><div class="nhan">Giá trị bánh thành phẩm còn hạn</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="so @(b.TongTonThatTiemAn > 0 ? "text-danger" : "")">@Fmt.Tien(b.TongTonThatTiemAn)</div><div class="nhan">Tổn thất tiềm ẩn (hết hạn)</div></div></div>
+    </div>
+    <p class="text-secondary">Thời điểm báo cáo: <strong>@Fmt.NgayGio(b.ThoiDiem)</strong>. Đơn giá bình quân nguyên liệu là bình quân gia quyền của các lô còn tồn. Giá vốn bánh ước tính theo BOM và giá nhập gần nhất. Hàng hết hạn là tổn thất tiềm ẩn cần lập phiếu xuất hủy.</p>
+
+    <h2 class="h5 mt-4 mb-2">1. Giá trị tồn kho nguyên liệu</h2>
+    @if (b.NguyenLieu.Count == 0)
+    {
+        <div class="card-f text-center mb-4">Không có nguyên liệu nào phù hợp.</div>
+    }
+    else
+    {
+        <div class="card-f p-0 table-responsive mb-4">
+        <table class="table table-cards align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Nguyên liệu</th>
+                    <th>ĐVT</th>
+                    <th class="text-end">Tồn còn hạn</th>
+                    <th class="text-end">Tồn hết hạn</th>
+                    <th class="text-end">Đơn giá BQ</th>
+                    <th class="text-end">Giá trị còn hạn</th>
+                    <th class="text-end">Tổn thất tiềm ẩn</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var x in b.NguyenLieu)
+            {
+                <tr>
+                    <td data-label="Nguyên liệu"><strong>@x.TenNguyenLieu</strong></td>
+                    <td data-label="ĐVT">@x.DonViTinh</td>
+                    <td data-label="Tồn còn hạn" class="text-end">@Fmt.So(x.TongTonConHan)</td>
+                    <td data-label="Tồn hết hạn" class="text-end @(x.TongTonHetHan > 0 ? "text-danger" : "")">@Fmt.So(x.TongTonHetHan)</td>
+                    <td data-label="Đơn giá BQ" class="text-end">@Fmt.Tien(x.DonGiaBinhQuan)</td>
+                    <td data-label="Giá trị còn hạn" class="text-end">@Fmt.Tien(x.GiaTriTonConHan)</td>
+                    <td data-label="Tổn thất tiềm ẩn" class="text-end @(x.GiaTriTonHetHan > 0 ? "text-danger" : "")">@Fmt.Tien(x.GiaTriTonHetHan)</td>
+                </tr>
+            }
+            </tbody>
+            <tfoot class="table-light">
+                <tr class="fw-bold">
+                    <td colspan="5">Tổng phần nguyên liệu</td>
+                    <td class="text-end">@Fmt.Tien(b.TongGiaTriNguyenLieuConHan)</td>
+                    <td class="text-end @(b.TongGiaTriNguyenLieuHetHan > 0 ? "text-danger" : "")">@Fmt.Tien(b.TongGiaTriNguyenLieuHetHan)</td>
+                </tr>
+            </tfoot>
+        </table>
+        </div>
+    }
+
+    <h2 class="h5 mt-4 mb-2">2. Giá trị tồn kho thành phẩm (bánh)</h2>
+    @if (b.ThanhPham.Count == 0)
+    {
+        <div class="card-f text-center mb-4">Không có bánh nào còn tồn trong kho.</div>
+    }
+    else
+    {
+        <div class="card-f p-0 table-responsive mb-4">
+        <table class="table table-cards align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Kích thước</th>
+                    <th class="text-end">Tồn còn hạn</th>
+                    <th class="text-end">Tồn hết hạn</th>
+                    <th class="text-end">Giá vốn ước tính (BOM)</th>
+                    <th class="text-end">Giá trị còn hạn</th>
+                    <th class="text-end">Tổn thất tiềm ẩn</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var x in b.ThanhPham)
+            {
+                <tr>
+                    <td data-label="Sản phẩm"><strong>@x.TenSanPham</strong></td>
+                    <td data-label="Kích thước">@x.KichThuoc</td>
+                    <td data-label="Tồn còn hạn" class="text-end">@x.SoLuongTonConHan</td>
+                    <td data-label="Tồn hết hạn" class="text-end @(x.SoLuongTonHetHan > 0 ? "text-danger" : "")">@x.SoLuongTonHetHan</td>
+                    <td data-label="Giá vốn ước tính" class="text-end">@Fmt.Tien(x.GiaVonUocTinh)</td>
+                    <td data-label="Giá trị còn hạn" class="text-end">@Fmt.Tien(x.GiaTriTonConHan)</td>
+                    <td data-label="Tổn thất tiềm ẩn" class="text-end @(x.GiaTriTonHetHan > 0 ? "text-danger" : "")">@Fmt.Tien(x.GiaTriTonHetHan)</td>
+                </tr>
+            }
+            </tbody>
+            <tfoot class="table-light">
+                <tr class="fw-bold">
+                    <td colspan="5">Tổng phần thành phẩm</td>
+                    <td class="text-end">@Fmt.Tien(b.TongGiaTriThanhPhamConHan)</td>
+                    <td class="text-end @(b.TongGiaTriThanhPhamHetHan > 0 ? "text-danger" : "")">@Fmt.Tien(b.TongGiaTriThanhPhamHetHan)</td>
+                </tr>
+            </tfoot>
+        </table>
+        </div>
+    }
+
+    <div class="card-f p-3 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h3 class="h6 mb-1">Tổng cộng toàn kho (Nguyên liệu + Thành phẩm)</h3>
+                <span class="text-secondary small">Giá trị tồn kho hợp lệ mang lại doanh thu; tổn thất tiềm ẩn phải xử lý tiêu hủy.</span>
+            </div>
+            <div class="text-end">
+                <div>Giá trị tồn kho (còn hạn): <strong class="fs-5 text-success">@Fmt.Tien(b.TongGiaTriTonKho)</strong></div>
+                <div>Tổn thất tiềm ẩn (hết hạn): <strong class="fs-5 text-danger">@Fmt.Tien(b.TongTonThatTiemAn)</strong></div>
+                <div class="text-muted small">Tổng giá trị danh nghĩa: @Fmt.Tien(b.TongGiaTriToanBo)</div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,979 @@
+/* ==========================================================================
+   /Dat/ThietKe: màn hình làm việc (xem docs/design-khach.md, mục 11)
+   Token và nút .dat-btn dùng chung nằm ở dat-banh.css. Tệp này chỉ có phần riêng của ThietKe.
+   Màu phẳng, không bóng, bo 4px. Viền 1px chỉ ở ô chọn, ô nhập và dòng kẻ.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Thanh bước: năm ô chữ. Không vòng tròn số, không đường nối.
+   -------------------------------------------------------------------------- */
+.dat-stepper-wrap {
+  margin-bottom: 1.5rem;
+}
+.dat-stepper {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+.dat-step {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-surface);
+  color: var(--dat-text-secondary);
+  font: 600 var(--dat-fs-body) / 1.25 var(--dat-font);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-step:hover {
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+}
+.dat-step.completed {
+  background: var(--dat-bg-accent-soft);
+  color: var(--dat-text-main);
+}
+.dat-step.active {
+  background: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+.dat-step-now {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Hai cột: khung vẽ dính bên trái, các bước bên phải
+   -------------------------------------------------------------------------- */
+.dat-studio {
+  display: grid;
+  grid-template-columns: 440px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.dat-studio > * {
+  min-width: 0;
+}
+.dat-preview-col {
+  position: sticky;
+  top: calc(var(--dat-header-h) + 1rem);
+}
+
+/* --------------------------------------------------------------------------
+   Khung vẽ: một tờ giấy, tab 2D/3D, công cụ, hình, tổng tiền
+   -------------------------------------------------------------------------- */
+.dat-canvas-card {
+  background: var(--dat-bg-surface);
+  border-radius: var(--dat-radius-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.dat-canvas-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.dat-view-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.dat-view-tab {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-secondary);
+  font: 600 var(--dat-fs-body) / 1.25 var(--dat-font);
+  cursor: pointer;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-view-tab:hover {
+  background: var(--dat-bg-accent-soft);
+  color: var(--dat-text-main);
+}
+.dat-view-tab.active {
+  background: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+
+.dat-canvas-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.dat-canvas-tools.d-none {
+  display: none;
+}
+.dat-btn-tool {
+  min-height: 40px;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-main);
+  font: 600 var(--dat-fs-small) / 1.2 var(--dat-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-btn-tool:hover {
+  background: var(--dat-bg-accent-soft);
+}
+.dat-btn-tool.active {
+  background: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+.dat-btn-tool.danger:hover {
+  background: var(--dat-danger-bg);
+  color: var(--dat-danger);
+}
+.dat-btn-tool:disabled {
+  background: var(--dat-bg-muted);
+  color: var(--dat-text-muted);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.dat-icon-inline {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.dat-canvas-body {
+  background: var(--dat-bg-canvas);
+  border-radius: var(--dat-radius-sm);
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+#canvas-wrapper {
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  max-width: 100%;
+  min-width: 0; /* flex item: không để canvas 400px chống đỡ; thiet-ke.js tự co canvas theo khung */
+  line-height: 0;
+}
+.dat-canvas-card,
+.dat-canvas-body {
+  min-width: 0;
+  max-width: 100%;
+}
+.dat-btn-tool {
+  min-width: 0;
+}
+
+/* 3D: khung vuông, co theo chiều rộng */
+#cake-3d-wrapper {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+  position: relative;
+}
+#cake-3d-wrapper.d-none {
+  display: none;
+}
+#cake-3d-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: grab;
+}
+#cake-3d-container:active {
+  cursor: grabbing;
+}
+#cake-3d-container.is-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  color: var(--dat-text-secondary);
+  font-size: var(--dat-fs-small);
+  cursor: progress;
+}
+.dat-3d-overlay-hint {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dat-bg-surface);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--dat-radius-sm);
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.dat-canvas-card > .dat-perf {
+  margin: 0.25rem 0;
+}
+
+/* Tổng tiền */
+.dat-price-rows {
+  margin: 0 0 0.75rem;
+}
+.dat-price-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--dat-text-secondary);
+}
+.dat-price-row dt,
+.dat-price-row dd {
+  font-weight: 400;
+  margin: 0;
+}
+.dat-price-row dd {
+  color: var(--dat-text-main);
+  font-variant-numeric: tabular-nums;
+}
+.dat-price-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.dat-price-total-label {
+  font-weight: 600;
+}
+.dat-price-total-val {
+  font-family: var(--dat-font-display);
+  font-size: var(--dat-fs-head);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dat-price-status {
+  margin: 0.25rem 0 0;
+  min-height: 1.25rem;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   Các bước: mỗi bước một tờ giấy
+   -------------------------------------------------------------------------- */
+.dat-step-panel {
+  display: none;
+  background: var(--dat-bg-surface);
+  border-radius: var(--dat-radius-sm);
+  padding: 1.5rem;
+}
+.dat-step-panel.active {
+  display: block;
+}
+.dat-panel-header {
+  margin-bottom: 1.5rem;
+}
+.dat-panel-title {
+  font-family: var(--dat-font-display);
+  font-size: var(--dat-fs-head);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+}
+.dat-panel-desc {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--dat-text-secondary);
+}
+
+.dat-group {
+  margin-bottom: 2rem;
+}
+.dat-group-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin-bottom: 0.75rem;
+}
+body.dat-body .dat-group-title {
+  display: block;
+  margin: 0 0 0.75rem;
+  font-family: var(--dat-font);
+  font-size: var(--dat-fs-body);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+  color: var(--dat-text-main);
+}
+.dat-group-head .dat-group-title {
+  margin: 0;
+}
+body.dat-body .dat-group-title.dat-group-lead {
+  font-family: var(--dat-font-display);
+  font-size: var(--dat-fs-lead);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25rem;
+}
+.dat-group-note,
+.dat-field-help {
+  margin: 0;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.dat-chip-row + .dat-group-note,
+.dat-field-help {
+  margin-top: 0.5rem;
+}
+.dat-group-lead + .dat-group-note {
+  margin: 0 0 1rem;
+}
+.dat-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--dat-text-secondary);
+}
+.dat-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Lựa chọn một: thẻ chữ (cỡ, cốt, viền) và chip (số tầng, dáng dâu)
+   -------------------------------------------------------------------------- */
+.dat-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.dat-cell {
+  display: contents;
+}
+.dat-option-card {
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  background: var(--dat-bg-surface);
+  border: 1px solid var(--dat-border-strong);
+  border-radius: var(--dat-radius-sm);
+  color: var(--dat-text-main);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-option-card:hover {
+  background: var(--dat-bg-muted);
+}
+.dat-option-card.active {
+  background: var(--dat-accent);
+  border-color: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+.dat-option-title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+.dat-option-desc {
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+.dat-option-price {
+  margin-top: auto;
+  padding-top: 0.25rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--dat-text-secondary);
+}
+.dat-option-card.active .dat-option-desc,
+.dat-option-card.active .dat-option-price {
+  color: var(--dat-field-muted);
+}
+.card-banh-nen .dat-option-title {
+  font-family: var(--dat-font-display);
+  font-size: var(--dat-fs-lead);
+  letter-spacing: -0.01em;
+}
+
+.dat-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: relative;
+}
+.dat-chip {
+  min-height: var(--dat-control-h);
+  padding: 0.5rem 1rem;
+  background: var(--dat-bg-surface);
+  border: 1px solid var(--dat-border-strong);
+  border-radius: var(--dat-radius-sm);
+  color: var(--dat-text-main);
+  font: 600 var(--dat-fs-body) / 1.25 var(--dat-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease);
+}
+.dat-chip:hover {
+  background: var(--dat-bg-muted);
+}
+.dat-chip.active,
+.dat-chip-input:checked + .dat-chip {
+  background: var(--dat-accent);
+  border-color: var(--dat-accent);
+  color: var(--dat-text-inverse);
+}
+.dat-chip-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.dat-chip-input:focus-visible + .dat-chip {
+  outline: 2px solid var(--dat-text-main);
+  outline-offset: 2px;
+}
+.dat-chip-input:disabled + .dat-chip {
+  background: var(--dat-bg-muted);
+  border-color: var(--dat-bg-muted);
+  color: var(--dat-text-muted);
+  cursor: not-allowed;
+}
+
+/* Ô màu: tròn, chọn bằng vòng viền */
+.dat-swatch-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.dat-swatch-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--dat-border-strong);
+  border-radius: var(--dat-radius-full);
+  cursor: pointer;
+}
+.dat-swatch-btn:hover {
+  outline: 2px solid var(--dat-border-strong);
+  outline-offset: 2px;
+}
+.dat-swatch-btn.active {
+  outline: 2px solid var(--dat-text-main);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Mặt cắt bánh (hình minh họa, đổi màu theo cốt và kem)
+   -------------------------------------------------------------------------- */
+.dat-layer-body {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+.dat-cake-cutaway-box svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.dat-layer-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dat-layer-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.125rem 0;
+}
+.dat-legend-dot {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border: 1px solid var(--dat-border-strong);
+  border-radius: var(--dat-radius-xs);
+}
+#legend-dot-frosting { background: #FFFDF5; }
+#legend-dot-sponge { background: #FBE7C6; }
+.dat-legend-cream { background: #FFF8F0; }
+.dat-legend-jam { background: #E63956; }
+
+/* --------------------------------------------------------------------------
+   Topping, nến
+   -------------------------------------------------------------------------- */
+.dat-topping-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+.dat-toolbar-label {
+  color: var(--dat-text-secondary);
+}
+.dat-topping-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.5rem;
+}
+.dat-topping-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto auto;
+  grid-template-areas: "thumb info count btn";
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--dat-border);
+}
+.dat-topping-thumb {
+  grid-area: thumb;
+  width: 48px;
+  height: 48px;
+  padding: 4px;
+  object-fit: contain;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-muted);
+}
+.dat-topping-info {
+  grid-area: info;
+  min-width: 0;
+}
+.dat-topping-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dat-topping-price {
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.dat-topping-counter {
+  grid-area: count;
+  min-width: 3.5ch;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--dat-radius-sm);
+  font-size: var(--dat-fs-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--dat-text-secondary);
+}
+.dat-topping-counter.has {
+  background: var(--dat-bg-accent-soft);
+  color: var(--dat-text-main);
+}
+.dat-btn-add-topping {
+  grid-area: btn;
+}
+
+.dat-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dat-qty-btn {
+  width: 44px;
+  padding: 0;
+  font-size: var(--dat-fs-lead);
+}
+.dat-qty-input.form-control {
+  width: 72px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.dat-qty-label {
+  margin-left: 0.5rem;
+  color: var(--dat-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Chữ và ảnh in
+   -------------------------------------------------------------------------- */
+.dat-check {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--dat-control-h);
+  font-weight: 600;
+  cursor: pointer;
+}
+.dat-check input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--dat-accent);
+  cursor: pointer;
+}
+.dat-print-box {
+  margin-top: 0.75rem;
+}
+.dat-print-box.d-none {
+  display: none;
+}
+.dat-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.dat-upload {
+  margin: 0;
+  cursor: pointer;
+}
+.dat-note {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-warning-bg);
+  color: var(--dat-warning);
+  font-size: var(--dat-fs-small);
+}
+
+/* --------------------------------------------------------------------------
+   Bước 5: phiếu tóm tắt (thân phiếu, đường đục lỗ, cuống) và form
+   -------------------------------------------------------------------------- */
+.dat-ticket {
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border-radius: var(--dat-radius-sm);
+  background: var(--dat-bg-canvas);
+}
+.dat-summary {
+  margin: 0;
+}
+.dat-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--dat-border);
+}
+.dat-summary-item:first-child {
+  border-top: 0;
+}
+.dat-summary-label {
+  flex: none;
+  white-space: nowrap;
+  font-weight: 400;
+  color: var(--dat-text-secondary);
+}
+.dat-summary-value {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.dat-link {
+  min-width: 44px;
+  margin: -0.75rem 0;
+  padding: 0.75rem 0 0.75rem 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--dat-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+.dat-summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--dat-border-strong);
+  font-weight: 600;
+}
+.dat-summary-total strong {
+  font-family: var(--dat-font-display);
+  font-size: var(--dat-fs-head);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dat-ticket .dat-perf {
+  margin: 1rem 0 0.75rem;
+}
+.dat-stub {
+  margin: 0;
+  font-size: var(--dat-fs-small);
+  color: var(--dat-text-secondary);
+}
+
+.dat-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.dat-span-2 {
+  grid-column: 1 / -1;
+}
+.dat-form-grid .text-danger {
+  display: block;
+  margin-top: 0.25rem;
+}
+.dat-contact .dat-group-lead {
+  margin-bottom: 0.25rem;
+}
+.dat-contact .dat-group-note {
+  margin-bottom: 1rem;
+}
+
+/* Chân bước (máy tính) */
+.dat-step-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--dat-border);
+}
+.dat-step-footer .btn-next-step,
+.dat-step-footer #btn-luu-thiet-ke {
+  margin-left: auto;
+}
+#btn-luu-thiet-ke {
+  min-height: 48px;
+  padding-inline: 2rem;
+}
+
+/* Ô nhập lỗi: layout khách không nạp site.css nên tự có style ở đây */
+.input-validation-error {
+  border-color: var(--dat-danger);
+  background-color: var(--dat-danger-bg);
+}
+.input-validation-error:focus {
+  border-color: var(--dat-danger);
+}
+
+/* Thông báo nháp (toast dùng chung nằm ở dat-banh.css) */
+.dat-toast strong {
+  font-weight: 600;
+}
+.dat-toast-nhap {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.dat-toast-note {
+  display: block;
+  font-size: var(--dat-fs-small);
+}
+.dat-toast-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.dat-toast-nhap button {
+  min-height: 44px;
+  padding: 0.25rem 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Thanh dưới trên mobile
+   -------------------------------------------------------------------------- */
+.dat-mobile-bar {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .dat-studio {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .dat-preview-col {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Thanh bước thành dòng chữ "Bước n/5" và thanh tiến độ 6px, năm đoạn vẫn bấm được */
+  .dat-step-now {
+    display: block;
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+  }
+  .dat-stepper-wrap {
+    margin-bottom: 1rem;
+  }
+  .dat-step {
+    position: relative;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+  }
+  .dat-step:hover,
+  .dat-step.completed,
+  .dat-step.active {
+    background: none;
+  }
+  .dat-step-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .dat-step::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 6px;
+    transform: translateY(-50%);
+    border-radius: var(--dat-radius-xs);
+    background: var(--dat-bg-surface);
+  }
+  .dat-step.completed::after {
+    background: var(--dat-border-strong);
+  }
+  .dat-step.active::after {
+    background: var(--dat-accent);
+  }
+
+  /* Khung vẽ lên trên: tab, hình, rồi công cụ */
+  .dat-canvas-card {
+    padding: 0.75rem;
+  }
+  .dat-canvas-header {
+    display: contents;
+  }
+  .dat-view-mode-tabs {
+    order: 0;
+  }
+  .dat-canvas-body {
+    order: 1;
+    padding: 0.5rem;
+  }
+  .dat-canvas-tools {
+    order: 2;
+  }
+  .dat-btn-tool {
+    min-height: 44px;
+  }
+  .dat-canvas-card > .dat-perf,
+  .dat-price-box {
+    display: none;
+  }
+
+  .dat-step-panel {
+    padding: 1rem;
+  }
+  .dat-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dat-layer-body,
+  .dat-two-col,
+  .dat-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dat-layer-body {
+    gap: 1rem;
+  }
+  .dat-cake-cutaway-box {
+    max-width: 200px;
+  }
+  .dat-swatch-list {
+    display: grid;
+    grid-template-columns: repeat(4, 44px);
+  }
+  .dat-topping-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dat-topping-item {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb info btn"
+      "thumb count btn";
+  }
+  .dat-topping-counter {
+    justify-self: start;
+    padding-left: 0;
+  }
+  .dat-ticket {
+    padding: 0.75rem 1rem 1rem;
+  }
+
+  /* Điều hướng bước chỉ còn ở thanh dưới */
+  .dat-step-footer {
+    display: none;
+  }
+  .dat-mobile-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+    padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    background: var(--dat-bg-surface);
+    border-top: 1px solid var(--dat-border);
+  }
+  .dat-mobile-price {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .dat-mobile-price-lbl {
+    font-size: var(--dat-fs-small);
+    color: var(--dat-text-secondary);
+    line-height: 1.2;
+  }
+  .dat-mobile-price-val {
+    font-family: var(--dat-font-display);
+    font-size: var(--dat-fs-lead);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .dat-mobile-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dat-mobile-actions .dat-btn {
+    padding-inline: 1rem;
+  }
+  body.dat-body:has(.dat-mobile-bar) .dat-footer {
+    padding-bottom: 6.5rem;
+  }
+  .dat-toast-container {
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    right: 1rem;
+    left: 1rem;
+    align-items: center;
+  }
+  .dat-toast {
+    max-width: 100%;
+    width: fit-content;
+  }
+}

@@ -1,0 +1,106 @@
+@page
+@model Friendship.Web.Pages.BanHang.DonDatModel
+@{ ViewData["Title"] = "Tạo đơn đặt"; }
+<h1 class="page-title">Tạo đơn đặt bánh</h1>
+
+@if (!Model.CoCa)
+{
+    <div class="alert alert-warning">Bạn chưa mở ca nên chưa thu cọc được. <a asp-page="/BanHang/Ca/Index">Mở ca</a></div>
+}
+
+<form method="post" class="card-f mb-4" onsubmit="document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="sdt">Số điện thoại khách</label>
+            <input id="sdt" name="SoDienThoai" value="@Model.SoDienThoai" class="form-control" inputmode="tel" data-sdt />
+            <div class="small text-secondary" data-khach-info></div>
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="ten">Tên khách (nếu là khách mới)</label>
+            <input id="ten" name="TenKhach" value="@Model.TenKhach" class="form-control" />
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="hen">Ngày giờ hẹn lấy</label>
+            <input id="hen" name="NgayGioLay" type="datetime-local" value="@Model.NgayGioLay?.ToString("yyyy-MM-ddTHH:mm")" class="form-control" />
+        </div>
+    </div>
+
+    <table class="table align-middle">
+        <thead><tr><th>Bánh</th><th style="width:110px">Số lượng</th><th>Lời chúc (mỗi bánh một lời chúc)</th><th style="width:60px"></th></tr></thead>
+        <tbody id="dong" data-rows="Lines">
+        @for (var i = 0; i < Model.Lines.Count; i++)
+        {
+            var l = Model.Lines[i];
+            <tr data-row>
+                <td>
+                    <select name="Lines[@i].SanPhamId" class="form-select" aria-label="Bánh">
+                        <option value="0">— Chọn bánh —</option>
+                        @foreach (var sp in Model.SanPhams)
+                        {
+                            <option value="@sp.Id" selected="@(l.SanPhamId == sp.Id)">@sp.TenBanh (@sp.KichThuoc) — @Fmt.Tien(sp.DonGia)</option>
+                        }
+                    </select>
+                </td>
+                <td><input name="Lines[@i].SoLuong" type="number" step="1" min="1" value="@(l.SoLuong is null or 0 ? "" : l.SoLuong.ToString())" class="form-control" aria-label="Số lượng" inputmode="numeric" /></td>
+                <td><input name="Lines[@i].LoiChuc" value="@l.LoiChuc" maxlength="200" class="form-control" aria-label="Lời chúc" /></td>
+                <td><button type="button" class="btn btn-outline-primary btn-sm" data-del-row aria-label="Xóa dòng">✕</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-outline-primary btn-sm mb-3" data-add-row="#dong">+ Thêm bánh</button>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6 col-md-3">
+            <label class="form-label" for="vc">Mã voucher</label>
+            <input id="vc" name="MaVoucher" value="@Model.MaVoucher" class="form-control text-uppercase" />
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label" for="diem">Dùng điểm</label>
+            <input id="diem" name="DiemSuDung" type="number" step="1" min="0" value="@(Model.DiemSuDung is null or 0 ? "" : Model.DiemSuDung.ToString())" class="form-control" inputmode="numeric" />
+        </div>
+    </div>
+
+    <button type="submit" asp-page-handler="Preview" class="btn btn-outline-primary">Xem trước</button>
+
+    @if (Model.Xem is { } d)
+    {
+        var (min, max) = CocRule.Khoang(d.TongThanhToan);
+        <input type="hidden" name="PreviewToken" value="@Model.PreviewToken" />
+        <input type="hidden" name="Nonce" value="@Model.Nonce" />
+        <h2 class="h5 mt-4">Xác nhận đơn</h2>
+        <div class="card-f mb-3" style="max-width:480px">
+            @foreach (var c in d.ChiTiets)
+            {
+                <div class="d-flex justify-content-between"><span>@c.SanPham.TenBanh × @c.SoLuong @if (!string.IsNullOrEmpty(c.LoiChuc)) { <em class="text-secondary">“@c.LoiChuc”</em> }</span><span>@Fmt.Tien(c.ThanhTien)</span></div>
+            }
+            <div class="d-flex justify-content-between border-top pt-2 mt-2"><span>Tổng tiền hàng</span><span>@Fmt.Tien(d.TongTienHang)</span></div>
+            @if (d.TienGiamGia > 0) { <div class="d-flex justify-content-between"><span>Voucher</span><span>− @Fmt.Tien(d.TienGiamGia)</span></div> }
+            @if (d.DiemSuDung > 0) { <div class="d-flex justify-content-between"><span>Đổi @d.DiemSuDung điểm (trừ khi giao)</span><span>− @Fmt.Tien(DiemRule.TienGiam(d.DiemSuDung))</span></div> }
+            <div class="d-flex justify-content-between fw-bold"><span>Tổng thanh toán</span><span>@Fmt.Tien(d.TongThanhToan)</span></div>
+            <div class="small text-secondary mt-1">Cọc hợp lệ: từ @Fmt.Tien(min) đến @Fmt.Tien(max) (30%–50%). Để trống nếu khách cọc sau (đơn chưa xuống bếp).</div>
+        </div>
+        <div class="row g-2 mb-3" style="max-width:640px">
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="coc">Tiền cọc (₫)</label>
+                <input id="coc" name="TienCoc" type="number" step="1" min="0" value="@Model.TienCoc" class="form-control" inputmode="numeric" />
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label" for="pt">Phương thức</label>
+                <select id="pt" name="PhuongThuc" class="form-select">
+                    <option value="TIEN_MAT" selected="@(Model.PhuongThuc == PhuongThucTT.TIEN_MAT)">Tiền mặt</option>
+                    <option value="CHUYEN_KHOAN" selected="@(Model.PhuongThuc == PhuongThucTT.CHUYEN_KHOAN)">Chuyển khoản (đã nhận tiền)</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label" for="dua">Tiền khách đưa</label>
+                <input id="dua" name="TienKhachDua" type="number" step="1" min="0" value="@Model.TienKhachDua" class="form-control" inputmode="numeric" />
+            </div>
+        </div>
+        <button type="submit" asp-page-handler="Tao" class="btn btn-primary btn-lg">Xác nhận đơn</button>
+    }
+</form>
+
+@section Scripts { <script src="~/js/khach.js" asp-append-version="true"></script> }

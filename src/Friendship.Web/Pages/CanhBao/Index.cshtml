@@ -1,0 +1,87 @@
+@page
+@model Friendship.Web.Pages.CanhBao.IndexModel
+@{ ViewData["Title"] = "Cảnh báo hạn sử dụng"; }
+<h1 class="page-title">Cảnh báo hạn sử dụng</h1>
+
+@if (Model.ThayNguyenLieu && Model.ThayBanh)
+{
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link @(Model.TabHienTai == "nl" ? "active" : "")" href="?Tab=nl">Nguyên liệu</a></li>
+        <li class="nav-item"><a class="nav-link @(Model.TabHienTai == "banh" ? "active" : "")" href="?Tab=banh">Bánh</a></li>
+    </ul>
+}
+
+@if (Model.TabHienTai == "nl")
+{
+    <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="Tab" value="nl" />
+        <div class="col-8 col-md-4">
+            <select name="Loc" class="form-select" aria-label="Lọc nguyên liệu">
+                <option value="">Tất cả nguyên liệu</option>
+                @foreach (var n in Model.DanhSachNguyenLieu)
+                {
+                    <option value="@n.NguyenLieu.Id" selected="@(Model.Loc == n.NguyenLieu.Id)">@n.NguyenLieu.TenGoi</option>
+                }
+            </select>
+        </div>
+        <div class="col-4 col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Lọc</button></div>
+    </form>
+
+    @if (Model.LoNguyenLieu.Count == 0)
+    {
+        <div class="card-f text-center">Không có lô nào cần chú ý.</div>
+    }
+    else
+    {
+        <div class="card-f p-0">
+        <table class="table table-cards align-middle mb-0">
+            <thead><tr><th>Nguyên liệu</th><th>Lô</th><th>Hạn sử dụng</th><th>Còn lại</th><th class="text-end">Tồn</th><th>Tình trạng</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var x in Model.LoNguyenLieu)
+            {
+                var (nhan, css) = Fmt.Date(x.TrangThai);
+                <tr class="@(x.TrangThai == TrangThaiDate.HET_HAN ? "table-danger" : "")">
+                    <td data-label="Nguyên liệu">@x.Lo.NguyenLieu.TenGoi</td>
+                    <td data-label="Lô">#@x.Lo.Id</td>
+                    <td data-label="Hạn sử dụng">@Fmt.Ngay(x.Lo.HanSuDung)</td>
+                    <td data-label="Còn lại">@(x.NgayConLai < 0 ? "Quá hạn " + (-x.NgayConLai) + " ngày" : x.NgayConLai + " ngày")</td>
+                    <td data-label="Tồn" class="text-end">@Fmt.So(x.Lo.SoLuongCon) @x.Lo.NguyenLieu.DonViTinh</td>
+                    <td data-label="Tình trạng"><span class="badge-f @css">@nhan</span></td>
+                    <td class="text-end">@if (Model.ChoPhepLapPhieuHuy) { <a asp-page="/Huy/Tao" asp-route-nl="@x.Lo.Id" class="btn btn-outline-primary btn-sm">Lập phiếu hủy</a> }</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+    }
+}
+else
+{
+    @if (Model.LoBanh.Count == 0)
+    {
+        <div class="card-f text-center">Không có lô nào cần chú ý.</div>
+    }
+    else
+    {
+        <div class="card-f p-0">
+        <table class="table table-cards align-middle mb-0">
+            <thead><tr><th>Bánh</th><th>Lô</th><th>Hạn sử dụng</th><th>Còn lại</th><th class="text-end">Tồn</th><th>Tình trạng</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var x in Model.LoBanh)
+            {
+                var (nhan, css) = Fmt.Date(x.TrangThai);
+                <tr class="@(x.TrangThai == TrangThaiDate.HET_HAN ? "table-danger" : "")">
+                    <td data-label="Bánh">@x.Lo.SanPham.TenBanh</td>
+                    <td data-label="Lô">#@x.Lo.Id</td>
+                    <td data-label="Hạn sử dụng">@Fmt.NgayGio(x.Lo.HanSuDung)</td>
+                    <td data-label="Còn lại">@(x.ConLai < TimeSpan.Zero ? "Quá hạn " + (int)(-x.ConLai).TotalMinutes + " phút" : (int)x.ConLai.TotalHours + " giờ " + x.ConLai.Minutes + " phút")</td>
+                    <td data-label="Tồn" class="text-end">@x.Lo.SoLuongTon</td>
+                    <td data-label="Tình trạng"><span class="badge-f @css">@nhan</span></td>
+                    <td class="text-end">@if (Model.ChoPhepLapPhieuHuy) { <a asp-page="/Huy/Tao" asp-route-banh="@x.Lo.Id" class="btn btn-outline-primary btn-sm">Lập phiếu hủy</a> }</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+    }
+}

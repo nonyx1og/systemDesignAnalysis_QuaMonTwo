@@ -1,0 +1,75 @@
+@page "{id:int}"
+@model Friendship.Web.Pages.Kho.KiemKe.EditModel
+@{
+    var p = Model.Phieu!;
+    var sua = p.TrangThai == TrangThaiPhieu.NHAP;
+    var (nhan, css) = Fmt.Phieu(p.TrangThai);
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    ViewData["Title"] = "Phiếu kiểm kê " + p.Ma;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="page-title mb-0">Phiếu kiểm kê @p.Ma <span class="badge-f @css">@nhan</span></h1>
+    <a asp-page="Index" class="btn btn-outline-primary">Quay lại</a>
+</div>
+<p class="text-secondary">Lập lúc @Fmt.NgayGio(p.NgayKiemKe) bởi @p.NguoiThucHien.HoTen
+    @if (p.NguoiDuyet is not null) { <span>· @(p.TrangThai == TrangThaiPhieu.TU_CHOI ? "từ chối" : "duyệt") bởi @p.NguoiDuyet.HoTen lúc @(p.NgayDuyet is { } nd ? Fmt.NgayGio(nd) : "")</span> }
+    @if (!string.IsNullOrEmpty(p.LyDoTuChoi)) { <span>· Lý do từ chối: <strong>@p.LyDoTuChoi</strong></span> }
+</p>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <div class="card-f p-0 mb-3">
+    <table class="table table-cards align-middle mb-0">
+        <thead><tr><th>Nguyên liệu</th><th>Lô</th><th>HSD</th><th class="text-end">SL hệ thống</th><th style="width:150px">SL thực tế</th><th class="text-end">Chênh lệch</th><th>Lý do</th></tr></thead>
+        <tbody>
+        @for (var i = 0; i < Model.Rows.Count; i++)
+        {
+            var row = Model.Rows[i];
+            var ct = p.ChiTiets.FirstOrDefault(c => c.Id == row.ChiTietId);
+            if (ct is null) { continue; }   // dòng lạ (id không thuộc phiếu): bỏ qua khi hiển thị lại, thông báo lỗi nằm đầu trang
+            var thucTe = row.SoLuongThucTe.GetValueOrDefault();
+            var lech = thucTe - ct.SoLuongHeThong;
+            <tr>
+                <td data-label="Nguyên liệu">@ct.LoNguyenLieu.NguyenLieu.TenGoi (@ct.LoNguyenLieu.NguyenLieu.DonViTinh)</td>
+                <td data-label="Lô">#@ct.LoNguyenLieuId</td>
+                <td data-label="HSD">@Fmt.Ngay(ct.LoNguyenLieu.HanSuDung)</td>
+                <td data-label="SL hệ thống" class="text-end">@Fmt.So(ct.SoLuongHeThong)</td>
+                <td data-label="SL thực tế">
+                    @if (sua)
+                    {
+                        <input type="hidden" name="Rows[@i].ChiTietId" value="@row.ChiTietId" />
+                        <input name="Rows[@i].SoLuongThucTe" type="number" step="0.001" min="0" value="@(row.SoLuongThucTe?.ToString("0.###", inv))" data-he-thong="@ct.SoLuongHeThong.ToString("0.###", inv)" class="form-control kk-thuc-te" aria-label="Số lượng thực tế" />
+                    }
+                    else { @Fmt.So(thucTe) }
+                </td>
+                <td data-label="Chênh lệch" class="text-end kk-lech @(lech < 0 ? "text-danger" : lech > 0 ? "text-success" : "")">@(lech > 0 ? "+" : "")@Fmt.So(lech)</td>
+                <td data-label="Lý do">
+                    @if (sua) { <input name="Rows[@i].LyDo" value="@row.LyDo" class="form-control" placeholder="Bắt buộc nếu lệch" aria-label="Lý do" /> }
+                    else { @row.LyDo }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+    @if (sua)
+    {
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit" asp-page-handler="Luu" class="btn btn-outline-primary">Lưu nháp</button>
+            <button type="submit" asp-page-handler="Gui" class="btn btn-primary">Gửi duyệt</button>
+            <button type="submit" asp-page-handler="Huy" class="btn btn-outline-primary ms-auto" formnovalidate onclick="return confirm('Hủy phiếu kiểm kê nháp này?');">Hủy phiếu nháp</button>
+        </div>
+    }
+</form>
+@section Scripts {
+    <script>
+        document.querySelectorAll('.kk-thuc-te').forEach(function (el) {
+            el.addEventListener('input', function () {
+                var lech = (parseFloat(el.value) || 0) - parseFloat(el.dataset.heThong);
+                var o = el.closest('tr').querySelector('.kk-lech');
+                o.textContent = (lech > 0 ? '+' : '') + (Math.round(lech * 1000) / 1000).toString().replace('.', ',');
+                o.className = 'text-end kk-lech ' + (lech < 0 ? 'text-danger' : lech > 0 ? 'text-success' : '');
+            });
+        });
+    </script>
+}

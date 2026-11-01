@@ -1,0 +1,27 @@
+@page
+@model Friendship.Web.Pages.Account.LoginModel
+@{ ViewData["Title"] = "Đăng nhập"; }
+<div class="w-100" style="max-width:400px">
+<div class="auth-card">
+    <div class="brand">@Icons.Logo(32)<span>nongnongBakery</span></div>
+    <h1>Đăng nhập</h1>
+    <p class="text-secondary mb-4">để tiếp tục vào hệ thống quản lý tiệm bánh</p>
+    <form method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        <div class="mb-3">
+            <label asp-for="TenDangNhap" class="form-label">Tên đăng nhập</label>
+            <input asp-for="TenDangNhap" class="form-control" autocomplete="username" autofocus />
+            <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="MatKhau" class="form-label">Mật khẩu</label>
+            <input asp-for="MatKhau" type="password" class="form-control" autocomplete="current-password" />
+            <span asp-validation-for="MatKhau" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+    </form>
+</div>
+<p class="auth-foot">Quên mật khẩu? Liên hệ quản trị viên để đặt lại.</p>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

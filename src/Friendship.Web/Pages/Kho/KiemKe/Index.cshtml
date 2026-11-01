@@ -1,0 +1,46 @@
+@page
+@model Friendship.Web.Pages.Kho.KiemKe.IndexModel
+@{ ViewData["Title"] = "Kiểm kê"; }
+<h1 class="page-title">Kiểm kê kho</h1>
+
+<div class="card-f mb-4">
+    @if (Model.DangMo is { } p)
+    {
+        var (nhan, css) = Fmt.Phieu(p.TrangThai);
+        <p class="mb-2">Đang có phiếu <strong>@p.Ma</strong> <span class="badge-f @css">@nhan</span>, lập lúc @Fmt.NgayGio(p.NgayKiemKe).</p>
+        <a asp-page="Edit" asp-route-id="@p.Id" class="btn btn-primary">@(p.TrangThai == TrangThaiPhieu.NHAP ? "Tiếp tục kiểm kê" : "Xem phiếu")</a>
+    }
+    else
+    {
+        <p class="mb-2">Chưa có phiếu kiểm kê nào đang mở. Phiếu sẽ liệt kê mọi lô nguyên liệu còn tồn để bạn đếm thực tế.</p>
+        <form method="post" asp-page-handler="Tao"><button type="submit" class="btn btn-primary">Tạo phiếu kiểm kê</button></form>
+    }
+</div>
+
+<h2 class="h5">Lịch sử</h2>
+@if (Model.LichSu.Count == 0)
+{
+    <div class="card-f text-center">Chưa có phiếu kiểm kê nào.</div>
+}
+else
+{
+    <div class="card-f p-0">
+    <table class="table table-cards align-middle mb-0">
+        <thead><tr><th>Phiếu</th><th>Ngày</th><th>Người thực hiện</th><th>Người duyệt</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var x in Model.LichSu)
+        {
+            var (nhan, css) = Fmt.Phieu(x.TrangThai);
+            <tr>
+                <td data-label="Phiếu">@x.Ma</td>
+                <td data-label="Ngày">@Fmt.NgayGio(x.NgayKiemKe)</td>
+                <td data-label="Người thực hiện">@x.NguoiThucHien.HoTen</td>
+                <td data-label="Người duyệt">@(x.NguoiDuyet?.HoTen ?? "—")</td>
+                <td data-label="Trạng thái"><span class="badge-f @css">@nhan</span></td>
+                <td class="text-end"><a asp-page="Edit" asp-route-id="@x.Id" class="btn btn-outline-primary btn-sm">Xem</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}

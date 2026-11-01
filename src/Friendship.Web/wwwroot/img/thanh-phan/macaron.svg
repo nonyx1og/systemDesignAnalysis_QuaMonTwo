@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <filter id="macShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="3.5" stdDeviation="3" flood-color="#3A1B28" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="macShellTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFB3C6"/>
+      <stop offset="50%" stop-color="#FF8FA3"/>
+      <stop offset="100%" stop-color="#E05776"/>
+    </linearGradient>
+    <linearGradient id="macShellBot" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF8FA3"/>
+      <stop offset="100%" stop-color="#BA3353"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#macShadow)">
+    <!-- Vỏ macaron dưới -->
+    <path d="M18 56 C18 68, 30 76, 50 76 C70 76, 82 68, 82 56 C82 54, 18 54, 18 56 Z" fill="url(#macShellBot)"/>
+    <!-- Chân váy macaron dưới (Pied) -->
+    <path d="M18 55 C22 58, 28 54, 34 57 C40 54, 48 57, 54 55 C60 57, 68 54, 74 57 C78 54, 82 56, 82 55 L82 53 L18 53 Z" fill="#D44265"/>
+
+    <!-- Lớp kem nhân bơ kẹp giữa (Ganache) -->
+    <rect x="22" y="47" width="56" height="8" rx="4" fill="#FFF8F0"/>
+    <ellipse cx="50" cy="51" rx="26" ry="3.5" fill="#FFE8D6"/>
+
+    <!-- Chân váy macaron trên -->
+    <path d="M18 48 C22 46, 28 49, 34 47 C40 49, 48 46, 54 48 C60 46, 68 49, 74 46 C78 48, 82 47, 82 48 L82 45 L18 45 Z" fill="#D44265"/>
+
+    <!-- Vỏ macaron vòm tròn trên -->
+    <path d="M18 45 C18 28, 30 20, 50 20 C70 20, 82 28, 82 45 C82 48, 18 48, 18 45 Z" fill="url(#macShellTop)"/>
+
+    <!-- Ánh sáng bóng vòm tròn macaron -->
+    <ellipse cx="46" cy="27" rx="18" ry="5" fill="#FFFFFF" opacity="0.55"/>
+  </g>
+</svg>

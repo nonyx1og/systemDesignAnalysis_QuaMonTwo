@@ -1,0 +1,86 @@
+@page
+@model Friendship.Web.Pages.Dat.TimModel
+@using Friendship.Domain
+@using Friendship.Web
+@{
+    ViewData["Title"] = "Tra cứu đơn";
+    // Mỗi trạng thái một tông màu; chữ trạng thái luôn hiện, màu chỉ là phụ.
+    static string Tong(TrangThaiThietKe t) => t switch
+    {
+        TrangThaiThietKe.CHO_DUYET => "cho",
+        TrangThaiThietKe.CAN_SUA or TrangThaiThietKe.TU_CHOI => "loi",
+        TrangThaiThietKe.DA_BAO_GIA => "tin",
+        TrangThaiThietKe.DA_DAT => "xong",
+        _ => "trung"
+    };
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/dat-tim.css" asp-append-version="true" />
+}
+
+<div class="tim">
+    <header class="tim-head">
+        <h1 class="dat-h1">Tra cứu đơn</h1>
+        <p class="dat-lead">Nhập số điện thoại đặt bánh và 4 ký tự cuối của mã tra cứu.</p>
+    </header>
+
+    <div class="tim-grid">
+        <form method="get" class="dat-paper tim-form" aria-labelledby="tim-form-title">
+            <h2 id="tim-form-title" class="tim-h2">Thông tin tra cứu</h2>
+            <div class="tim-fields">
+                <div>
+                    <label asp-for="Sdt" class="form-label">Số điện thoại đặt bánh</label>
+                    <input asp-for="Sdt" type="tel" inputmode="tel" autocomplete="tel" class="form-control" required />
+                </div>
+                <div>
+                    <label asp-for="BonKyTuCuoi" class="form-label">4 ký tự cuối của mã</label>
+                    <input asp-for="BonKyTuCuoi" type="text" maxlength="4" autocomplete="off" autocapitalize="off" spellcheck="false" class="form-control" aria-describedby="tim-ma-goi-y" required />
+                    <p id="tim-ma-goi-y" class="form-text">Phân biệt chữ hoa và chữ thường.</p>
+                </div>
+            </div>
+
+            @if (Model.DaTim && Model.KetQua.Count == 0)
+            {
+                <p class="tim-loi" role="alert">
+                    Không có đơn nào khớp. Kiểm tra lại số điện thoại và 4 ký tự cuối của mã tra cứu.
+                    Chưa có đơn? <a href="/Dat/ThietKe">Thiết kế bánh</a>.
+                </p>
+            }
+
+            <button type="submit" class="dat-btn dat-btn-primary tim-submit">Tra cứu</button>
+        </form>
+
+        <aside class="dat-paper tim-stub" aria-labelledby="tim-stub-title">
+            <h2 id="tim-stub-title" class="tim-h2">Mã tra cứu nằm ở đâu</h2>
+            <p>Khi bạn gửi thiết kế, hệ thống cấp một mã tra cứu gồm 22 ký tự. Mã hiện ở đầu trang theo dõi và nằm trong địa chỉ của trang đó. Bạn giữ mã này, chỉ cần nhập 4 ký tự cuối.</p>
+            <hr class="dat-perf" />
+            <p class="tim-stub-label">Ví dụ: mã kết thúc bằng kP4_</p>
+            <p class="tim-stub-code" role="img" aria-label="Ví dụ: 18 ký tự đầu bất kỳ, 4 ký tự cuối là kP4_">
+                <span aria-hidden="true">••••••••••••••••••</span><mark>kP4_</mark>
+            </p>
+        </aside>
+    </div>
+
+    @if (Model.DaTim && Model.KetQua.Count > 0)
+    {
+        <section class="tim-ketqua" aria-labelledby="tim-kq-title">
+            <h2 id="tim-kq-title" class="tim-h2">Tìm thấy @Model.KetQua.Count đơn</h2>
+            <ul class="tim-list">
+                @foreach (var tk in Model.KetQua)
+                {
+                    var daBaoGia = tk.TrangThai is TrangThaiThietKe.DA_BAO_GIA or TrangThaiThietKe.DA_DAT;
+                    <li>
+                        <a class="tim-row" href="/Dat/Theo/@tk.MaTraCuu">
+                            <span class="tim-ma">@tk.Ma</span>
+                            <span class="tim-chip tim-chip--@Tong(tk.TrangThai)">@ThietKeRule.TenTrangThai(tk.TrangThai)</span>
+                            <span class="tim-banh">@tk.SanPhamNen.TenBanh<span class="tim-sub">@tk.SanPhamNen.KichThuoc</span></span>
+                            <span class="tim-hen"><span class="tim-sub">Hẹn lấy</span>@Fmt.NgayGio(tk.NgayGioLay)</span>
+                            <span class="tim-tien dat-money"><span class="tim-sub">@(daBaoGia ? "Giá chính thức" : "Tạm tính")</span>@Fmt.Tien(daBaoGia ? tk.GiaCuoi : tk.GiaTamTinh)</span>
+                            <span class="tim-go">Xem đơn</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+</div>

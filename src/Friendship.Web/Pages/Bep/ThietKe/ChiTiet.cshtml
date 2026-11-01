@@ -1,0 +1,654 @@
+@page
+@model Friendship.Web.Pages.Bep.ThietKe.ChiTietModel
+@using Friendship.Domain
+@{
+    ViewData["Title"] = $"Chi tiết thiết kế {Model.ThietKe.MaTraCuu}";
+    var tk = Model.ThietKe;
+    var maxPhuPhi = tk.GiaTamTinh * ThietKeRule.PhuPhiToiDa;
+}
+
+<link rel="stylesheet" href="~/css/bep-thiet-ke.css" asp-append-version="true" />
+
+<!-- Giao diện web thông thường (Ẩn khi in) -->
+<div class="khong-in">
+    <div class="mb-3">
+        <a href="/Bep/ThietKe/Index" class="text-decoration-none text-muted small">&larr; Quay lại danh sách chờ duyệt</a>
+        <div class="d-flex justify-content-between align-items-center mt-1">
+            <h2 class="fw-bold mb-0">Duyệt thiết kế: <span class="text-primary font-monospace">@tk.MaTraCuu</span></h2>
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">@ThietKeRule.TenTrangThai(tk.TrangThai)</span>
+        </div>
+    </div>
+
+    @if (!ModelState.IsValid)
+    {
+        <div class="alert alert-danger" role="alert">
+            <div asp-validation-summary="All" class="mb-0"></div>
+        </div>
+    }
+
+    @if (Model.CanhBaos.Count > 0)
+    {
+        <div class="alert alert-warning mb-4 shadow-sm" role="alert">
+            <h6 class="alert-heading fw-bold mb-2">⚠️ Cảnh báo tồn kho nguyên liệu (tính đến ngày hẹn lấy):</h6>
+            <ul class="mb-0 ps-3">
+                @foreach (var cb in Model.CanhBaos)
+                {
+                    <li>@cb</li>
+                }
+            </ul>
+            <div class="small text-muted mt-2 fst-italic">* Cảnh báo này không chặn việc duyệt bánh, nhưng cần lưu ý nhập thêm nguyên liệu kịp thời.</div>
+        </div>
+    }
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">🖼️ Bản vẽ & Mô hình 3D</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" id="btn-xem-3d">
+                            🧊 Xem 3D
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-dark fw-semibold" id="btn-in-phieu">
+                            🖨️ In phiếu
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Ảnh 2D xem trước -->
+                    <div id="cake-2d-box">
+                        <img src="/dat/anh/@tk.MaTraCuu/thiet-ke" id="img-thiet-ke-2d" alt="Bản vẽ thiết kế" class="img-fluid rounded border mb-3" style="max-height: 380px;" />
+                    </div>
+
+                    <!-- Khung mô hình 3D chỉ đọc (mở khi bấm Xem 3D) -->
+                    <div id="cake-3d-box" class="d-none mb-3 text-start">
+                        <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                            <span class="small fw-semibold text-muted">Mô hình 3D (Xoay chuột để kiểm tra mọi góc):</span>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" id="btn-3d-rotate" class="btn btn-outline-secondary btn-sm" title="Bật/Tắt tự động xoay">▶ Tự xoay</button>
+                                <button type="button" id="btn-3d-reset" class="btn btn-outline-secondary btn-sm" title="Đặt lại góc nhìn chuẩn">⟲ Đặt lại</button>
+                            </div>
+                        </div>
+                        <div id="cake-3d-container" style="width: 100%; height: 380px; background: radial-gradient(circle, #fcfcfc 0%, #ececec 100%); border-radius: 8px; border: 1px solid #dee2e6; position: relative;"></div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(tk.AnhInAn))
+                    {
+                        <div class="p-3 bg-light rounded text-start mb-3">
+                            <h6 class="fw-bold small text-muted mb-2">Vùng in ảnh ăn được:</h6>
+                            <img src="/dat/anh/@tk.MaTraCuu/in" alt="Ảnh in ăn được" class="img-thumbnail" style="max-height: 120px;" />
+                        </div>
+                    }
+
+                    <div class="text-start bg-light p-3 rounded">
+                        <h6 class="fw-bold small mb-2">Thông số kỹ thuật chi tiết:</h6>
+                        <ul class="list-group list-group-flush small">
+                            <li class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                <span>Bánh nền: <strong>@tk.SanPhamNen.TenBanh</strong> (@tk.SanPhamNen.KichThuoc)</span>
+                                <span>@tk.SanPhamNen.DonGia.ToString("N0") đ</span>
+                            </li>
+                            <li class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                <span>Số tầng bánh: <strong>@(Model.SoTang == 2 ? (Model.TenTangPhu ?? "Bánh 2 tầng") : "1 tầng tiêu chuẩn")</strong></span>
+                                <span class="badge @(Model.SoTang == 2 ? "bg-danger" : "bg-secondary")">@(Model.SoTang == 2 ? "2 TẦNG" : "1 TẦNG")</span>
+                            </li>
+                            <li class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                <span>Cốt bánh: <strong>@Model.TenCot</strong></span>
+                                <span class="text-muted">Đã chọn</span>
+                            </li>
+                            <li class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                <span>Màu kem phủ: 
+                                    <span class="color-swatch-box" style="background-color: @Model.MauKem;"></span>
+                                    <strong>@Model.TenMauKem</strong> <code class="text-muted">(@Model.MauKem)</code>
+                                </span>
+                                <span class="text-muted">Đã chọn</span>
+                            </li>
+                            <li class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                <span>Viền bánh: <strong>@Model.TenVien</strong></span>
+                                <span class="text-muted">Đã chọn</span>
+                            </li>
+                            @if (Model.Toppings.Count > 0)
+                            {
+                                <li class="list-group-item bg-transparent px-0">
+                                    <span>Topping trang trí:</span>
+                                    <ul class="ps-3 mb-0 mt-1">
+                                        @foreach (var tp in Model.Toppings)
+                                        {
+                                            <li><strong>@tp.Ten</strong> &times; <strong>@tp.SoLuong</strong></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                            @if (Model.SoNen > 0)
+                            {
+                                <li class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                    <span>Nến sinh nhật: <strong>@Model.SoNen cây</strong></span>
+                                    <span class="text-muted">Đi kèm</span>
+                                </li>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(tk.ChuTrenBanh))
+                            {
+                                <li class="list-group-item bg-transparent px-0">
+                                    <div>Chữ trên bánh: <strong class="text-primary">"@tk.ChuTrenBanh"</strong></div>
+                                    <div class="text-muted small">Font: @Model.FontChu | Màu chữ: @Model.MauChu</div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">📋 Thông tin khách & Hẹn lấy</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">Khách hàng:</dt>
+                        <dd class="col-sm-8 fw-bold">@tk.KhachHang.TenKhachHang</dd>
+
+                        <dt class="col-sm-4 text-muted">Số điện thoại:</dt>
+                        <dd class="col-sm-8 font-monospace">@tk.KhachHang.SoDienThoai</dd>
+
+                        <dt class="col-sm-4 text-muted">Hẹn lấy:</dt>
+                        <dd class="col-sm-8 fw-bold text-danger fs-6">@tk.NgayGioLay.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-4 text-muted">Gửi lúc:</dt>
+                        <dd class="col-sm-8">@(tk.NgayGui?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                        @if (!string.IsNullOrWhiteSpace(tk.ChuTrenBanh))
+                        {
+                            <dt class="col-sm-4 text-muted">Chữ trên bánh:</dt>
+                            <dd class="col-sm-8 fst-italic fw-semibold text-primary">"@tk.ChuTrenBanh"</dd>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(tk.LoiNhan))
+                        {
+                            <dt class="col-sm-4 text-muted">Lời nhắn:</dt>
+                            <dd class="col-sm-8 text-muted">@tk.LoiNhan</dd>
+                        }
+                    </dl>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Giá tạm tính (khách thấy):</span>
+                        <h5 class="fw-bold text-success mb-0">@tk.GiaTamTinh.ToString("N0") đ</h5>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Giá vốn dự kiến (nội bộ bếp):</span>
+                        <strong class="text-dark">@Model.GiaVonDuKien.ToString("N0") đ</strong>
+                    </div>
+                </div>
+            </div>
+
+            @if (tk.TrangThai == TrangThaiThietKe.CHO_DUYET)
+            {
+                <div class="card shadow-sm border-0 mb-3 border-top border-4 border-success">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="fw-bold mb-0 text-success">✅ Duyệt thiết kế và Khóa giá</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" asp-page-handler="Duyet" asp-route-id="@tk.Id">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Phụ phí thủ công / độ khó (nếu có):</label>
+                                <div class="input-group">
+                                    <input type="number" asp-for="PhuPhi" class="form-control" min="0" max="@maxPhuPhi" step="1000" />
+                                    <span class="input-group-text">₫</span>
+                                </div>
+                                <div class="form-text small">Tối đa 30% giá tạm tính (@maxPhuPhi.ToString("N0") đ).</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Lý do phụ phí (bắt buộc khi có phụ phí):</label>
+                                <input type="text" asp-for="LyDoPhuPhi" class="form-control" placeholder="VD: Trang trí hoa văn nổi 3D tốn nhiều thời gian" />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 fw-bold">
+                                Duyệt thiết kế & Báo giá
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0 border-top border-3 border-warning h-100">
+                            <div class="card-header bg-white py-2">
+                                <h6 class="fw-bold mb-0 text-warning">✏️ Yêu cầu sửa</h6>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" asp-page-handler="YeuCauSua" asp-route-id="@tk.Id">
+                                    <div class="mb-2">
+                                        <label class="form-label small">Ghi chú cho khách:</label>
+                                        <textarea asp-for="GhiChu" class="form-control form-control-sm" rows="3" placeholder="VD: Chữ quá dài cho bánh 16cm, vui lòng rút gọn"></textarea>
+                                        <span asp-validation-for="GhiChu" class="text-danger small"></span>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-warning w-100 btn-sm fw-semibold">
+                                        Gửi yêu cầu sửa
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-0 border-top border-3 border-danger h-100">
+                            <div class="card-header bg-white py-2">
+                                <h6 class="fw-bold mb-0 text-danger">❌ Từ chối bánh</h6>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" asp-page-handler="TuChoi" asp-route-id="@tk.Id">
+                                    <div class="mb-2">
+                                        <label class="form-label small">Lý do từ chối:</label>
+                                        <textarea asp-for="LyDo" class="form-control form-control-sm" rows="3" placeholder="VD: Bếp kín lịch vào khung giờ này, không thể nhận thêm"></textarea>
+                                        <span asp-validation-for="LyDo" class="text-danger small"></span>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-danger w-100 btn-sm fw-semibold">
+                                        Từ chối thiết kế
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- PHIẾU LÀM BÁNH KHỔ A5 (DÀNH CHO BẾP IN ẤN) -->
+<!-- ========================================================================= -->
+<div class="phieu-in-a5" id="phieu-in-a5">
+    <div class="phieu-header">
+        <div class="phieu-title-row">
+            <div>
+                <h4 class="phieu-title">TIỆM BÁNH FRIENDSHIP</h4>
+                <div class="phieu-subtitle">PHIẾU LÀM BÁNH (A5)</div>
+            </div>
+            <div class="phieu-code-box">
+                <div class="phieu-ma-tra-cuu">@tk.MaTraCuu</div>
+                <div class="phieu-ma-don">Mã: @tk.Ma</div>
+            </div>
+        </div>
+        <div class="phieu-hen-lay">
+            <span>⏰ HẸN LẤY BÁNH:</span>
+            <strong>@tk.NgayGioLay.ToString("dd/MM/yyyy HH:mm")</strong>
+        </div>
+        <div class="phieu-khach-row">
+            <span>Khách hàng: <strong>@tk.KhachHang.TenKhachHang</strong></span>
+            <span>SĐT: <strong>@tk.KhachHang.SoDienThoai</strong></span>
+        </div>
+    </div>
+
+    <div class="phieu-body">
+        <div class="phieu-col-info">
+            <table class="phieu-table">
+                <tr>
+                    <td class="phieu-label">Cỡ bánh:</td>
+                    <td class="phieu-val"><strong>@tk.SanPhamNen.TenBanh (@tk.SanPhamNen.KichThuoc)</strong></td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Số tầng:</td>
+                    <td class="phieu-val">
+                        @if (Model.SoTang == 2)
+                        {
+                            <strong style="text-transform: uppercase;">2 TẦNG @(!string.IsNullOrEmpty(Model.TenTangPhu) ? $"({Model.TenTangPhu})" : "")</strong>
+                        }
+                        else
+                        {
+                            <span>1 tầng tiêu chuẩn</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Cốt bánh:</td>
+                    <td class="phieu-val"><strong>@Model.TenCot</strong></td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Màu kem:</td>
+                    <td class="phieu-val">
+                        <span class="phieu-color-swatch-print" style="background-color: @Model.MauKem;"></span>
+                        <strong>@Model.TenMauKem (@Model.MauKem)</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Viền bánh:</td>
+                    <td class="phieu-val">@Model.TenVien</td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Topping:</td>
+                    <td class="phieu-val">
+                        @if (Model.Toppings.Count > 0)
+                        {
+                            <ul class="phieu-list-topping">
+                                @foreach (var tp in Model.Toppings)
+                                {
+                                    <li><strong>@tp.Ten</strong> &times; <strong>@tp.SoLuong</strong></li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>Không topping</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Chữ trên bánh:</td>
+                    <td class="phieu-val">
+                        @if (!string.IsNullOrWhiteSpace(tk.ChuTrenBanh))
+                        {
+                            <span class="phieu-chu">"@tk.ChuTrenBanh"</span>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Font chữ:</td>
+                    <td class="phieu-val">@Model.FontChu (Màu: @Model.MauChu)</td>
+                </tr>
+                <tr>
+                    <td class="phieu-label">Số nến:</td>
+                    <td class="phieu-val"><strong>@(Model.SoNen > 0 ? $"{Model.SoNen} cây" : "0 cây (không lấy)")</strong></td>
+                </tr>
+                @if (!string.IsNullOrWhiteSpace(tk.LoiNhan))
+                {
+                    <tr>
+                        <td class="phieu-label">Ghi chú khách:</td>
+                        <td class="phieu-val">@tk.LoiNhan</td>
+                    </tr>
+                }
+                @if (!string.IsNullOrWhiteSpace(tk.GhiChuBep))
+                {
+                    <tr>
+                        <td class="phieu-label">Lưu ý bếp:</td>
+                        <td class="phieu-val">@tk.GhiChuBep</td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+        <div class="phieu-col-images">
+            <div class="phieu-img-box">
+                <div class="phieu-img-caption">Bản vẽ thiết kế 2D</div>
+                <img src="/dat/anh/@tk.MaTraCuu/thiet-ke" alt="Bản vẽ 2D" class="phieu-img-preview" />
+            </div>
+            <div class="phieu-img-box d-none" id="phieu-box-anh-3d">
+                <div class="phieu-img-caption">Mô hình 3D (Đã xem)</div>
+                <img id="phieu-anh-3d" alt="Ảnh chụp 3D" class="phieu-img-preview" />
+            </div>
+            @if (!string.IsNullOrEmpty(tk.AnhInAn))
+            {
+                <div class="phieu-img-box">
+                    <div class="phieu-img-caption">Ảnh in ăn được</div>
+                    <img src="/dat/anh/@tk.MaTraCuu/in" alt="Ảnh in ăn được" class="phieu-img-preview" />
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="phieu-footer">
+        <div class="phieu-sign-col">
+            <div>Thợ bánh phụ trách: .......................................</div>
+            <div class="phieu-sign-line"></div>
+        </div>
+        <div class="phieu-sign-col">
+            <div>Bắt đầu làm: ...........h...........</div>
+            <div>Hoàn thành: ...........h...........</div>
+        </div>
+    </div>
+</div>
+
+<!-- Dữ liệu hỗ trợ khởi tạo mô hình 3D -->
+@* DuLieuJson do khách gửi, lưu nguyên văn: chuỗi "</script>" trong JSON sẽ thoát khỏi thẻ script (XSS vào trang bếp).
+   Trong JSON hợp lệ "<" chỉ nằm trong chuỗi, nên đổi thành escape \u003c vẫn giữ nguyên dữ liệu. *@
+<script id="du-lieu-thiet-ke-json" type="application/json">@Html.Raw(Model.ThietKe.DuLieuJson.Replace("<", @"\u003c"))</script>
+<script id="du-lieu-danh-muc" type="application/json">
+@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+    thanhPhans = Model.ThietKe.ThanhPhans.Select(tp => new {
+        id = tp.ThanhPhanId,
+        ten = tp.ThanhPhan?.Ten ?? "",
+        anh = tp.ThanhPhan?.AnhMinhHoa ?? ""
+    })
+}))
+</script>
+<script id="du-lieu-toppings-json" type="application/json">
+@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ThietKe.ThanhPhans
+    .Where(tp => tp.ThanhPhan?.Nhom == NhomThanhPhan.TOPPING)
+    .Select(tp => new {
+        id = tp.ThanhPhanId,
+        ten = tp.ThanhPhan?.Ten ?? "",
+        soLuong = tp.SoLuong
+    })))
+</script>
+
+<input type="hidden" id="thong-tin-kich-thuoc" value="@tk.SanPhamNen.KichThuoc" />
+<input type="hidden" id="thong-tin-mau-kem" value="@Model.MauKem" />
+<input type="hidden" id="thong-tin-co-vien" value="@(Model.CoVien ? "true" : "false")" />
+<input type="hidden" id="thong-tin-cot-flavor" value="@Model.CotFlavor" />
+<input type="hidden" id="thong-tin-so-nen" value="@Model.SoNen" />
+<input type="hidden" id="thong-tin-so-tang" value="@Model.SoTang" />
+
+@section Scripts {
+    @* Thư viện 3D chỉ nạp khi bếp bấm "Xem 3D". <template> không tải gì, nhưng tag helper vẫn sinh URL có fingerprint (cache-busting) do Razor quản lý. *@
+    <template id="tpl-3d-scripts">
+        <script src="/lib/three/three.min.js" asp-append-version="true"></script>
+        <script src="/lib/three/OrbitControls.js" asp-append-version="true"></script>
+        <script src="/lib/three/RoomEnvironment.js" asp-append-version="true"></script>
+        <script src="/js/thiet-ke-3d-trangtri.js" asp-append-version="true"></script>
+        <script src="/js/thiet-ke-3d.js" asp-append-version="true"></script>
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+
+            let tai3DPromise = null;
+            let is3DVisible = false;
+
+            function nap3D() {
+                if (tai3DPromise) return tai3DPromise;
+                const tpl = document.getElementById('tpl-3d-scripts');
+                const urls = tpl ? Array.from(tpl.content.querySelectorAll('script')).map(s => s.getAttribute('src')) : [];
+                const btn = document.getElementById('btn-xem-3d');
+                const container = document.getElementById('cake-3d-container');
+                if (btn) btn.setAttribute('aria-busy', 'true');
+                if (container) {
+                    container.classList.add('is-loading');
+                    container.textContent = 'Đang tải mô hình 3D...';
+                }
+
+                tai3DPromise = urls.reduce(function (p, url) {
+                    return p.then(function () {
+                        return new Promise(function (ok, loi) {
+                            const s = document.createElement('script');
+                            s.src = url;
+                            s.onload = ok;
+                            s.onerror = function () { loi(new Error('Không tải được ' + url)); };
+                            document.head.appendChild(s);
+                        });
+                    });
+                }, Promise.resolve()).then(function () {
+                    if (!window.Cake3D) throw new Error('Cake3D không khả dụng (WebGL/Three.js)');
+                    if (container) {
+                        container.classList.remove('is-loading');
+                        container.innerHTML = '';
+                    }
+
+                    // Khởi tạo Cake3D
+                    window.Cake3D.init(container, null);
+
+                    // Đọc dữ liệu thiết kế từ DOM
+                    const duLieuEl = document.getElementById('du-lieu-thiet-ke-json');
+                    let duLieu = {};
+                    if (duLieuEl && duLieuEl.textContent) {
+                        try { duLieu = JSON.parse(duLieuEl.textContent); } catch (e) { console.error(e); }
+                    }
+
+                    // Kích thước bánh
+                    const kichThuocStr = document.getElementById('thong-tin-kich-thuoc')?.value || '20cm';
+                    const matchCm = kichThuocStr.match(/\d+/);
+                    const cm = matchCm ? parseInt(matchCm[0], 10) : 20;
+                    window.Cake3D.setCakeDimensions(cm);
+
+                    // Màu kem
+                    const mauKem = duLieu.mauKem || document.getElementById('thong-tin-mau-kem')?.value || '#FFFDF5';
+                    window.Cake3D.setCakeColor(mauKem);
+
+                    // Kiểu viền
+                    const coVien = document.getElementById('thong-tin-co-vien')?.value === 'true';
+                    window.Cake3D.setRimStyle(coVien);
+
+                    // Hương vị cốt
+                    const cotFlavor = document.getElementById('thong-tin-cot-flavor')?.value || 'vani';
+                    window.Cake3D.setCotFlavor(cotFlavor);
+
+                    // Nến
+                    const soNen = parseInt(duLieu.soNen ?? document.getElementById('thong-tin-so-nen')?.value ?? 0, 10);
+                    if (typeof window.Cake3D.setCandles === 'function') {
+                        window.Cake3D.setCandles(soNen);
+                    }
+
+                    // Số tầng bánh 3D
+                    const soTang = parseInt(duLieu.soTang ?? document.getElementById('thong-tin-so-tang')?.value ?? 1, 10);
+                    if (typeof window.Cake3D.setTiers === 'function') {
+                        const k2 = (cm >= 24) ? 18 : 16;
+                        window.Cake3D.setTiers(soTang, k2);
+                    }
+
+                    // Topping 3D
+                    let canvasObjects = duLieu.canvas?.objects || [];
+                    if (canvasObjects.length === 0) {
+                        // Nếu không có canvas.objects (ví dụ đơn mẫu seed), tạo objects từ danh sách topping
+                        const toppingsMetaEl = document.getElementById('du-lieu-toppings-json');
+                        if (toppingsMetaEl && toppingsMetaEl.textContent) {
+                            try {
+                                const tps = JSON.parse(toppingsMetaEl.textContent);
+                                let allItems = [];
+                                tps.forEach(tp => {
+                                    for (let i = 0; i < (tp.soLuong || 1); i++) {
+                                        allItems.push(tp);
+                                    }
+                                });
+                                const count = allItems.length;
+                                allItems.forEach((tp, idx) => {
+                                    const angle = (idx / count) * Math.PI * 2;
+                                    const r = 85;
+                                    canvasObjects.push({
+                                        customType: 'topping',
+                                        thanhPhanId: tp.id,
+                                        thanhPhanTen: tp.ten,
+                                        left: 200 + Math.cos(angle) * r,
+                                        top: 200 + Math.sin(angle) * r,
+                                        angle: 0,
+                                        scaleX: 1,
+                                        scaleY: 1
+                                    });
+                                });
+                            } catch (e) { console.error(e); }
+                        }
+                    }
+
+                    if (window.Cake3DTrangTri && typeof window.Cake3DTrangTri.sync === 'function') {
+                        const fakeCanvas = {
+                            getObjects: function () { return canvasObjects; }
+                        };
+                        window.Cake3DTrangTri.sync({
+                            fabricCanvas: fakeCanvas,
+                            canvasTexture: null,
+                            toppingGroup: window.Cake3D.getToppingGroup(),
+                            currentRadius: window.Cake3D.getCurrentRadius(),
+                            currentHeight: window.Cake3D.getCurrentHeight()
+                        });
+                    }
+
+                    // Texture mặt trên từ ảnh preview 2D đã lưu
+                    const img2d = document.getElementById('img-thiet-ke-2d');
+                    if (img2d && typeof window.Cake3D.loadTextureFromImage === 'function') {
+                        window.Cake3D.loadTextureFromImage(img2d.src || img2d);
+                    }
+
+                    window.Cake3D.resize();
+                }).catch(function (err) {
+                    tai3DPromise = null;
+                    console.error('Lỗi nạp thư viện 3D:', err);
+                    alert('Không thể tải mô hình 3D. Vui lòng kiểm tra lại kết nối mạng.');
+                }).finally(function () {
+                    if (btn) btn.removeAttribute('aria-busy');
+                });
+                return tai3DPromise;
+            }
+
+            // Nút Xem 3D
+            const btnXem3D = document.getElementById('btn-xem-3d');
+            const box3D = document.getElementById('cake-3d-box');
+            if (btnXem3D && box3D) {
+                btnXem3D.addEventListener('click', function () {
+                    if (!is3DVisible) {
+                        box3D.classList.remove('d-none');
+                        is3DVisible = true;
+                        btnXem3D.textContent = 'Ẩn 3D';
+                        btnXem3D.classList.remove('btn-outline-primary');
+                        btnXem3D.classList.add('btn-primary');
+                        nap3D().then(function () {
+                            if (window.Cake3D) window.Cake3D.resize();
+                        });
+                    } else {
+                        box3D.classList.add('d-none');
+                        is3DVisible = false;
+                        btnXem3D.textContent = '🧊 Xem 3D';
+                        btnXem3D.classList.remove('btn-primary');
+                        btnXem3D.classList.add('btn-outline-primary');
+                    }
+                });
+            }
+
+            // Nút Tự xoay 3D
+            const btnRotate = document.getElementById('btn-3d-rotate');
+            if (btnRotate) {
+                btnRotate.addEventListener('click', function () {
+                    if (window.Cake3D && typeof window.Cake3D.toggleAutoRotate === 'function') {
+                        const rotating = window.Cake3D.toggleAutoRotate();
+                        btnRotate.textContent = rotating ? '⏸ Dừng xoay' : '▶ Tự xoay';
+                    }
+                });
+            }
+
+            // Nút Đặt lại góc nhìn
+            const btnReset = document.getElementById('btn-3d-reset');
+            if (btnReset) {
+                btnReset.addEventListener('click', function () {
+                    if (window.Cake3D && typeof window.Cake3D.resetCamera === 'function') {
+                        window.Cake3D.resetCamera();
+                    }
+                });
+            }
+
+            function capNhatSnapshot3D() {
+                // Nếu bếp đã mở mô hình 3D thì chụp snapshot gán vào ảnh 3D trên phiếu in
+                if (window.Cake3D && typeof window.Cake3D.getSnapshot === 'function') {
+                    const snap = window.Cake3D.getSnapshot();
+                    const box3dImg = document.getElementById('phieu-box-anh-3d');
+                    const img3d = document.getElementById('phieu-anh-3d');
+                    if (snap && box3dImg && img3d) {
+                        img3d.src = snap;
+                        box3dImg.classList.remove('d-none');
+                    }
+                }
+            }
+
+            window.addEventListener('beforeprint', capNhatSnapshot3D);
+
+            // Nút In phiếu
+            const btnInPhieu = document.getElementById('btn-in-phieu');
+            if (btnInPhieu) {
+                btnInPhieu.addEventListener('click', function () {
+                    capNhatSnapshot3D();
+                    window.print();
+                });
+            }
+        })();
+    </script>
+}

@@ -1,0 +1,515 @@
+@page "{ma?}"
+@model Friendship.Web.Pages.Dat.ThietKeModel
+@{
+    ViewData["Title"] = string.IsNullOrEmpty(Model.Input.MaTraCuu) ? "Thiết kế bánh" : $"Sửa thiết kế {Model.Input.MaTraCuu}";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dat-thietke.css" asp-append-version="true" />
+}
+
+<script id="du-lieu-danh-muc" type="application/json">@Html.Raw(Model.DanhMucJson)</script>
+
+<h1 class="visually-hidden">Thiết kế bánh kem</h1>
+
+<!-- Thanh bước: năm ô chữ. Trên mobile chỉ còn dòng "Bước n/5" và thanh tiến độ. -->
+<nav class="dat-stepper-wrap" aria-label="Các bước thiết kế bánh">
+    <p class="dat-step-now" id="dat-step-now" aria-hidden="true">Bước 1/5: Bánh nền</p>
+    <ol class="dat-stepper" id="dat-stepper">
+        <li>
+            <button type="button" class="dat-step active" data-step="1" id="step-btn-1" aria-current="step"><span class="dat-step-label">Bánh nền</span></button>
+        </li>
+        <li>
+            <button type="button" class="dat-step" data-step="2" id="step-btn-2"><span class="dat-step-label">Cốt và kem</span></button>
+        </li>
+        <li>
+            <button type="button" class="dat-step" data-step="3" id="step-btn-3"><span class="dat-step-label">Viền và topping</span></button>
+        </li>
+        <li>
+            <button type="button" class="dat-step" data-step="4" id="step-btn-4"><span class="dat-step-label">Chữ và ảnh in</span></button>
+        </li>
+        <li>
+            <button type="button" class="dat-step" data-step="5" id="step-btn-5"><span class="dat-step-label">Xem lại và gửi</span></button>
+        </li>
+    </ol>
+</nav>
+
+<div class="dat-studio">
+    <!-- Cột trái: khung vẽ và giá, dính khi cuộn -->
+    <aside class="dat-preview-col" aria-label="Xem trước bánh">
+        <div class="dat-canvas-card">
+            <div class="dat-canvas-header">
+                <div class="dat-view-mode-tabs" role="tablist" aria-label="Chế độ xem bánh">
+                    <button type="button" class="dat-view-tab active" id="btn-view-2d" data-view="2d" role="tab" aria-selected="true" title="Vẽ phẳng 2D">Bản vẽ 2D</button>
+                    <button type="button" class="dat-view-tab" id="btn-view-3d" data-view="3d" role="tab" aria-selected="false" title="Mô hình 3D, xoay 360 độ">Mô hình 3D</button>
+                </div>
+                <div class="dat-canvas-tools" id="tools-2d">
+                    <button type="button" id="btn-tool-undo" class="dat-btn-tool" title="Hoàn tác (Ctrl+Z)" aria-label="Hoàn tác" disabled>
+                        <svg class="dat-icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                        Hoàn tác
+                    </button>
+                    <button type="button" id="btn-tool-redo" class="dat-btn-tool" title="Làm lại (Ctrl+Y)" aria-label="Làm lại" disabled>
+                        <svg class="dat-icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                        Làm lại
+                    </button>
+                    <button type="button" id="btn-tool-arrange-rim" class="dat-btn-tool" title="Xếp dâu tây đều quanh viền bánh">Xếp viền</button>
+                    <button type="button" id="btn-tool-berry-style" class="dat-btn-tool" title="Đổi kiểu dâu: nguyên quả, bổ đôi, cắt lát">Đổi kiểu dâu</button>
+                    <button type="button" id="btn-xoa-chon" class="dat-btn-tool danger" title="Xóa phần tử đang chọn (Delete)">Xóa chọn</button>
+                    <button type="button" id="btn-xoa-tat-ca" class="dat-btn-tool" title="Vẽ lại từ đầu">Làm mới</button>
+                </div>
+                <div class="dat-canvas-tools d-none" id="tools-3d">
+                    <button type="button" id="btn-3d-auto-rotate" class="dat-btn-tool" aria-pressed="false" title="Bật hoặc tắt tự xoay">Tự xoay</button>
+                    <button type="button" id="btn-3d-cutaway" class="dat-btn-tool" title="Xem lát cắt cốt bánh">Lát cắt</button>
+                    <button type="button" id="btn-3d-reset-cam" class="dat-btn-tool" title="Đặt lại góc nhìn">Góc chuẩn</button>
+                </div>
+            </div>
+
+            <div class="dat-canvas-body">
+                <div id="canvas-wrapper">
+                    <canvas id="cake-canvas" width="400" height="400" aria-label="Mặt bánh nhìn từ trên xuống"></canvas>
+                </div>
+
+                <div id="cake-3d-wrapper" class="d-none">
+                    <div id="cake-3d-container"></div>
+                    <div class="dat-3d-overlay-hint">
+                        <span>Kéo để xoay, lăn chuột để phóng to</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="dat-perf" aria-hidden="true" />
+
+            <div class="dat-price-box" aria-live="polite">
+                <dl class="dat-price-rows">
+                    <div class="dat-price-row">
+                        <dt>Bánh nền</dt>
+                        <dd id="hien-thi-gia-nen">0 ₫</dd>
+                    </div>
+                    <div class="dat-price-row">
+                        <dt>Cốt, kem và topping</dt>
+                        <dd id="hien-thi-gia-tp">0 ₫</dd>
+                    </div>
+                </dl>
+                <div class="dat-price-total">
+                    <span class="dat-price-total-label">Tạm tính</span>
+                    <span class="dat-price-total-val" id="hien-thi-tong">0 ₫</span>
+                </div>
+                <p id="hien-thi-trang-thai-gia" class="dat-price-status"></p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Cột phải: mỗi bước một tờ giấy -->
+    <section class="dat-options-col" aria-label="Tùy chọn thiết kế">
+        <form method="post" enctype="multipart/form-data" asp-page-handler="Luu" id="form-thiet-ke">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="alert alert-danger" hidden="@(ViewData.ModelState.IsValid ? "hidden" : null)"></div>
+
+            <input type="hidden" asp-for="Input.MaTraCuu" id="input-ma-tra-cuu" />
+            <input type="hidden" asp-for="Input.DuLieuJson" id="input-du-lieu-json" />
+            <input type="file" asp-for="Input.AnhThietKe" id="input-anh-thiet-ke" class="d-none" />
+            <input type="file" asp-for="Input.AnhInAn" id="input-anh-in" class="d-none" />
+            <input type="hidden" id="buoc-loi-server" value="@Model.BuocLoi" />
+
+            <!-- Bước 1: bánh nền -->
+            <div class="dat-step-panel active" id="panel-step-1" data-panel="1">
+                <div class="dat-panel-header">
+                    <h2 class="dat-panel-title">Chọn cỡ bánh</h2>
+                    <p class="dat-panel-desc">Cỡ bánh quyết định số người ăn và giá bánh nền.</p>
+                </div>
+
+                @if (Model.BuocLoi == 1 && !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <!-- Select ẩn để đồng bộ với JS và phía server -->
+                <div class="d-none">
+                    <label for="select-banh-nen">Kích cỡ bánh nền</label>
+                    <select id="select-banh-nen">
+                        <option value="">Chọn kích cỡ bánh nền</option>
+                        @foreach (var sp in Model.SanPhams)
+                        {
+                            <option value="@sp.Id" data-gia="@sp.DonGia" data-kt="@sp.KichThuoc">@sp.TenBanh (@sp.KichThuoc) – @sp.DonGia.ToString("N0", vi) ₫</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="dat-group">
+                    <h3 class="dat-group-title" id="nhan-kich-co">Kích cỡ</h3>
+                    <div class="dat-card-grid" id="grid-banh-nen" role="group" aria-labelledby="nhan-kich-co">
+                        @foreach (var sp in Model.SanPhams)
+                        {
+                            var nguoiAn = sp.KichThuoc.Contains("16") ? "2 đến 4 người" : sp.KichThuoc.Contains("20") ? "6 đến 8 người" : "10 đến 14 người";
+                            <div class="dat-option-card card-banh-nen" data-id="@sp.Id" tabindex="0" role="button" aria-pressed="false">
+                                <span class="dat-option-title">@sp.KichThuoc</span>
+                                <span class="dat-option-desc">@nguoiAn</span>
+                                <span class="dat-option-price">@sp.DonGia.ToString("N0", vi) ₫</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="dat-group" id="box-so-tang">
+                    <h3 class="dat-group-title">Số tầng</h3>
+                    <span id="badge-tang-status" hidden>1 tầng</span>
+                    <div class="dat-chip-row" role="group" aria-label="Chọn số tầng bánh">
+                        <input type="radio" class="dat-chip-input" name="radio-so-tang" id="radio-tang-1" value="1" checked autocomplete="off">
+                        <label class="dat-chip" for="radio-tang-1">1 tầng</label>
+
+                        <input type="radio" class="dat-chip-input" name="radio-so-tang" id="radio-tang-2" value="2" autocomplete="off">
+                        <label class="dat-chip" for="radio-tang-2" id="label-tang-2">2 tầng</label>
+                    </div>
+                    <p class="dat-group-note" id="desc-so-tang">Bánh 2 tầng chỉ làm được với cỡ 20cm và 24cm.</p>
+                </div>
+
+                <div class="dat-step-footer">
+                    <button type="button" class="dat-btn dat-btn-primary btn-next-step" data-next="2">Tiếp: Cốt và kem</button>
+                </div>
+            </div>
+
+            <!-- Bước 2: cốt và kem -->
+            <div class="dat-step-panel" id="panel-step-2" data-panel="2">
+                <div class="dat-panel-header">
+                    <h2 class="dat-panel-title">Chọn cốt và kem</h2>
+                    <p class="dat-panel-desc">Chọn một loại cốt bánh và màu kem phủ.</p>
+                </div>
+
+                @if (Model.BuocLoi == 2 && !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <div class="dat-group">
+                    <div class="dat-group-head">
+                        <h3 class="dat-group-title" id="nhan-cot">Cốt bánh</h3>
+                        <p class="dat-group-note">Bắt buộc chọn một. Theo cỡ bánh đã chọn.</p>
+                    </div>
+                    <div id="container-cot" class="dat-card-grid" role="group" aria-labelledby="nhan-cot">
+                        <p class="dat-empty">Chọn cỡ bánh ở bước 1 để xem các loại cốt.</p>
+                    </div>
+                </div>
+
+                <div class="dat-group">
+                    <div class="dat-group-head">
+                        <h3 class="dat-group-title">Màu kem phủ</h3>
+                        <p class="dat-group-note" id="label-ten-mau-kem">Trắng sữa</p>
+                    </div>
+                    <div id="swatch-mau-kem" class="dat-swatch-list"></div>
+                </div>
+
+                <!-- Mặt cắt bánh: hình vẽ minh họa, đổi màu theo cốt và kem đã chọn -->
+                <div class="dat-group dat-layer-explorer" id="layer-explorer-card">
+                    <div class="dat-group-head">
+                        <h3 class="dat-group-title">Mặt cắt bánh</h3>
+                        <p class="dat-group-note" id="layer-badge-flavor">Cốt vani truyền thống</p>
+                    </div>
+                    <div class="dat-layer-body">
+                        <div class="dat-cake-cutaway-box">
+                            <svg id="svg-layer-cutaway" viewBox="0 0 200 130" role="img" aria-label="Mặt cắt các lớp của bánh">
+                                <defs>
+                                    <pattern id="pat-sponge-texture" width="8" height="8" patternUnits="userSpaceOnUse">
+                                        <circle cx="2" cy="2" r="0.6" fill="#000000" opacity="0.08"/>
+                                        <circle cx="6" cy="5" r="0.8" fill="#000000" opacity="0.06"/>
+                                    </pattern>
+                                </defs>
+                                <rect x="15" y="112" width="170" height="6" rx="2" fill="#C9A24A"/>
+                                <rect id="cut-frosting-left" x="25" y="24" width="7" height="88" fill="#FFFDF5" rx="1"/>
+                                <rect id="cut-frosting-right" x="168" y="24" width="7" height="88" fill="#FFFDF5" rx="1"/>
+                                <rect id="cut-frosting-top" x="25" y="18" width="150" height="8" rx="3" fill="#FFFDF5"/>
+                                <rect id="cut-sponge-1" x="32" y="26" width="136" height="24" fill="#FBE7C6"/>
+                                <rect x="32" y="26" width="136" height="24" fill="url(#pat-sponge-texture)"/>
+                                <rect x="32" y="50" width="136" height="7" fill="#FFF8F0"/>
+                                <rect x="50" y="52" width="100" height="3" rx="1.5" fill="#E63956" opacity="0.85"/>
+                                <rect id="cut-sponge-2" x="32" y="57" width="136" height="24" fill="#FBE7C6"/>
+                                <rect x="32" y="57" width="136" height="24" fill="url(#pat-sponge-texture)"/>
+                                <rect x="32" y="81" width="136" height="7" fill="#FFF8F0"/>
+                                <rect id="cut-sponge-3" x="32" y="88" width="136" height="24" fill="#FBE7C6"/>
+                                <rect x="32" y="88" width="136" height="24" fill="url(#pat-sponge-texture)"/>
+                            </svg>
+                        </div>
+                        <ul class="dat-layer-legend">
+                            <li><span class="dat-legend-dot" id="legend-dot-frosting"></span>Kem phủ ngoài: <strong id="legend-text-frosting">Trắng sữa</strong></li>
+                            <li><span class="dat-legend-dot" id="legend-dot-sponge"></span>3 lớp bông lan: <strong id="legend-text-sponge">Vani xốp mềm</strong></li>
+                            <li><span class="dat-legend-dot dat-legend-cream"></span>2 lớp kem bơ kẹp giữa</li>
+                            <li><span class="dat-legend-dot dat-legend-jam"></span>Nhân kẹp giữa: mứt dâu</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="dat-step-footer">
+                    <button type="button" class="dat-btn dat-btn-secondary btn-prev-step" data-prev="1">Quay lại</button>
+                    <button type="button" class="dat-btn dat-btn-primary btn-next-step" data-next="3">Tiếp: Viền và topping</button>
+                </div>
+            </div>
+
+            <!-- Bước 3: viền, topping, nến -->
+            <div class="dat-step-panel" id="panel-step-3" data-panel="3">
+                <div class="dat-panel-header">
+                    <h2 class="dat-panel-title">Viền và topping</h2>
+                    <p class="dat-panel-desc">Chọn kiểu viền, thêm phụ kiện lên mặt bánh rồi kéo đến chỗ bạn muốn.</p>
+                </div>
+
+                @if (Model.BuocLoi == 3 && !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <div class="dat-group">
+                    <div class="dat-group-head">
+                        <h3 class="dat-group-title" id="nhan-vien">Kiểu viền</h3>
+                        <p class="dat-group-note">Không bắt buộc, chọn tối đa một kiểu.</p>
+                    </div>
+                    <div id="container-vien" class="dat-card-grid" role="group" aria-labelledby="nhan-vien"></div>
+                </div>
+
+                <div class="dat-group">
+                    <div class="dat-group-head">
+                        <h3 class="dat-group-title" id="nhan-topping">Topping</h3>
+                        <p class="dat-group-note">Tối đa 12 phụ kiện mỗi bánh.</p>
+                    </div>
+
+                    <div class="dat-topping-toolbar">
+                        <span class="dat-toolbar-label" id="nhan-dau-tay">Dáng dâu tây</span>
+                        <div class="dat-chip-row" role="group" id="group-strawberry-style" aria-labelledby="nhan-dau-tay">
+                            <button type="button" class="dat-chip active" data-style="nguyen_qua" title="Dâu tây nguyên quả">Trái nguyên</button>
+                            <button type="button" class="dat-chip" data-style="bo_doi" title="Dâu tây bổ đôi">Bổ đôi</button>
+                            <button type="button" class="dat-chip" data-style="cat_lat" title="Dâu tây cắt lát">Cắt lát</button>
+                        </div>
+                    </div>
+
+                    <div id="container-topping" class="dat-topping-list"></div>
+                </div>
+
+                <div class="dat-group">
+                    <div class="dat-group-head">
+                        <label class="dat-group-title" for="input-so-nen">Nến sinh nhật</label>
+                        <p class="dat-group-note" id="ghi-chu-nen">Miễn phí, tối đa 10 cây.</p>
+                    </div>
+                    <div class="dat-qty">
+                        <button type="button" class="dat-btn dat-btn-secondary dat-qty-btn" id="btn-giam-nen" aria-label="Giảm số nến">−</button>
+                        <input type="number" id="input-so-nen" name="Input.SoNen" class="form-control dat-qty-input" value="@(Model.Input.SoNen ?? 0)" min="0" max="10" aria-describedby="ghi-chu-nen" />
+                        <button type="button" class="dat-btn dat-btn-secondary dat-qty-btn" id="btn-tang-nen" aria-label="Tăng số nến">+</button>
+                        <span class="dat-qty-label" id="nhan-so-nen">0 cây</span>
+                    </div>
+                </div>
+
+                <div class="dat-step-footer">
+                    <button type="button" class="dat-btn dat-btn-secondary btn-prev-step" data-prev="2">Quay lại</button>
+                    <button type="button" class="dat-btn dat-btn-primary btn-next-step" data-next="4">Tiếp: Chữ và ảnh in</button>
+                </div>
+            </div>
+
+            <!-- Bước 4: chữ và ảnh in -->
+            <div class="dat-step-panel" id="panel-step-4" data-panel="4">
+                <div class="dat-panel-header">
+                    <h2 class="dat-panel-title">Chữ và ảnh in</h2>
+                    <p class="dat-panel-desc">Ghi chữ lên mặt bánh. Có thể in thêm một ảnh lên giấy gạo ăn được.</p>
+                </div>
+
+                @if (Model.BuocLoi == 4 && !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <div class="dat-group">
+                    <label class="dat-group-title" for="input-chu-canvas">Dòng chữ trên mặt bánh</label>
+                    <input type="text" id="input-chu-canvas" class="form-control" maxlength="30" value="@Model.Input.ChuTrenBanh" placeholder="Ví dụ: Chúc mừng sinh nhật mẹ" aria-describedby="ghi-chu-chu" />
+                    <p class="dat-field-help" id="ghi-chu-chu">Tối đa 30 ký tự.</p>
+                </div>
+
+                <div class="dat-group dat-two-col">
+                    <div>
+                        <label for="select-font-chu" class="dat-group-title">Kiểu chữ</label>
+                        <select id="select-font-chu" class="form-select">
+                            <option value="'Dancing Script', cursive">Uốn lượn</option>
+                            <option value="'Pacifico', cursive">Nghệ thuật</option>
+                            <option value="'Arial', sans-serif">Đơn giản</option>
+                        </select>
+                    </div>
+                    <div>
+                        <h3 class="dat-group-title" id="nhan-mau-chu">Màu chữ</h3>
+                        <div id="swatch-mau-chu" class="dat-swatch-list" role="group" aria-labelledby="nhan-mau-chu"></div>
+                    </div>
+                </div>
+
+                <div class="dat-group" id="wrapper-in-an">
+                    <label class="dat-check" for="checkbox-in-an">
+                        <input type="checkbox" id="checkbox-in-an" />
+                        <span>In ảnh ăn được lên giấy gạo</span>
+                    </label>
+
+                    <div id="khu-vuc-in-an" class="dat-print-box d-none">
+                        <div class="dat-btn-row">
+                            <label class="dat-btn dat-btn-secondary dat-upload">
+                                Tải ảnh in lên <input type="file" id="input-tai-anh-in" accept="image/png,image/jpeg" hidden />
+                            </label>
+                            <button type="button" id="btn-ve-tay" class="dat-btn dat-btn-secondary" aria-pressed="false">Bút vẽ tay: tắt</button>
+                        </div>
+                        <p class="dat-note" role="note">Phần in giống bản vẽ thiết kế. Kem và trang trí thủ công do thợ làm theo mẫu.</p>
+                    </div>
+                </div>
+
+                <div class="dat-step-footer">
+                    <button type="button" class="dat-btn dat-btn-secondary btn-prev-step" data-prev="3">Quay lại</button>
+                    <button type="button" class="dat-btn dat-btn-primary btn-next-step" data-next="5">Tiếp: Xem lại và gửi</button>
+                </div>
+            </div>
+
+            <!-- Bước 5: phiếu tóm tắt và thông tin khách -->
+            <div class="dat-step-panel" id="panel-step-5" data-panel="5">
+                <div class="dat-panel-header">
+                    <h2 class="dat-panel-title">Xem lại và gửi</h2>
+                    <p class="dat-panel-desc">Kiểm tra thiết kế, điền thông tin nhận bánh rồi gửi. Bếp xem lại trước khi báo giá.</p>
+                </div>
+
+                @if (Model.BuocLoi == 5 && !ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <!-- Phiếu: thân phiếu, đường đục lỗ, cuống -->
+                <div class="dat-ticket" id="dat-summary-box">
+                    <dl class="dat-summary">
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">Kích thước</dt>
+                            <dd class="dat-summary-value" id="summary-banh-nen">Chưa chọn</dd>
+                        </div>
+                        <div class="dat-summary-item" id="row-summary-so-tang">
+                            <dt class="dat-summary-label">Số tầng</dt>
+                            <dd class="dat-summary-value" id="summary-so-tang">1 tầng</dd>
+                        </div>
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">Cốt bánh</dt>
+                            <dd class="dat-summary-value" id="summary-cot">Chưa chọn</dd>
+                        </div>
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">Màu kem</dt>
+                            <dd class="dat-summary-value" id="summary-mau-kem">Trắng sữa</dd>
+                        </div>
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">Kiểu viền</dt>
+                            <dd class="dat-summary-value" id="summary-vien">Không viền</dd>
+                        </div>
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">Topping</dt>
+                            <dd class="dat-summary-value" id="summary-toppings">Chưa chọn</dd>
+                        </div>
+                        <div class="dat-summary-item" id="row-summary-nen">
+                            <dt class="dat-summary-label">Nến</dt>
+                            <dd class="dat-summary-value" id="summary-nen">Không lấy nến</dd>
+                        </div>
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">Chữ trên bánh</dt>
+                            <dd class="dat-summary-value">
+                                <span id="tom-tat-chu-tren-banh">Không ghi chữ</span>
+                                <button type="button" class="dat-link btn-goto-step" data-step="4">Sửa</button>
+                            </dd>
+                        </div>
+                        <div class="dat-summary-item">
+                            <dt class="dat-summary-label">In ảnh ăn được</dt>
+                            <dd class="dat-summary-value" id="summary-in-an">Không dùng</dd>
+                        </div>
+                    </dl>
+                    <div class="dat-summary-total">
+                        <span>Tạm tính</span>
+                        <strong id="summary-gia-tong">0 ₫</strong>
+                    </div>
+                    <hr class="dat-perf" aria-hidden="true" />
+                    <p class="dat-stub">Mã tra cứu sẽ hiện sau khi gửi. Giữ mã để xem tiến độ và đặt cọc.</p>
+                    <input type="hidden" asp-for="Input.ChuTrenBanh" />
+                </div>
+
+                <div class="dat-group dat-contact">
+                    <h3 class="dat-group-title dat-group-lead">Thông tin nhận bánh</h3>
+                    <p class="dat-group-note">Các ô đều bắt buộc, trừ ghi chú cho bếp.</p>
+
+                    <div class="dat-form-grid">
+                        <div>
+                            <label asp-for="Input.HoTen" class="form-label">Họ và tên</label>
+                            <input asp-for="Input.HoTen" class="form-control" placeholder="Ví dụ: Nguyễn Thị Lan" autocomplete="name" required aria-describedby="loi-ho-ten" />
+                            <span asp-validation-for="Input.HoTen" id="loi-ho-ten" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.SoDienThoai" class="form-label">Số điện thoại</label>
+                            <input asp-for="Input.SoDienThoai" class="form-control" placeholder="Ví dụ: 090 123 4567" type="tel" inputmode="tel" autocomplete="tel" required aria-describedby="ghi-chu-sdt loi-sdt" />
+                            <p class="dat-field-help" id="ghi-chu-sdt">10 chữ số.</p>
+                            <span asp-validation-for="Input.SoDienThoai" id="loi-sdt" class="text-danger"></span>
+                        </div>
+
+                        <div class="dat-span-2">
+                            <label asp-for="Input.NgayGioLay" class="form-label">Thời gian hẹn nhận bánh</label>
+                            <input asp-for="Input.NgayGioLay" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" required aria-describedby="ghi-chu-ngay loi-ngay" />
+                            <p class="dat-field-help" id="ghi-chu-ngay">Đặt trước ít nhất 48 giờ.</p>
+                            <span asp-validation-for="Input.NgayGioLay" id="loi-ngay" class="text-danger"></span>
+                        </div>
+
+                        <div class="dat-span-2">
+                            <label asp-for="Input.LoiNhan" class="form-label">Ghi chú cho bếp</label>
+                            <textarea asp-for="Input.LoiNhan" class="form-control" rows="3" maxlength="200" placeholder="Ví dụ: ít ngọt, thắt nơ hồng ngoài hộp" aria-describedby="ghi-chu-loi-nhan loi-loi-nhan"></textarea>
+                            <p class="dat-field-help" id="ghi-chu-loi-nhan">Tối đa 200 ký tự.</p>
+                            <span asp-validation-for="Input.LoiNhan" id="loi-loi-nhan" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dat-step-footer">
+                    <button type="button" class="dat-btn dat-btn-secondary btn-prev-step" data-prev="4">Quay lại</button>
+                    <button type="submit" id="btn-luu-thiet-ke" class="dat-btn dat-btn-primary">Gửi thiết kế</button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+
+<!-- Thanh dưới trên mobile: tổng tiền và nút chuyển bước -->
+<div class="dat-mobile-bar" id="dat-mobile-bar">
+    <div class="dat-mobile-price">
+        <span class="dat-mobile-price-lbl">Tạm tính</span>
+        <span class="dat-mobile-price-val" id="mobile-gia-tong" aria-live="polite">0 ₫</span>
+    </div>
+    <div class="dat-mobile-actions">
+        <button type="button" class="dat-btn dat-btn-secondary" id="btn-mobile-prev">Trước</button>
+        <button type="button" class="dat-btn dat-btn-primary" id="btn-mobile-next">Tiếp</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/lib/fabric/fabric.min.js" asp-append-version="true" defer></script>
+    @* Thư viện 3D chỉ nạp khi khách mở tab 3D. <template> không tải gì, nhưng tag helper vẫn sinh URL có fingerprint (cache-busting) cho thiet-ke.js đọc ra. *@
+    <template id="tpl-3d-scripts">
+        <script src="/lib/three/three.min.js" asp-append-version="true"></script>
+        <script src="/lib/three/OrbitControls.js" asp-append-version="true"></script>
+        <script src="/lib/three/RoomEnvironment.js" asp-append-version="true"></script>
+        <script src="/js/thiet-ke-3d-trangtri.js" asp-append-version="true"></script>
+        <script src="/js/thiet-ke-3d.js" asp-append-version="true"></script>
+    </template>
+    <script src="/js/thiet-ke.js" asp-append-version="true" defer></script>
+}

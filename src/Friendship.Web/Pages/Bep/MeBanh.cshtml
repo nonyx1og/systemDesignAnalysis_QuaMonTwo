@@ -1,0 +1,51 @@
+@page
+@model Friendship.Web.Pages.Bep.MeBanhModel
+@{ ViewData["Title"] = "Ghi nhận mẻ bánh"; }
+<h1 class="page-title">Ghi nhận mẻ bánh</h1>
+
+<form method="post" class="card-f" onsubmit="document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <p class="mb-2 fw-bold">Bánh vừa ra lò</p>
+    <div class="row g-2 mb-3">
+        @foreach (var sp in Model.SanPhams)
+        {
+            <div class="col-6 col-md-4 col-xl-3">
+                <input type="radio" class="btn-check" name="SanPhamId" id="sp@(sp.Id)" value="@sp.Id" data-gio="@sp.HanSuDungGio" checked="@(Model.SanPhamId == sp.Id)" />
+                <label class="btn btn-outline-primary btn-bep w-100" for="sp@(sp.Id)">@sp.TenBanh<br /><small>@sp.KichThuoc · HSD @sp.HanSuDungGio giờ</small></label>
+            </div>
+        }
+    </div>
+
+    <div class="row g-2 mb-3" style="max-width:560px">
+        <div class="col-12 col-md-5">
+            <label class="form-label" for="sl">Số lượng</label>
+            <input id="sl" name="SoLuong" type="number" step="1" min="1" value="@Model.SoLuong" class="form-control form-control-lg" inputmode="numeric" />
+        </div>
+        <div class="col-12 col-md-7">
+            <label class="form-label" for="ra">Giờ ra lò (để trống = bây giờ)</label>
+            <input id="ra" name="GioRaLo" type="datetime-local" value="@Model.GioRaLo?.ToString("yyyy-MM-ddTHH:mm")" max="@Model.BayGio.ToString("yyyy-MM-ddTHH:mm")" class="form-control form-control-lg" />
+        </div>
+    </div>
+    <p class="text-secondary" id="hsd" aria-live="polite"></p>
+    <button type="submit" class="btn btn-primary btn-bep">Ghi nhận mẻ</button>
+</form>
+
+@section Scripts {
+<script>
+    // Hiển thị trước hạn sử dụng = giờ ra lò + số giờ HSD của bánh (UC13 bước 2).
+    (function () {
+        var ra = document.getElementById('ra'), out = document.getElementById('hsd');
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function capNhat() {
+            var chon = document.querySelector('input[name=SanPhamId]:checked');
+            if (!chon) { out.textContent = ''; return; }
+            var t = ra.value ? new Date(ra.value) : new Date();
+            t = new Date(t.getTime() + Number(chon.dataset.gio) * 3600000);
+            out.textContent = 'Hạn sử dụng dự kiến: ' + pad(t.getDate()) + '/' + pad(t.getMonth() + 1) + '/' + t.getFullYear() + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes());
+        }
+        document.addEventListener('change', function (e) { if (e.target.matches('input[name=SanPhamId], #ra')) capNhat(); });
+        capNhat();
+    })();
+</script>
+}

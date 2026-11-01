@@ -1,0 +1,16 @@
+@model string
+@{
+    (string Khoa, string Nhan, string Url)[] tabs =
+    [
+        ("sanpham", "Sản phẩm", "/QuanLy/SanPham"),
+        ("thanhphan", "Thành phần bánh", "/QuanLy/ThanhPhan"),
+        ("nguyenlieu", "Nguyên liệu", "/QuanLy/NguyenLieu"),
+        ("khuyenmai", "Khuyến mãi", "/QuanLy/KhuyenMai"),
+    ];
+}
+<ul class="nav nav-tabs mb-3">
+    @foreach (var t in tabs)
+    {
+        <li class="nav-item"><a class="nav-link @(t.Khoa == Model ? "active" : "")" href="@t.Url">@t.Nhan</a></li>
+    }
+</ul>

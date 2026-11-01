@@ -1,0 +1,262 @@
+@page "{ma}"
+@model Friendship.Web.Pages.Dat.TheoModel
+@using Friendship.Domain
+@using Friendship.Web
+@{
+    var tk = Model.ThietKe;
+    ViewData["Title"] = $"Đơn {tk.Ma}";
+
+    // Tông màu theo trạng thái. Chữ trạng thái luôn hiện, màu chỉ là phụ.
+    var tong = tk.TrangThai switch
+    {
+        TrangThaiThietKe.CHO_DUYET => "cho",
+        TrangThaiThietKe.CAN_SUA or TrangThaiThietKe.TU_CHOI => "loi",
+        TrangThaiThietKe.DA_BAO_GIA => "tin",
+        TrangThaiThietKe.DA_DAT => "xong",
+        _ => "trung"
+    };
+
+    var (tieuDe, noiDung) = tk.TrangThai switch
+    {
+        TrangThaiThietKe.NHAP => ("Đây là bản nháp", "Bếp chưa thấy thiết kế này. Gửi cho bếp khi bạn đã chọn xong."),
+        TrangThaiThietKe.CHO_DUYET => ("Bếp đang xem thiết kế", "Bếp kiểm tra rồi báo giá hoặc yêu cầu sửa. Mở lại trang này bằng mã tra cứu để xem kết quả."),
+        TrangThaiThietKe.CAN_SUA => ("Bếp yêu cầu sửa thiết kế", ""),
+        TrangThaiThietKe.DA_BAO_GIA => ("Bếp đã báo giá", "Chuyển khoản tiền cọc để giữ đơn. Chưa cọc thì bếp chưa bắt đầu làm."),
+        TrangThaiThietKe.DA_DAT => ("Đã nhận cọc", "Thu ngân đã xác nhận tiền cọc. Đơn đã chuyển sang bếp."),
+        TrangThaiThietKe.TU_CHOI => ("Tiệm không nhận đơn này", ""),
+        TrangThaiThietKe.HET_HAN => ("Báo giá đã hết hạn", $"Báo giá chỉ có hiệu lực {ThietKeRule.GioHanBaoGia} giờ. Bạn có thể thiết kế lại."),
+        TrangThaiThietKe.KHACH_HUY => ("Bạn đã hủy thiết kế này", ""),
+        _ => ("", "")
+    };
+
+    // Bốn chặng của một đơn; chặng hiện tại theo trạng thái. Các trạng thái kết thúc không có thanh tiến độ.
+    string[] chang = ["Gửi bếp", "Bếp duyệt", "Đặt cọc", "Làm bánh"];
+    int hienTai = tk.TrangThai switch
+    {
+        TrangThaiThietKe.NHAP => 0,
+        TrangThaiThietKe.CHO_DUYET or TrangThaiThietKe.CAN_SUA => 1,
+        TrangThaiThietKe.DA_BAO_GIA => 2,
+        TrangThaiThietKe.DA_DAT => 3,
+        _ => -1
+    };
+
+    var khachSua = ThietKeRule.KhachSuaDuoc(tk.TrangThai);
+    var dangBaoGia = tk.TrangThai == TrangThaiThietKe.DA_BAO_GIA;
+    var coGiaChinhThuc = dangBaoGia || tk.TrangThai == TrangThaiThietKe.DA_DAT;
+    var khoangCoc = CocRule.Khoang(tk.GiaCuoi);
+    var phanTramMin = (int)Math.Round(CocRule.TiLeToiThieu * 100);
+    var phanTramMax = (int)Math.Round(CocRule.TiLeToiDa * 100);
+    var coAnhThanhPham = !string.IsNullOrEmpty(tk.AnhThanhPham);
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/dat-theo.css" asp-append-version="true" />
+}
+
+<div class="theo">
+    <header class="theo-head">
+        <a href="/Dat/Tim" class="theo-back">Tra cứu đơn khác</a>
+        <div class="theo-head-row">
+            <h1 class="dat-h1">Đơn @tk.Ma</h1>
+            <span class="theo-chip theo-chip--@tong">@ThietKeRule.TenTrangThai(tk.TrangThai)</span>
+        </div>
+        <p class="theo-meta">
+            <span>Hẹn lấy bánh <strong>@Fmt.NgayGio(tk.NgayGioLay)</strong></span>
+            @if (tk.NgayGui.HasValue)
+            {
+                <span>Gửi bếp lúc @Fmt.NgayGio(tk.NgayGui.Value)</span>
+            }
+            @if (tk.NgayDuyet.HasValue)
+            {
+                <span>Bếp xử lý lúc @Fmt.NgayGio(tk.NgayDuyet.Value)</span>
+            }
+        </p>
+    </header>
+
+    @if (hienTai >= 0)
+    {
+        <ol class="theo-steps" aria-label="Tiến độ đơn">
+            @for (var i = 0; i < chang.Length; i++)
+            {
+                var cls = i < hienTai ? "xong" : i == hienTai ? "nay" : "chua";
+                <li class="theo-step theo-step--@cls" aria-current="@(i == hienTai ? "step" : null)">
+                    <span class="theo-step-ten">@chang[i]</span>
+                    <span class="theo-step-tt">@(i < hienTai ? "Xong" : i == hienTai ? (tk.TrangThai == TrangThaiThietKe.CAN_SUA ? "Chờ bạn sửa" : "Đang ở đây") : "Chưa tới")</span>
+                </li>
+            }
+        </ol>
+    }
+
+    <div class="theo-body@(dangBaoGia ? " theo-body--coc" : "")">
+        <section class="theo-notice theo-notice--@tong" aria-labelledby="theo-notice-title">
+            <h2 id="theo-notice-title" class="theo-notice-title">@tieuDe</h2>
+            @if (!string.IsNullOrEmpty(noiDung))
+            {
+                <p>@noiDung</p>
+            }
+            @if ((tk.TrangThai == TrangThaiThietKe.CAN_SUA || tk.TrangThai == TrangThaiThietKe.TU_CHOI) && !string.IsNullOrEmpty(tk.GhiChuBep))
+            {
+                <p class="theo-note"><span class="theo-note-nhan">Phản hồi của bếp</span>@tk.GhiChuBep</p>
+            }
+            @if (tk.TrangThai == TrangThaiThietKe.DA_DAT && tk.DonHang != null)
+            {
+                <p>Mã đơn chính thức <strong>@tk.DonHang.Ma</strong>. Tiến độ làm bánh: <strong>@TrangThaiDonRule.Ten(tk.DonHang.TrangThai)</strong>.</p>
+            }
+
+            @if (khachSua)
+            {
+                <div class="theo-actions">
+                    @if (tk.TrangThai == TrangThaiThietKe.CAN_SUA)
+                    {
+                        <a href="/Dat/ThietKe/@tk.MaTraCuu" class="dat-btn dat-btn-primary">Sửa thiết kế</a>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Gui">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dat-btn dat-btn-primary">Gửi bếp duyệt</button>
+                        </form>
+                        <a href="/Dat/ThietKe/@tk.MaTraCuu" class="dat-btn dat-btn-secondary">Sửa thiết kế</a>
+                    }
+                    @if (tk.TrangThai == TrangThaiThietKe.CAN_SUA)
+                    {
+                        <form method="post" asp-page-handler="Gui">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dat-btn dat-btn-secondary">Gửi lại để bếp duyệt</button>
+                        </form>
+                    }
+                </div>
+            }
+            else if (tk.TrangThai == TrangThaiThietKe.HET_HAN)
+            {
+                <div class="theo-actions">
+                    <a href="/Dat/ThietKe" class="dat-btn dat-btn-primary">Thiết kế bánh mới</a>
+                </div>
+            }
+        </section>
+
+        @if (dangBaoGia)
+        {
+            <section class="dat-paper theo-coc" aria-labelledby="theo-coc-title">
+                <h2 id="theo-coc-title" class="theo-h2">Đặt cọc qua VietQR</h2>
+                <p class="theo-coc-nhan">Tiền cọc, tối thiểu @phanTramMin%</p>
+                <p class="theo-coc-so dat-money dat-money-deposit">@Fmt.Tien(khoangCoc.Min)</p>
+                <p class="theo-coc-khoang">Mức cho phép từ @Fmt.Tien(khoangCoc.Min) đến @Fmt.Tien(khoangCoc.Max) (@phanTramMin% đến @phanTramMax% giá chính thức).</p>
+
+                <div class="theo-qr">
+                    <img src="/dat/anh/@tk.MaTraCuu/qr" alt="Mã VietQR đặt cọc đơn @tk.Ma" width="240" height="240" fetchpriority="high" />
+                </div>
+                <p class="theo-qr-ghichu">Quét bằng ứng dụng ngân hàng. Mã đã điền sẵn số tiền tối thiểu.</p>
+
+                <dl class="theo-ck">
+                    <div>
+                        <dt>Nội dung chuyển khoản</dt>
+                        <dd><code class="theo-ck-noidung">@tk.Ma</code></dd>
+                    </div>
+                    @if (tk.HanBaoGia.HasValue)
+                    {
+                        <div>
+                            <dt>Hạn báo giá</dt>
+                            <dd>@Fmt.NgayGio(tk.HanBaoGia.Value)</dd>
+                        </div>
+                    }
+                </dl>
+                <p class="theo-coc-sau">Ghi đúng nội dung chuyển khoản. Thu ngân đối chiếu rồi xác nhận cọc, đơn sẽ chuyển sang bếp.</p>
+            </section>
+        }
+
+        <section class="dat-paper theo-chitiet" aria-labelledby="theo-ct-title">
+            <h2 id="theo-ct-title" class="theo-h2">Thiết kế của bạn</h2>
+
+            <div class="theo-anh@(coAnhThanhPham ? " theo-anh--doi" : "")">
+                <figure>
+                    <img src="/dat/anh/@tk.MaTraCuu/thiet-ke" alt="Bản vẽ thiết kế 2D" width="320" height="320" fetchpriority="@(dangBaoGia ? "auto" : "high")" />
+                    <figcaption>@(coAnhThanhPham ? "Bản thiết kế" : "Bản vẽ 2D từ phiên thiết kế của bạn")</figcaption>
+                </figure>
+                @if (coAnhThanhPham)
+                {
+                    <figure>
+                        <img src="/dat/anh/@tk.MaTraCuu/thanh-pham" alt="Bánh thật bếp đã làm" width="320" height="320" />
+                        <figcaption>Bánh thật do bếp chụp</figcaption>
+                    </figure>
+                }
+            </div>
+
+            <dl class="theo-dl">
+                <div><dt>Khách hàng</dt><dd>@tk.KhachHang.TenKhachHang</dd></div>
+                <div><dt>Số điện thoại</dt><dd class="num">@tk.KhachHang.SoDienThoai</dd></div>
+                <div><dt>Hẹn lấy bánh</dt><dd class="num">@Fmt.NgayGio(tk.NgayGioLay)</dd></div>
+                <div><dt>Bánh nền</dt><dd>@tk.SanPhamNen.TenBanh (@tk.SanPhamNen.KichThuoc)</dd></div>
+                @if (!string.IsNullOrWhiteSpace(tk.ChuTrenBanh))
+                {
+                    <div><dt>Chữ trên bánh</dt><dd>“@tk.ChuTrenBanh”</dd></div>
+                }
+                @if (!string.IsNullOrWhiteSpace(tk.LoiNhan))
+                {
+                    <div><dt>Ghi chú cho bếp</dt><dd>@tk.LoiNhan</dd></div>
+                }
+            </dl>
+
+            <h3 class="theo-h3">Thành phần đã chọn</h3>
+            @if (tk.ThanhPhans.Count == 0)
+            {
+                <p class="theo-trong">Chưa chọn phụ kiện hay topping.</p>
+            }
+            else
+            {
+                <ul class="theo-tp">
+                    @foreach (var c in tk.ThanhPhans)
+                    {
+                        <li>
+                            <span>@c.ThanhPhan.Ten &times; @c.SoLuong</span>
+                            <span class="dat-money">@Fmt.Tien(c.DonGia * c.SoLuong)</span>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @if (khachSua || tk.TrangThai == TrangThaiThietKe.CHO_DUYET)
+            {
+                <form method="post" asp-page-handler="Huy" class="theo-huy" onsubmit="return confirm('Bạn có chắc chắn muốn hủy thiết kế này?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dat-btn theo-btn-huy">Hủy thiết kế</button>
+                </form>
+            }
+        </section>
+
+        <aside class="dat-paper theo-phieu" aria-labelledby="theo-gia-title">
+            <h2 id="theo-gia-title" class="theo-h2">Giá</h2>
+            <dl class="theo-gia">
+                <div>
+                    <dt>Tạm tính ban đầu</dt>
+                    <dd class="dat-money">@Fmt.Tien(tk.GiaTamTinh)</dd>
+                </div>
+                @if (coGiaChinhThuc)
+                {
+                    <div>
+                        <dt>Phụ phí thủ công, độ khó</dt>
+                        <dd class="dat-money">+@Fmt.Tien(tk.PhuPhi)</dd>
+                    </div>
+                    @if (!string.IsNullOrEmpty(tk.LyDoPhuPhi))
+                    {
+                        <div class="theo-gia-lydo"><dt class="visually-hidden">Lý do phụ phí</dt><dd>@tk.LyDoPhuPhi</dd></div>
+                    }
+                }
+            </dl>
+            @if (coGiaChinhThuc)
+            {
+                <div class="theo-gia-cuoi">
+                    <span>Giá chính thức</span>
+                    <span class="dat-money">@Fmt.Tien(tk.GiaCuoi)</span>
+                </div>
+            }
+            else if (hienTai >= 0)
+            {
+                <p class="theo-gia-cho">Giá chính thức có khi bếp báo giá.</p>
+            }
+
+            <hr class="dat-perf" />
+            <p class="theo-cuong-nhan">Mã tra cứu, giữ để xem lại đơn</p>
+            <p class="theo-cuong-ma">@tk.MaTraCuu</p>
+        </aside>
+    </div>
+</div>

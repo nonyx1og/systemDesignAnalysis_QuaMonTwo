@@ -1,0 +1,217 @@
+/* Kiểu dáng màn hình thông thường cho trang Bếp Chi Tiết */
+.phieu-in-a5 {
+    display: none;
+}
+
+#cake-3d-container canvas {
+    display: block;
+    border-radius: 8px;
+}
+
+.color-swatch-box {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #666;
+    vertical-align: text-bottom;
+    border-radius: 3px;
+    margin-right: 4px;
+}
+
+/* Định dạng in khổ A5 dành riêng cho bếp */
+@media print {
+    @page {
+        size: A5 portrait;
+        margin: 6mm 8mm;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-size: 10pt !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ẩn toàn bộ giao diện web của ứng dụng */
+    .khong-in, header, footer, nav, .navbar, .alert, .btn, .card {
+        display: none !important;
+    }
+
+    /* Hiển thị phiếu in A5 chiếm trọn trang */
+    .phieu-in-a5 {
+        display: block !important;
+        width: 100% !important;
+        max-width: 148mm;
+        margin: 0 auto !important;
+        color: #000 !important;
+        background: #fff !important;
+        box-sizing: border-box;
+    }
+
+    .phieu-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 5px;
+        margin-bottom: 6px;
+    }
+
+    .phieu-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .phieu-title {
+        font-size: 13pt;
+        font-weight: 900;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .phieu-subtitle {
+        font-size: 9pt;
+        font-weight: 700;
+        color: #222;
+    }
+
+    .phieu-code-box {
+        text-align: right;
+    }
+
+    .phieu-ma-tra-cuu {
+        font-family: monospace;
+        font-size: 12pt;
+        font-weight: 900;
+        border: 1.5px solid #000;
+        padding: 2px 6px;
+        display: inline-block;
+    }
+
+    .phieu-ma-don {
+        font-size: 8.5pt;
+        color: #333;
+        margin-top: 1px;
+    }
+
+    .phieu-hen-lay {
+        background: #eee !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border: 1.5px solid #000;
+        padding: 3px 6px;
+        margin-top: 5px;
+        font-size: 10.5pt;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .phieu-khach-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 9.5pt;
+        margin-top: 4px;
+    }
+
+    .phieu-body {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .phieu-col-info {
+        flex: 1 1 58%;
+    }
+
+    .phieu-col-images {
+        flex: 1 1 42%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .phieu-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+    }
+
+    .phieu-table td {
+        padding: 2.5px 2px;
+        vertical-align: top;
+        border-bottom: 1px dotted #bbb;
+    }
+
+    .phieu-label {
+        width: 33%;
+        font-weight: 700;
+        color: #222;
+    }
+
+    .phieu-val {
+        color: #000;
+    }
+
+    .phieu-color-swatch-print {
+        display: inline-block;
+        width: 13px;
+        height: 13px;
+        border: 1px solid #000;
+        vertical-align: middle;
+        margin-right: 4px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .phieu-list-topping {
+        margin: 0;
+        padding-left: 14px;
+    }
+
+    .phieu-chu {
+        font-weight: bold;
+        font-size: 10pt;
+    }
+
+    .phieu-img-box {
+        border: 1.5px solid #000;
+        padding: 3px;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .phieu-img-caption {
+        font-size: 8pt;
+        font-weight: 800;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+    }
+
+    .phieu-img-preview {
+        max-width: 100%;
+        max-height: 115px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .phieu-footer {
+        border-top: 1.5px solid #000;
+        padding-top: 4px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 8.5pt;
+    }
+
+    .phieu-sign-col {
+        width: 48%;
+    }
+
+    .phieu-sign-line {
+        height: 30px;
+    }
+}

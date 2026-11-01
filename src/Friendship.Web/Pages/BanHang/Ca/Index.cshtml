@@ -1,0 +1,77 @@
+@page
+@model Friendship.Web.Pages.BanHang.Ca.IndexModel
+@{
+    ViewData["Title"] = "Ca thu ngân";
+    var chong = "document.querySelectorAll('button[type=submit]').forEach(function (b) { setTimeout(function () { b.disabled = true; }, 0); });";
+}
+<h1 class="page-title">Ca thu ngân</h1>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+@if (Model.Ca is { } ca && Model.Tong is { } th)
+{
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <div class="card-f">
+                <p class="mb-1"><span class="badge-f ok">Đang mở</span> <strong>@ca.Ma</strong></p>
+                <p class="mb-1">Mở lúc <strong>@Fmt.NgayGio(ca.GioMoCa)</strong></p>
+                <p class="mb-3">Tiền quỹ đầu ca: <strong>@Fmt.Tien(ca.TienDauCa)</strong></p>
+                <div class="d-flex justify-content-between"><span>Thu tiền mặt</span><span>@Fmt.Tien(th.ThuTienMat)</span></div>
+                <div class="d-flex justify-content-between"><span>Hoàn tiền mặt</span><span>− @Fmt.Tien(th.HoanTienMat)</span></div>
+                <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2"><span>Tiền mặt hệ thống</span><span>@Fmt.Tien(th.TienMatHeThong)</span></div>
+                <div class="d-flex justify-content-between fw-bold"><span>Chuyển khoản hệ thống</span><span>@Fmt.Tien(th.ChuyenKhoanHeThong)</span></div>
+                <div class="small text-secondary mt-1">@th.SoGiaoDich giao dịch trong ca.</div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <a asp-page="/BanHang/BanLe" class="btn btn-primary">Bán lẻ</a>
+                    <a asp-page="/BanHang/DonDat" class="btn btn-outline-primary">Tạo đơn đặt</a>
+                    <a asp-page="/BanHang/Don/Index" class="btn btn-outline-primary">Danh sách đơn</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <form method="post" asp-page-handler="Chot" class="card-f" onsubmit="@chong">
+                <h2 class="h5">Chốt ca</h2>
+                <label class="form-label" for="tm">Tiền mặt đếm thực tế trong két (₫)</label>
+                <input id="tm" name="TienMatThucTe" type="number" step="1" min="0" value="@Model.TienMatThucTe" data-he="@th.TienMatHeThong.ToString("0.###", inv)" class="form-control mb-2" inputmode="numeric" />
+                <label class="form-label" for="ck">Tổng chuyển khoản theo ứng dụng ngân hàng (₫)</label>
+                <input id="ck" name="ChuyenKhoanThucTe" type="number" step="1" min="0" value="@Model.ChuyenKhoanThucTe" data-he="@th.ChuyenKhoanHeThong.ToString("0.###", inv)" class="form-control mb-2" inputmode="numeric" />
+                <div id="lech" class="small fw-bold mb-2" aria-live="polite"></div>
+                <label class="form-label" for="gc">Giải trình (bắt buộc nếu có chênh lệch)</label>
+                <textarea id="gc" name="GhiChu" rows="2" maxlength="500" class="form-control mb-3">@Model.GhiChu</textarea>
+                <button type="submit" class="btn btn-primary">Chốt ca</button>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <form method="post" class="card-f mb-3" style="max-width:420px" onsubmit="@chong">
+        <p class="text-secondary">Bạn chưa mở ca. Nhập tiền quỹ đầu ca để bắt đầu thu tiền.</p>
+        <label for="TienDauCa" class="form-label">Tiền quỹ đầu ca (₫)</label>
+        <input id="TienDauCa" asp-for="TienDauCa" type="number" step="1" min="0" class="form-control mb-3" inputmode="numeric" />
+        <button type="submit" class="btn btn-primary">Mở ca</button>
+    </form>
+    @if (Model.CaTruoc is { } truoc)
+    {
+        <p><a asp-page="BienBan" asp-route-id="@truoc.Id">Biên bản ca gần nhất (@truoc.Ma@(truoc.GioDongCa is { } g ? ", chốt " + Fmt.NgayGio(g) : ""))</a></p>
+    }
+}
+
+@section Scripts {
+<script>
+    // Hiện chênh lệch ngay khi nhập số thực tế (số chính thức do máy chủ tính khi chốt).
+    (function () {
+        var tm = document.getElementById('tm'), ck = document.getElementById('ck'), out = document.getElementById('lech');
+        if (!tm || !ck) return;
+        function f(n) { return n.toLocaleString('vi-VN') + ' ₫'; }
+        function tinh() {
+            if (tm.value === '' || ck.value === '') { out.textContent = ''; return; }
+            var a = Number(tm.value) - Number(tm.dataset.he), b = Number(ck.value) - Number(ck.dataset.he);
+            out.textContent = 'Chênh lệch: tiền mặt ' + f(a) + ', chuyển khoản ' + f(b);
+            out.className = 'small fw-bold mb-2 ' + (a === 0 && b === 0 ? 'text-success' : 'text-danger');
+        }
+        tm.addEventListener('input', tinh); ck.addEventListener('input', tinh); tinh();
+    })();
+</script>
+}
