@@ -1,5 +1,5 @@
 // thiet-ke-3d.js - Trình diễn Mô hình Bánh Kem 3D Thời Gian Thực (Three.js WebGL)
-// Tích hợp cho nongnongBakery (nongnongBakery 3D)
+// Tích hợp cho FrendshipBakery (FrendshipBakery 3D)
 // Tham khảo mô hình bánh nhiều tầng và xếp khối Three.js:
 // 1. ascodeasice/three-js-birthday-cake (Giấy phép MIT) - Cấu trúc tham số xếp tầng Cylinder theo trục Y.
 // 2. naborajs/birthday-bloom (Giấy phép MIT) - Kỹ thuật dựng khối nhiều tầng và quản lý ánh sáng WebGL.

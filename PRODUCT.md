@@ -36,7 +36,7 @@ A complete bakery operation in one system, where the cake a customer designs, th
 
 ## Brand Commitments
 
-- Product name is **nongnongBakery** (replaces "Friendship" in the UI). Earlier color (caramel brown) and the 🥐 emoji logo are not binding; color and logo are chosen anew.
+- Product name is **FrendshipBakery** (replaces "Friendship" in the UI). Earlier color (caramel brown) and the 🥐 emoji logo are not binding; color and logo are chosen anew.
 - Internal staff app follows the Shopify Admin convention (user-chosen reference, 2026-10-23): it should sit credibly alongside Shopify Admin, with KiotViet/Sapo as local peers.
 - The public customer pages (`/Dat`) get their own separate design later; they do not have to share the staff app's look.
 

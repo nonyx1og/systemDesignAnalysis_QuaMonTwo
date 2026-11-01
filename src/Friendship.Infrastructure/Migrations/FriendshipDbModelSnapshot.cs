@@ -22,6 +22,97 @@ namespace Friendship.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Friendship.Domain.Entities.BienBanDoiChieuKho", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GhiChuGiaiTrinh")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NguoiDoiChieuId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PhieuDinhLuongCaId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("ThoiGianDoiChieu")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguoiDoiChieuId");
+
+                    b.HasIndex("PhieuDinhLuongCaId")
+                        .IsUnique();
+
+                    b.ToTable("BienBanDoiChieuKhos");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.CaNhanVien", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BuoiCa")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("GioDongCa")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("GioMoCa")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LoaiCa")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("NhanVienId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NhanVienId", "LoaiCa")
+                        .IsUnique()
+                        .HasFilter("[TrangThai] = 'DANG_MO'");
+
+                    b.ToTable("CaNhanViens");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.CaThuNgan", b =>
                 {
                     b.Property<int>("Id")
@@ -83,6 +174,91 @@ namespace Friendship.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("CK_CaThuNgan_TienDauCa", "[TienDauCa] >= 0");
                         });
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietBaoLoi", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NguyenLieuId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PhieuBaoLoiId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SoLuong")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguyenLieuId");
+
+                    b.HasIndex("PhieuBaoLoiId");
+
+                    b.ToTable("ChiTietBaoLois");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietDinhLuongCa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NguyenLieuId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PhieuDinhLuongCaId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SoLuongDinhLuong")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguyenLieuId");
+
+                    b.HasIndex("PhieuDinhLuongCaId");
+
+                    b.ToTable("ChiTietDinhLuongCas");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietDoiChieuKho", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BienBanDoiChieuKhoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NguyenLieuId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SoLuongDinhLuong")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<decimal>("SoLuongXuatKho")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BienBanDoiChieuKhoId");
+
+                    b.HasIndex("NguyenLieuId");
+
+                    b.ToTable("ChiTietDoiChieuKhos");
                 });
 
             modelBuilder.Entity("Friendship.Domain.Entities.ChiTietDonHang", b =>
@@ -227,6 +403,33 @@ namespace Friendship.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietXuatKho", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NguyenLieuId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PhieuXuatKhoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SoLuong")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguyenLieuId");
+
+                    b.HasIndex("PhieuXuatKhoId");
+
+                    b.ToTable("ChiTietXuatKhos");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.DinhLuong", b =>
                 {
                     b.Property<int>("SanPhamId")
@@ -339,6 +542,53 @@ namespace Friendship.Infrastructure.Migrations
                     b.ToTable("DonHangs");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.GopY", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DiemDanhGia")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HoTen")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("KhachHangId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("NgayGui")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SoDienThoai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TieuDe")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KhachHangId");
+
+                    b.ToTable("GopYs");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.KhachHang", b =>
                 {
                     b.Property<int>("Id")
@@ -347,8 +597,20 @@ namespace Friendship.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("DiaChi")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DiemTichLuy")
                         .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MatKhauHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("NgayTao")
+                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -589,6 +851,106 @@ namespace Friendship.Infrastructure.Migrations
                     b.ToTable("NhanViens");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuBaoLoiMeBanh", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CaNhanVienId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GhiChuQuanLy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LyDoLoi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("NgayDuyet")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayLap")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("NguoiDuyetId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NhanVienLapId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int?>("SanPhamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoLuongHong")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaNhanVienId");
+
+                    b.HasIndex("NguoiDuyetId");
+
+                    b.HasIndex("NhanVienLapId");
+
+                    b.HasIndex("SanPhamId");
+
+                    b.ToTable("PhieuBaoLoiMeBanhs");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuDinhLuongCa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CaNhanVienId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NguoiLapId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("ThoiGianXuat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaNhanVienId");
+
+                    b.HasIndex("NguoiLapId");
+
+                    b.ToTable("PhieuDinhLuongCas");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.PhieuKiemKe", b =>
                 {
                     b.Property<int>("Id")
@@ -679,6 +1041,30 @@ namespace Friendship.Infrastructure.Migrations
                     b.ToTable("PhieuXuatHuys");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuXuatKho", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayXuat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NhanVienXuatId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NhanVienXuatId");
+
+                    b.ToTable("PhieuXuatKhos");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.SanPham", b =>
                 {
                     b.Property<int>("Id")
@@ -696,6 +1082,9 @@ namespace Friendship.Infrastructure.Migrations
 
                     b.Property<int>("HanSuDungGio")
                         .HasColumnType("int");
+
+                    b.Property<string>("HinhAnh")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KichThuoc")
                         .IsRequired()
@@ -926,6 +1315,89 @@ namespace Friendship.Infrastructure.Migrations
                     b.ToTable("ThietKeThanhPhans");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.TieuHaoDinhLuongCa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CaNhanVienId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DonHangId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nguon")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("NguyenLieuId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PhieuBaoLoiId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SanPhamId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SoLuong")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<DateTime>("ThoiGian")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaNhanVienId");
+
+                    b.HasIndex("DonHangId");
+
+                    b.HasIndex("NguyenLieuId");
+
+                    b.HasIndex("PhieuBaoLoiId");
+
+                    b.HasIndex("SanPhamId");
+
+                    b.ToTable("TieuHaoDinhLuongCas");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.BienBanDoiChieuKho", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.NhanVien", "NguoiDoiChieu")
+                        .WithMany()
+                        .HasForeignKey("NguoiDoiChieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.PhieuDinhLuongCa", "PhieuDinhLuongCa")
+                        .WithOne("BienBanDoiChieu")
+                        .HasForeignKey("Friendship.Domain.Entities.BienBanDoiChieuKho", "PhieuDinhLuongCaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NguoiDoiChieu");
+
+                    b.Navigation("PhieuDinhLuongCa");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.CaNhanVien", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.NhanVien", "NhanVien")
+                        .WithMany()
+                        .HasForeignKey("NhanVienId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NhanVien");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.CaThuNgan", b =>
                 {
                     b.HasOne("Friendship.Domain.Entities.NhanVien", "NhanVien")
@@ -935,6 +1407,63 @@ namespace Friendship.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("NhanVien");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietBaoLoi", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
+                        .WithMany()
+                        .HasForeignKey("NguyenLieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.PhieuBaoLoiMeBanh", "PhieuBaoLoi")
+                        .WithMany("ChiTiets")
+                        .HasForeignKey("PhieuBaoLoiId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NguyenLieu");
+
+                    b.Navigation("PhieuBaoLoi");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietDinhLuongCa", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
+                        .WithMany()
+                        .HasForeignKey("NguyenLieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.PhieuDinhLuongCa", "PhieuDinhLuongCa")
+                        .WithMany("ChiTiets")
+                        .HasForeignKey("PhieuDinhLuongCaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NguyenLieu");
+
+                    b.Navigation("PhieuDinhLuongCa");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietDoiChieuKho", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.BienBanDoiChieuKho", "BienBanDoiChieuKho")
+                        .WithMany("ChiTiets")
+                        .HasForeignKey("BienBanDoiChieuKhoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
+                        .WithMany()
+                        .HasForeignKey("NguyenLieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BienBanDoiChieuKho");
+
+                    b.Navigation("NguyenLieu");
                 });
 
             modelBuilder.Entity("Friendship.Domain.Entities.ChiTietDonHang", b =>
@@ -1021,6 +1550,25 @@ namespace Friendship.Infrastructure.Migrations
                     b.Navigation("PhieuXuatHuy");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.ChiTietXuatKho", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
+                        .WithMany()
+                        .HasForeignKey("NguyenLieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.PhieuXuatKho", "PhieuXuatKho")
+                        .WithMany("ChiTiets")
+                        .HasForeignKey("PhieuXuatKhoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NguyenLieu");
+
+                    b.Navigation("PhieuXuatKho");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.DinhLuong", b =>
                 {
                     b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
@@ -1084,6 +1632,16 @@ namespace Friendship.Infrastructure.Migrations
                     b.Navigation("NhanVien");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.GopY", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.KhachHang", "KhachHang")
+                        .WithMany()
+                        .HasForeignKey("KhachHangId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("KhachHang");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.LoNguyenLieu", b =>
                 {
                     b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
@@ -1104,6 +1662,58 @@ namespace Friendship.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("SanPham");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuBaoLoiMeBanh", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.CaNhanVien", "CaNhanVien")
+                        .WithMany("PhieuBaoLois")
+                        .HasForeignKey("CaNhanVienId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.NhanVien", "NguoiDuyet")
+                        .WithMany()
+                        .HasForeignKey("NguoiDuyetId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Friendship.Domain.Entities.NhanVien", "NhanVienLap")
+                        .WithMany()
+                        .HasForeignKey("NhanVienLapId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.SanPham", "SanPham")
+                        .WithMany()
+                        .HasForeignKey("SanPhamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CaNhanVien");
+
+                    b.Navigation("NguoiDuyet");
+
+                    b.Navigation("NhanVienLap");
+
+                    b.Navigation("SanPham");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuDinhLuongCa", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.CaNhanVien", "CaNhanVien")
+                        .WithMany("PhieuDinhLuongs")
+                        .HasForeignKey("CaNhanVienId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.NhanVien", "NguoiLap")
+                        .WithMany()
+                        .HasForeignKey("NguoiLapId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CaNhanVien");
+
+                    b.Navigation("NguoiLap");
                 });
 
             modelBuilder.Entity("Friendship.Domain.Entities.PhieuKiemKe", b =>
@@ -1140,6 +1750,17 @@ namespace Friendship.Infrastructure.Migrations
                     b.Navigation("NguoiDuyet");
 
                     b.Navigation("NguoiLap");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuXuatKho", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.NhanVien", "NhanVienXuat")
+                        .WithMany()
+                        .HasForeignKey("NhanVienXuatId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NhanVienXuat");
                 });
 
             modelBuilder.Entity("Friendship.Domain.Entities.ThanhPhanTrangTri", b =>
@@ -1223,6 +1844,60 @@ namespace Friendship.Infrastructure.Migrations
                     b.Navigation("ThietKe");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.TieuHaoDinhLuongCa", b =>
+                {
+                    b.HasOne("Friendship.Domain.Entities.CaNhanVien", "CaNhanVien")
+                        .WithMany("TieuHaos")
+                        .HasForeignKey("CaNhanVienId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.DonHang", "DonHang")
+                        .WithMany()
+                        .HasForeignKey("DonHangId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Friendship.Domain.Entities.NguyenLieu", "NguyenLieu")
+                        .WithMany()
+                        .HasForeignKey("NguyenLieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Friendship.Domain.Entities.PhieuBaoLoiMeBanh", "PhieuBaoLoi")
+                        .WithMany()
+                        .HasForeignKey("PhieuBaoLoiId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Friendship.Domain.Entities.SanPham", "SanPham")
+                        .WithMany()
+                        .HasForeignKey("SanPhamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CaNhanVien");
+
+                    b.Navigation("DonHang");
+
+                    b.Navigation("NguyenLieu");
+
+                    b.Navigation("PhieuBaoLoi");
+
+                    b.Navigation("SanPham");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.BienBanDoiChieuKho", b =>
+                {
+                    b.Navigation("ChiTiets");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.CaNhanVien", b =>
+                {
+                    b.Navigation("PhieuBaoLois");
+
+                    b.Navigation("PhieuDinhLuongs");
+
+                    b.Navigation("TieuHaos");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.DonHang", b =>
                 {
                     b.Navigation("ChiTiets");
@@ -1237,12 +1912,29 @@ namespace Friendship.Infrastructure.Migrations
                     b.Navigation("Los");
                 });
 
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuBaoLoiMeBanh", b =>
+                {
+                    b.Navigation("ChiTiets");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuDinhLuongCa", b =>
+                {
+                    b.Navigation("BienBanDoiChieu");
+
+                    b.Navigation("ChiTiets");
+                });
+
             modelBuilder.Entity("Friendship.Domain.Entities.PhieuKiemKe", b =>
                 {
                     b.Navigation("ChiTiets");
                 });
 
             modelBuilder.Entity("Friendship.Domain.Entities.PhieuXuatHuy", b =>
+                {
+                    b.Navigation("ChiTiets");
+                });
+
+            modelBuilder.Entity("Friendship.Domain.Entities.PhieuXuatKho", b =>
                 {
                     b.Navigation("ChiTiets");
                 });

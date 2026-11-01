@@ -26,6 +26,17 @@ public class FriendshipDb(DbContextOptions<FriendshipDb> options) : DbContext(op
     public DbSet<DinhLuongThanhPhan> DinhLuongThanhPhans => Set<DinhLuongThanhPhan>();
     public DbSet<ThietKeBanh> ThietKeBanhs => Set<ThietKeBanh>();
     public DbSet<ThietKeThanhPhan> ThietKeThanhPhans => Set<ThietKeThanhPhan>();
+    public DbSet<GopY> GopYs => Set<GopY>();
+    public DbSet<CaNhanVien> CaNhanViens => Set<CaNhanVien>();
+    public DbSet<TieuHaoDinhLuongCa> TieuHaoDinhLuongCas => Set<TieuHaoDinhLuongCa>();
+    public DbSet<PhieuBaoLoiMeBanh> PhieuBaoLoiMeBanhs => Set<PhieuBaoLoiMeBanh>();
+    public DbSet<ChiTietBaoLoi> ChiTietBaoLois => Set<ChiTietBaoLoi>();
+    public DbSet<PhieuDinhLuongCa> PhieuDinhLuongCas => Set<PhieuDinhLuongCa>();
+    public DbSet<ChiTietDinhLuongCa> ChiTietDinhLuongCas => Set<ChiTietDinhLuongCa>();
+    public DbSet<PhieuXuatKho> PhieuXuatKhos => Set<PhieuXuatKho>();
+    public DbSet<ChiTietXuatKho> ChiTietXuatKhos => Set<ChiTietXuatKho>();
+    public DbSet<BienBanDoiChieuKho> BienBanDoiChieuKhos => Set<BienBanDoiChieuKho>();
+    public DbSet<ChiTietDoiChieuKho> ChiTietDoiChieuKhos => Set<ChiTietDoiChieuKho>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder c)
     {
@@ -41,6 +52,11 @@ public class FriendshipDb(DbContextOptions<FriendshipDb> options) : DbContext(op
         c.Properties<TrangThaiCa>().HaveConversion<string>().HaveMaxLength(30);
         c.Properties<NhomThanhPhan>().HaveConversion<string>().HaveMaxLength(30);
         c.Properties<TrangThaiThietKe>().HaveConversion<string>().HaveMaxLength(30);
+        c.Properties<LoaiCa>().HaveConversion<string>().HaveMaxLength(30);
+        c.Properties<BuoiCa>().HaveConversion<string>().HaveMaxLength(30);
+        c.Properties<NguonTieuHao>().HaveConversion<string>().HaveMaxLength(30);
+        c.Properties<TrangThaiPhieuDinhLuong>().HaveConversion<string>().HaveMaxLength(30);
+        c.Properties<TrangThaiDoiChieu>().HaveConversion<string>().HaveMaxLength(30);
     }
 
     protected override void OnModelCreating(ModelBuilder b)
@@ -61,6 +77,14 @@ public class FriendshipDb(DbContextOptions<FriendshipDb> options) : DbContext(op
             .HasForeignKey(x => x.ThietKeId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<DinhLuongThanhPhan>().HasOne(x => x.ThanhPhan).WithMany(x => x.DinhLuongs)
             .HasForeignKey(x => x.ThanhPhanId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<ChiTietBaoLoi>().HasOne(x => x.PhieuBaoLoi).WithMany(x => x.ChiTiets)
+            .HasForeignKey(x => x.PhieuBaoLoiId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<ChiTietDinhLuongCa>().HasOne(x => x.PhieuDinhLuongCa).WithMany(x => x.ChiTiets)
+            .HasForeignKey(x => x.PhieuDinhLuongCaId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<ChiTietXuatKho>().HasOne(x => x.PhieuXuatKho).WithMany(x => x.ChiTiets)
+            .HasForeignKey(x => x.PhieuXuatKhoId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<ChiTietDoiChieuKho>().HasOne(x => x.BienBanDoiChieuKho).WithMany(x => x.ChiTiets)
+            .HasForeignKey(x => x.BienBanDoiChieuKhoId).OnDelete(DeleteBehavior.Cascade);
 
         b.Entity<DinhLuong>().HasKey(x => new { x.SanPhamId, x.NguyenLieuId });
         b.Entity<DinhLuongThanhPhan>().HasKey(x => new { x.ThanhPhanId, x.NguyenLieuId });
@@ -78,6 +102,10 @@ public class FriendshipDb(DbContextOptions<FriendshipDb> options) : DbContext(op
         b.Entity<PhieuXuatHuy>().Property(x => x.RowVersion).IsRowVersion();
         b.Entity<PhieuKiemKe>().Property(x => x.RowVersion).IsRowVersion();
         b.Entity<ThietKeBanh>().Property(x => x.RowVersion).IsRowVersion();
+        b.Entity<CaNhanVien>().Property(x => x.RowVersion).IsRowVersion();
+        b.Entity<PhieuBaoLoiMeBanh>().Property(x => x.RowVersion).IsRowVersion();
+        b.Entity<PhieuDinhLuongCa>().Property(x => x.RowVersion).IsRowVersion();
+        b.Entity<BienBanDoiChieuKho>().Property(x => x.RowVersion).IsRowVersion();
 
         // UC16: không có hai phiếu kiểm kê nháp (hoặc hai phiếu chờ duyệt) cùng lúc, kể cả khi hai người bấm tạo đồng thời.
         b.Entity<PhieuKiemKe>().HasIndex(x => x.TrangThai).IsUnique()
@@ -85,6 +113,8 @@ public class FriendshipDb(DbContextOptions<FriendshipDb> options) : DbContext(op
 
         // BR25: mỗi nhân viên bán hàng chỉ có một ca đang mở, kể cả khi bấm mở ca đồng thời.
         b.Entity<CaThuNgan>().HasIndex(x => x.NhanVienId).IsUnique().HasFilter("[TrangThai] = 'DANG_MO'");
+        // Mỗi nhân viên chỉ có một ca làm việc (theo loại ca) đang mở
+        b.Entity<CaNhanVien>().HasIndex(x => new { x.NhanVienId, x.LoaiCa }).IsUnique().HasFilter("[TrangThai] = 'DANG_MO'");
 
         b.Entity<KhachHang>().ToTable(t => t.HasCheckConstraint("CK_KhachHang_Diem", "[DiemTichLuy] >= 0"));
         b.Entity<DinhLuong>().ToTable(t => t.HasCheckConstraint("CK_DinhLuong_DinhMuc", "[DinhMuc] > 0"));
@@ -133,5 +163,6 @@ public class FriendshipDb(DbContextOptions<FriendshipDb> options) : DbContext(op
         });
 
         b.Entity<DinhLuongThanhPhan>().ToTable(t => t.HasCheckConstraint("CK_DinhLuongThanhPhan_DinhMuc", "[DinhMuc] > 0"));
+        b.Entity<GopY>().HasOne(x => x.KhachHang).WithMany().HasForeignKey(x => x.KhachHangId).OnDelete(DeleteBehavior.SetNull);
     }
 }

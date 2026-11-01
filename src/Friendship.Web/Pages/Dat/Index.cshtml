@@ -1,4 +1,4 @@
-@page
+@page "/"
 @model Friendship.Web.Pages.Dat.IndexModel
 @using Friendship.Domain
 @using Friendship.Web
@@ -7,7 +7,6 @@
     var cocMin = (int)(CocRule.TiLeToiThieu * 100);
     var cocMax = (int)(CocRule.TiLeToiDa * 100);
     var phuPhi = (int)(ThietKeRule.PhuPhiToiDa * 100);
-    const string maMau = "pQ4xV7mK-2LtA_8RwZ0cNe";
 }
 
 @section Styles {
@@ -19,38 +18,12 @@
         <h1 id="di-tieu-de" class="dat-display">Tự thiết kế chiếc bánh của bạn</h1>
         <p class="dat-lead">Chọn bánh nền, cốt, kem và topping, xem bản 2D hoặc 3D. Giá cập nhật khi bạn chọn. Bếp xem lại trước khi báo giá.</p>
         <div class="di-hero-nut">
-            <a class="dat-btn dat-btn-primary dat-btn-lg" href="/Dat/ThietKe">Bắt đầu thiết kế</a>
-            <a class="di-lien-ket" href="/Dat/Tim">Tra cứu đơn</a>
+            <a class="dat-btn dat-btn-primary dat-btn-lg" href="/Dat/Menu">Thực đơn & Đặt bánh</a>
+            <a class="dat-btn dat-btn-lg" href="/Dat/ThietKe" style="background:#fff; border:1px solid var(--dat-champagne); color:var(--dat-text-main);">Tự thiết kế 2D</a>
+            <a class="dat-btn dat-btn-lg" href="/Dat/DonHang" style="background:#fff; border:1px solid var(--dat-champagne); color:var(--dat-text-main);">Đơn của tôi</a>
+            <a class="dat-btn dat-btn-lg" href="/Dat/GopY" style="background:#fff; border:1px solid var(--dat-champagne); color:var(--dat-text-main);">Góp ý cho tiệm</a>
         </div>
     </div>
-
-    <aside class="dat-paper di-phieu" aria-label="Phiếu đặt bánh ví dụ">
-        <div class="di-phieu-dau">
-            <p class="di-phieu-ten">Phiếu đặt bánh</p>
-            <p class="di-vd">Ví dụ</p>
-        </div>
-        <dl class="di-dong">
-            @if (Model.PhieuCoBanh is not null)
-            {
-                <div><dt>Kích cỡ</dt><dd>@Model.PhieuCoBanh</dd></div>
-            }
-            <div><dt>Cốt</dt><dd>Vani</dd></div>
-            <div><dt>Kem</dt><dd>Kem vani, viền xoắn</dd></div>
-            <div><dt>Topping</dt><dd>6 quả dâu tây</dd></div>
-            <div><dt>Lời chúc</dt><dd>Happy Day</dd></div>
-            @if (Model.PhieuTong is { } tong && Model.PhieuCoc is { } coc)
-            {
-                <div><dt>Tổng tạm tính</dt><dd class="dat-money">@Fmt.Tien(tong)</dd></div>
-                <div class="di-coc"><dt>Cọc từ @cocMin%</dt><dd class="dat-money dat-money-deposit">@Fmt.Tien(coc)</dd></div>
-            }
-        </dl>
-        <hr class="dat-perf" />
-        <div class="di-cuong">
-            <p class="di-cuong-nhan">Cuống phiếu, bạn giữ lại</p>
-            <p class="di-ma">@maMau</p>
-            <p class="di-ghi">Mã mẫu. Mã thật hiện sau khi bạn gửi thiết kế. Tra cứu cần số điện thoại và 4 ký tự cuối của mã.</p>
-        </div>
-    </aside>
 </section>
 
 <section class="di-khoi" id="cach-dat" aria-labelledby="di-cach-dat">

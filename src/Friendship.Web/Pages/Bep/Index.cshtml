@@ -18,6 +18,34 @@
     </form>
 </div>
 
+@if (Model.CaHienTai is not null)
+{
+    <div class="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success">🟢 Ca bếp đang mở</span>
+            <strong>@Model.CaHienTai.Ma</strong>
+            <span class="badge @(Model.CaHienTai.BuoiCa == BuoiCa.CA_SANG ? "bg-warning text-dark" : "bg-primary") fw-bold">
+                @(Model.CaHienTai.BuoiCa == BuoiCa.CA_SANG ? "☀️ Ca sáng" : "🌙 Ca chiều")
+            </span>
+            <span class="text-secondary small">(Mở lúc @Model.CaHienTai.GioMoCa.ToString("HH:mm dd/MM"))</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-page="/Bep/BaoLoi/Index" class="btn btn-outline-danger btn-sm">Báo mẻ lỗi</a>
+            <a asp-page="/Bep/Ca/Index" class="btn btn-success btn-sm">Xem định lượng & Chốt ca</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning d-flex justify-content-between align-items-center py-2 px-3 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark">⚠️ Chưa mở ca bếp</span>
+            <span>Bạn cần mở ca làm việc để tự động tích luỹ định lượng nguyên liệu khi làm bánh.</span>
+        </div>
+        <a asp-page="/Bep/Ca/Index" class="btn btn-warning btn-sm fw-bold">Mở ca bếp ngay</a>
+    </div>
+}
+
 <div id="mat-ket-noi" class="alert alert-warning" role="status" hidden>Dữ liệu chưa cập nhật (mất kết nối). Danh sách bên dưới là lần tải gần nhất.</div>
 <div id="ds">
     <partial name="_DanhSach" model="Model" />

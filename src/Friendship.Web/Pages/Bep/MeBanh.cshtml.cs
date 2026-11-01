@@ -1,12 +1,18 @@
 using Friendship.Domain;
 using Friendship.Domain.Entities;
 using Friendship.Infrastructure.Services;
+using Friendship.Web.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Friendship.Web.Pages.Bep;
 
-public class MeBanhModel(LoBanhService loBanh, SanPhamService sanPham, TimeProvider clock) : PageModel
+public class MeBanhModel(
+    LoBanhService loBanh,
+    SanPhamService sanPham,
+    TimeProvider clock,
+    CaNhanVienService caService,
+    DinhLuongService dinhLuong) : PageModel
 {
     [BindProperty] public int SanPhamId { get; set; }
     [BindProperty] public int? SoLuong { get; set; }
@@ -24,6 +30,17 @@ public class MeBanhModel(LoBanhService loBanh, SanPhamService sanPham, TimeProvi
             if (SanPhamId == 0) throw new NghiepVuException("Chọn bánh vừa ra lò.");
             var lo = await loBanh.GhiNhanMeAsync(SanPhamId, SoLuong ?? 0, GioRaLo);
             var sp = SanPhams.FirstOrDefault(s => s.Id == lo.SanPhamId);
+
+            // Tự động ghi nhận định lượng mẻ bánh vào ca bếp nếu có ca đang mở
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var ca = await caService.DangMoAsync(User.NhanVienId(), LoaiCa.BEP_BANH);
+                if (ca != null)
+                {
+                    await dinhLuong.GhiNhanTieuHaoMeBanhAsync(ca.Id, SanPhamId, lo.SoLuongSanXuat);
+                }
+            }
+
             TempData["Message"] = $"Đã ghi nhận {lo.SoLuongSanXuat} {sp?.TenBanh}, hạn sử dụng {Fmt.NgayGio(lo.HanSuDung)}. Quầy bán được ngay.";
             return RedirectToPage();
         }

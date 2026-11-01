@@ -1,0 +1,228 @@
+@page
+@model Friendship.Web.Pages.Bep.Ca.IndexModel
+@{
+    ViewData["Title"] = "Ca bếp & Quản lý định lượng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="h4 mb-1">Ca bếp & Quản lý định lượng tiêu hao</h2>
+        <div class="text-secondary small">Theo dõi định lượng nguyên liệu thực tế đã dùng trong ca và xuất phiếu sang kho</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="/Bep/BaoLoi/Index" class="btn btn-outline-danger btn-sm">
+            @Icons.Svg("alert", 16) Báo lỗi mẻ bánh
+        </a>
+        <a asp-page="/Bep/Index" class="btn btn-outline-primary btn-sm">
+            @Icons.Svg("pot", 16) Danh sách đơn cần làm
+        </a>
+    </div>
+</div>
+
+@if (Model.CaHienTai is null)
+{
+    <div class="card shadow-sm border-warning mb-4">
+        <div class="card-body py-4 text-center">
+            <div class="display-6 text-warning mb-2">⏱️</div>
+            <h4 class="card-title">Bạn hiện chưa có ca bếp đang mở</h4>
+            <p class="text-secondary mb-4" style="max-width: 500px; margin: 0 auto;">
+                Hãy mở ca làm việc để khi bạn hoàn thành bánh (chuyển Chờ giao), hệ thống sẽ tự động cộng định lượng nguyên liệu đã tiêu hao vào ca của bạn.
+            </p>
+            <form method="post" asp-page-handler="MoCa" class="d-inline-block text-start" style="max-width: 420px; width: 100%;">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Chọn buổi ca làm việc:</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="BuoiCa" id="buoiCaSang" value="CA_SANG" @(Model.BuoiCa == BuoiCa.CA_SANG ? "checked" : "") autocomplete="off">
+                            <label class="btn btn-outline-warning text-dark w-100 py-2 d-flex flex-column align-items-center border-2" for="buoiCaSang">
+                                <span class="fs-4">☀️</span>
+                                <span class="fw-bold">Ca sáng</span>
+                                <span class="small text-muted" style="font-size: 0.75rem;">06:00 – 14:00</span>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="BuoiCa" id="buoiCaChieu" value="CA_CHIEU" @(Model.BuoiCa == BuoiCa.CA_CHIEU ? "checked" : "") autocomplete="off">
+                            <label class="btn btn-outline-primary w-100 py-2 d-flex flex-column align-items-center border-2" for="buoiCaChieu">
+                                <span class="fs-4">🌙</span>
+                                <span class="fw-bold">Ca chiều</span>
+                                <span class="small text-muted" style="font-size: 0.75rem;">14:00 – 22:00</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Ghi chú ca làm việc (tùy chọn):</label>
+                    <input type="text" asp-for="GhiChuMoCa" class="form-control" placeholder="Ví dụ: Phụ trách bánh kem & bánh mỳ..." />
+                </div>
+                <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+                    @Icons.Svg("play", 18) Bắt đầu mở ca làm việc
+                </button>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    var ca = Model.CaHienTai;
+    var tong = Model.TongHop;
+    <div class="card shadow-sm border-success mb-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center py-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-white text-success fw-bold">DANG MO</span>
+                <span class="fw-bold">@ca.Ma</span>
+                <span class="badge @(ca.BuoiCa == BuoiCa.CA_SANG ? "bg-warning text-dark" : "bg-info text-dark") fw-bold">
+                    @(ca.BuoiCa == BuoiCa.CA_SANG ? "☀️ Ca sáng" : "🌙 Ca chiều")
+                </span>
+                <span>· Mở lúc @ca.GioMoCa.ToString("HH:mm dd/MM/yyyy")</span>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark">Nhân viên: @ca.NhanVien.HoTen</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded border text-center">
+                        <div class="text-secondary small">ĐƠN HÀNG ĐÃ LÀM XONG</div>
+                        <div class="h3 mb-0 text-primary fw-bold">@(tong?.SoDonDaLam ?? 0)</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded border text-center">
+                        <div class="text-secondary small">NGUYÊN LIỆU ĐÃ TIÊU HAO</div>
+                        <div class="h3 mb-0 text-success fw-bold">@(tong?.ChiTiets.Count ?? 0) loại</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded border text-center">
+                        <div class="text-secondary small">MẺ BÁNH LỖI ĐƯỢC DUYỆT</div>
+                        <div class="h3 mb-0 text-danger fw-bold">@(tong?.SoPhieuLoi ?? 0) mẻ</div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="h6 fw-bold mb-3">Bảng tổng hợp định lượng nguyên liệu tiêu hao trong ca:</h5>
+            @if (tong?.ChiTiets.Count == 0)
+            {
+                <div class="alert alert-info py-3 text-center">
+                    Chưa phát sinh tiêu hao định lượng nào trong ca này. Khi bấm "Chờ giao" trên màn hình đơn hoặc mẻ lỗi được quản lý duyệt, nguyên liệu sẽ xuất hiện ở đây.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive mb-4">
+                    <table class="table table-hover align-middle border">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;">STT</th>
+                                <th>Nguyên liệu</th>
+                                <th>Đơn vị tính</th>
+                                <th class="text-end">Tổng định lượng tiêu hao</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < tong!.ChiTiets.Count; i++)
+                            {
+                                var item = tong.ChiTiets[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td class="fw-semibold">@item.TenNguyenLieu</td>
+                                    <td><span class="badge bg-secondary">@item.DonViTinh</span></td>
+                                    <td class="text-end fw-bold text-success fs-6">@item.TongSoLuong.ToString("0.###")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="bg-light p-3 rounded border">
+                <h6 class="fw-bold mb-2">Chốt ca làm việc & Xuất phiếu sang kho đối chiếu</h6>
+                <p class="text-secondary small mb-3">
+                    Khi hết ca, bấm nút bên dưới để chốt ca làm việc. Hệ thống sẽ đóng ca và tự động tạo <strong>Phiếu định lượng ca</strong> gửi sang cho thủ kho đối chiếu với các phiếu xuất nguyên liệu thực tế.
+                </p>
+                <form method="post" asp-page-handler="ChotCa" onsubmit="return confirm('Bạn có chắc chắn muốn chốt ca và xuất phiếu định lượng sang kho?');">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-8">
+                            <input type="text" asp-for="GhiChuChotCa" class="form-control" placeholder="Ghi chú khi chốt ca (nếu có)..." />
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-warning w-100 fw-bold">
+                                @Icons.Svg("check", 18) Chốt ca & Xuất phiếu định lượng
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light py-2">
+        <h6 class="mb-0 fw-bold">Lịch sử các ca bếp gần đây của bạn</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Mã ca</th>
+                    <th>Buổi ca</th>
+                    <th>Giờ mở ca</th>
+                    <th>Giờ đóng ca</th>
+                    <th>Trạng thái</th>
+                    <th>Phiếu định lượng xuất</th>
+                    <th>Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.LichSuCa.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">Chưa có lịch sử ca nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var c in Model.LichSuCa)
+                    {
+                        <tr>
+                            <td class="fw-bold">@c.Ma</td>
+                            <td>
+                                <span class="badge @(c.BuoiCa == BuoiCa.CA_SANG ? "bg-warning text-dark" : "bg-primary")">
+                                    @(c.BuoiCa == BuoiCa.CA_SANG ? "☀️ Ca sáng" : "🌙 Ca chiều")
+                                </span>
+                            </td>
+                            <td>@c.GioMoCa.ToString("HH:mm dd/MM/yyyy")</td>
+                            <td>@(c.GioDongCa?.ToString("HH:mm dd/MM/yyyy") ?? "—")</td>
+                            <td>
+                                @if (c.TrangThai == TrangThaiCa.DANG_MO)
+                                {
+                                    <span class="badge bg-success">Đang mở</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Đã chốt</span>
+                                }
+                            </td>
+                            <td>
+                                @if (c.PhieuDinhLuongs.Count > 0)
+                                {
+                                    @foreach (var p in c.PhieuDinhLuongs)
+                                    {
+                                        <span class="badge bg-primary">@p.Ma</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="small text-muted">@c.GhiChu</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

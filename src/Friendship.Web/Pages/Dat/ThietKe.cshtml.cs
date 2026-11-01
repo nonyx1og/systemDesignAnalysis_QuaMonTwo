@@ -2,7 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Friendship.Domain;
 using Friendship.Domain.Entities;
+using Friendship.Infrastructure;
 using Friendship.Infrastructure.Services;
+using Friendship.Web.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
@@ -15,7 +17,8 @@ public class ThietKeModel(
     ThietKeService thietKeService,
     ThanhPhanService thanhPhanService,
     SanPhamService sanPhamService,
-    AnhService anhService) : PageModel
+    AnhService anhService,
+    FriendshipDb db) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? Ma { get; set; }
@@ -87,9 +90,19 @@ public class ThietKeModel(
             Input.ChuTrenBanh = tk.ChuTrenBanh;
             Input.LoiNhan = tk.LoiNhan;
         }
+        else
+        {
+            var khach = await CustomerAuthHelper.GetCurrentCustomerAsync(HttpContext, db);
+            if (khach is not null)
+            {
+                Input.HoTen = khach.TenKhachHang;
+                Input.SoDienThoai = khach.SoDienThoai;
+            }
+        }
 
         return Page();
     }
+
 
     public async Task<IActionResult> OnPostLuuAsync()
     {
@@ -202,6 +215,22 @@ public class ThietKeModel(
                 tenAnhIn);
 
             var tk = await thietKeService.LuuNhapAsync(input);
+            var khachHienTai = await CustomerAuthHelper.GetCurrentCustomerAsync(HttpContext, db);
+            if (khachHienTai is not null && tk.KhachHangId != khachHienTai.Id)
+            {
+                tk.KhachHangId = khachHienTai.Id;
+                await db.SaveChangesAsync();
+            }
+
+            try
+            {
+                await thietKeService.GuiAsync(tk.MaTraCuu);
+                TempData["Message"] = "Thiết kế của bạn đã được gửi tới bếp bánh! Bếp sẽ kiểm tra và gửi báo giá cho bạn.";
+            }
+            catch
+            {
+                // Bỏ qua nếu đã gửi trước đó
+            }
             return Redirect($"/Dat/Theo/{tk.MaTraCuu}");
         }
         catch (NghiepVuException ex)

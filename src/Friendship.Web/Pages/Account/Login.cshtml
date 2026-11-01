@@ -3,7 +3,7 @@
 @{ ViewData["Title"] = "Đăng nhập"; }
 <div class="w-100" style="max-width:400px">
 <div class="auth-card">
-    <div class="brand">@Icons.Logo(32)<span>nongnongBakery</span></div>
+    <div class="brand">@Icons.Logo(32)<span>FrendshipBakery</span></div>
     <h1>Đăng nhập</h1>
     <p class="text-secondary mb-4">để tiếp tục vào hệ thống quản lý tiệm bánh</p>
     <form method="post">
@@ -22,6 +22,11 @@
         <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
     </form>
 </div>
-<p class="auth-foot">Quên mật khẩu? Liên hệ quản trị viên để đặt lại.</p>
+<p class="auth-foot">
+    Quên mật khẩu? Liên hệ quản trị viên để đặt lại.<br />
+    <a href="/" class="text-decoration-none mt-2 d-inline-block">← Quay lại trang chủ đặt bánh</a>
+    &nbsp;·&nbsp;
+    <a href="/Dat/DangNhap" class="text-decoration-none mt-2 d-inline-block">Đăng nhập khách hàng</a>
+</p>
 </div>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -39,7 +39,7 @@
                         <option value="0">— Chọn bánh —</option>
                         @foreach (var sp in Model.SanPhams)
                         {
-                            <option value="@sp.Id" selected="@(l.SanPhamId == sp.Id)">@sp.TenBanh (@sp.KichThuoc) — @Fmt.Tien(sp.DonGia)</option>
+                            <option value="@sp.Id" data-is-cake="@sp.LaBanhKem.ToString().ToLower()" selected="@(l.SanPhamId == sp.Id)">@sp.TenBanh (@sp.KichThuoc) — @Fmt.Tien(sp.DonGia)</option>
                         }
                     </select>
                 </td>
@@ -103,4 +103,29 @@
     }
 </form>
 
-@section Scripts { <script src="~/js/khach.js" asp-append-version="true"></script> }
+@section Scripts {
+    <script src="~/js/khach.js" asp-append-version="true"></script>
+    <script>
+        function capNhatLoiChucDong() {
+            document.querySelectorAll('#dong tr').forEach(tr => {
+                const sel = tr.querySelector('select');
+                const inputLoiChuc = tr.querySelector('input[name*="LoiChuc"]');
+                if (!sel || !inputLoiChuc) return;
+                const opt = sel.options[sel.selectedIndex];
+                const isCake = opt && opt.getAttribute('data-is-cake') === 'true';
+                if (isCake) {
+                    inputLoiChuc.disabled = false;
+                    inputLoiChuc.placeholder = "Lời chúc trên bánh kem";
+                    inputLoiChuc.style.backgroundColor = "";
+                } else {
+                    inputLoiChuc.value = "";
+                    inputLoiChuc.disabled = true;
+                    inputLoiChuc.placeholder = "(Chỉ dành cho bánh kem)";
+                    inputLoiChuc.style.backgroundColor = "#e9ecef";
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', capNhatLoiChucDong);
+        document.getElementById('dong')?.addEventListener('change', capNhatLoiChucDong);
+    </script>
+}

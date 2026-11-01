@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <radialGradient id="croissantLight" cx="45%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="40%" stop-color="#FB923C"/>
+      <stop offset="85%" stop-color="#C2410C"/>
+      <stop offset="100%" stop-color="#7C2D12"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="60" cy="98" rx="46" ry="8" fill="#000" opacity="0.12"/>
+  <!-- Curved Crescent Body -->
+  <!-- Back arc / horns -->
+  <path d="M16,74 C10,50 34,42 45,48 L75,48 C86,42 110,50 104,74 C100,60 84,54 75,56 L45,56 C36,54 20,60 16,74 Z" fill="#9A3412"/>
+  <!-- Middle body segment -->
+  <path d="M26,72 C22,54 40,40 50,42 L70,42 C80,40 98,54 94,72 C88,60 78,54 68,54 L52,54 C42,54 32,60 26,72 Z" fill="#EA580C"/>
+  <!-- Central main puff -->
+  <path d="M34,70 C30,46 50,34 60,34 C70,34 90,46 86,70 C80,58 72,50 60,50 C48,50 40,58 34,70 Z" fill="url(#croissantLight)"/>
+  <!-- Crescent layered ridges -->
+  <path d="M42,50 Q60,42 78,50" stroke="#7C2D12" stroke-width="2" fill="none" opacity="0.4"/>
+  <path d="M36,60 Q60,50 84,60" stroke="#7C2D12" stroke-width="2.5" fill="none" opacity="0.45"/>
+  <path d="M32,70 Q60,60 88,70" stroke="#7C2D12" stroke-width="2" fill="none" opacity="0.35"/>
+  <!-- Gloss highlights -->
+  <path d="M45,40 Q60,36 75,40" stroke="#FFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/>
+</svg>

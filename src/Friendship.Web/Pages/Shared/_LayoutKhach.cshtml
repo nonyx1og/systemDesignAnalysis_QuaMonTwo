@@ -1,9 +1,21 @@
+@using Friendship.Web.Auth
+@using Microsoft.AspNetCore.Authentication
 @{
     // Trang đang mở, để đánh dấu aria-current trên liên kết điều hướng
+    // Trang đang mở, để đánh dấu aria-current trên liên kết điều hướng
     var duong = (Context.Request.Path.Value ?? "").TrimEnd('/');
+    if (string.IsNullOrEmpty(duong)) duong = "/";
     string? Hien(string href) => string.Equals(duong, href, StringComparison.OrdinalIgnoreCase) ? "page" : null;
     var dangTim = duong.StartsWith("/Dat/Tim", StringComparison.OrdinalIgnoreCase)
                || duong.StartsWith("/Dat/Theo", StringComparison.OrdinalIgnoreCase);
+
+    var khachAuth = await Context.AuthenticateAsync(CustomerAuthHelper.Scheme);
+    var isKhach = khachAuth.Succeeded && khachAuth.Principal is not null;
+    var tenKhach = khachAuth.Principal?.Identity?.Name ?? "Khách hàng";
+
+    var isStaff = User.Identity?.IsAuthenticated == true;
+    var tenStaff = User.Identity?.Name ?? "Nhân viên";
+    var vaiTroStaff = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -11,7 +23,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FFF8F4" />
-    <title>@ViewData["Title"] – nongnongBakery</title>
+    <title>@ViewData["Title"] – FrendshipBakery</title>
     <link rel="preload" href="~/fonts/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="~/fonts/source-serif-4-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="~/css/dat-banh.css" asp-append-version="true" />
@@ -22,23 +34,136 @@
 
     <header class="dat-header">
         <div class="container dat-header-inner">
-            <a class="dat-brand" href="/Dat" aria-label="nongnongBakery, trang chủ">
+            <a class="dat-brand" href="/" aria-label="FrendshipBakery, trang chủ">
                 @Icons.Logo(28)
-                <span class="dat-brand-name">nongnongBakery</span>
+                <span class="dat-brand-name">FrendshipBakery</span>
             </a>
 
             <nav class="dat-nav" aria-label="Điều hướng khách hàng">
-                <a class="dat-nav-link" href="/Dat" aria-current="@Hien("/Dat")">Trang chủ</a>
-                <a class="dat-nav-link" href="/Dat/Tim" aria-current="@(dangTim ? "page" : null)">Tra cứu đơn</a>
+                <a class="dat-nav-link" href="/" aria-current="@Hien("/")">Trang chủ</a>
+                <a class="dat-nav-link" href="/Dat/Menu" aria-current="@Hien("/Dat/Menu")">Thực đơn & Thành phần</a>
+                <a class="dat-nav-link" href="/Dat/DonHang" aria-current="@Hien("/Dat/DonHang")">Đơn của tôi</a>
+                <a class="dat-nav-link" href="/Dat/GopY" aria-current="@Hien("/Dat/GopY")">Góp ý</a>
                 <a class="dat-btn dat-btn-primary" href="/Dat/ThietKe" aria-current="@Hien("/Dat/ThietKe")">Thiết kế bánh</a>
+                
+                @if (isKhach)
+                {
+                    <details class="dat-acc-dropdown" style="margin-left: 0.5rem;">
+                        <summary>
+                            <span>👤 @tenKhach</span>
+                            <span style="font-size: 0.65rem; margin-left: 0.15rem;">▼</span>
+                        </summary>
+                        <div class="dat-acc-popover">
+                            <div style="font-size: 0.8125rem; color: var(--dat-text-muted); padding-bottom: 0.4rem; border-bottom: 1px solid var(--dat-champagne); margin-bottom: 0.25rem;">
+                                Khách hàng: <strong style="color: var(--dat-text-main);">@tenKhach</strong>
+                            </div>
+                            <a href="/Dat/TaiKhoan" class="dat-acc-link">👤 Hồ sơ & Tài khoản</a>
+                            <a href="/Dat/DonHang" class="dat-acc-link">📦 Đơn hàng của tôi</a>
+                            <a href="/Dat/GopY" class="dat-acc-link">💬 Góp ý cho tiệm</a>
+                            <hr style="border: 0; border-top: 1px solid var(--dat-champagne); margin: 0.25rem 0;" />
+                            <form method="post" action="/Dat/DangXuat" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dat-acc-link" style="width: 100%; border: none; background: none; text-align: left; color: #dc3545; cursor: pointer;">
+                                    🚪 Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                }
+                else if (isStaff)
+                {
+                    <details class="dat-acc-dropdown" style="margin-left: 0.5rem;">
+                        <summary>
+                            <span style="background: var(--dat-berry); color: #fff; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.75rem; margin-right: 0.25rem;">Nhân viên</span>
+                            <span>@tenStaff</span>
+                            <span style="font-size: 0.65rem; margin-left: 0.15rem;">▼</span>
+                        </summary>
+                        <div class="dat-acc-popover">
+                            <div style="font-size: 0.8125rem; color: var(--dat-text-muted); padding-bottom: 0.4rem; border-bottom: 1px solid var(--dat-champagne); margin-bottom: 0.25rem;">
+                                Tài khoản nhân viên: <strong style="color: var(--dat-text-main);">@tenStaff</strong> (@vaiTroStaff)
+                            </div>
+                            <a href="/TongQuan" class="dat-acc-link" style="font-weight: 600; color: var(--dat-berry);">
+                                📊 Vào trang quản lý (Tổng quan)
+                            </a>
+                            <a href="/BanHang/DonHang" class="dat-acc-link">
+                                🛒 Quản lý bán hàng & đơn
+                            </a>
+                            <a href="/Bep/ThietKe" class="dat-acc-link">
+                                🎂 Quản lý bếp bánh
+                            </a>
+                            <hr style="border: 0; border-top: 1px dashed var(--dat-champagne); margin: 0.25rem 0;" />
+                            <form method="post" asp-page="/Account/Logout" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dat-acc-link" style="width: 100%; border: none; background: none; text-align: left; color: #dc3545; cursor: pointer;">
+                                    🚪 Đăng xuất nhân viên
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                }
+                else
+                {
+                    <details class="dat-acc-dropdown" style="margin-left: 0.5rem;">
+                        <summary>
+                            <span>👤 Tài khoản</span>
+                            <span style="font-size: 0.65rem; margin-left: 0.15rem;">▼</span>
+                        </summary>
+                        <div class="dat-acc-popover">
+                            <div style="font-size: 0.8125rem; color: var(--dat-text-muted); padding-bottom: 0.4rem; border-bottom: 1px solid var(--dat-champagne); margin-bottom: 0.25rem;">
+                                Khu vực Tài khoản
+                            </div>
+                            <a href="/Dat/TaiKhoan" class="dat-acc-link" style="font-weight: 600;">
+                                👤 Trang tài khoản
+                            </a>
+                            <a href="/Dat/DangNhap" class="dat-acc-link" style="color: var(--dat-berry); font-weight: 600;">
+                                🔑 Đăng nhập
+                            </a>
+                            <a href="/Dat/DangKy" class="dat-acc-link" style="color: var(--dat-text-main);">
+                                📝 Đăng ký tài khoản khách
+                            </a>
+                            <hr style="border: 0; border-top: 1px dashed var(--dat-champagne); margin: 0.25rem 0;" />
+                            <a href="/Account/Login" class="dat-acc-link" style="font-size: 0.8125rem; color: var(--dat-text-secondary);">
+                                🏢 Cổng đăng nhập nhân viên
+                            </a>
+                        </div>
+                    </details>
+                }
             </nav>
 
             <details class="dat-menu">
                 <summary>@Icons.Svg("menu", 18)<span>Menu</span></summary>
                 <div class="dat-menu-panel">
-                    <a href="/Dat" aria-current="@Hien("/Dat")">Trang chủ</a>
-                    <a href="/Dat/Tim" aria-current="@(dangTim ? "page" : null)">Tra cứu đơn</a>
+                    <a href="/" aria-current="@Hien("/")">Trang chủ</a>
+                    <a href="/Dat/Menu" aria-current="@Hien("/Dat/Menu")">Thực đơn & Thành phần</a>
+                    <a href="/Dat/DonHang" aria-current="@Hien("/Dat/DonHang")">Đơn của tôi</a>
+                    <a href="/Dat/GopY" aria-current="@Hien("/Dat/GopY")">Góp ý cho tiệm</a>
                     <a class="dat-btn dat-btn-primary" href="/Dat/ThietKe" aria-current="@Hien("/Dat/ThietKe")">Thiết kế bánh</a>
+                    <hr style="border: 0; border-top: 1px dashed var(--dat-champagne); margin: 0.5rem 0;" />
+                    <div style="font-size: 0.8125rem; color: var(--dat-text-muted); font-weight: 700; text-transform: uppercase; padding: 0.25rem 0;">Tài khoản</div>
+                    @if (isKhach)
+                    {
+                        <a href="/Dat/TaiKhoan">👤 Tài khoản của @tenKhach</a>
+                        <a href="/Dat/DonHang">📦 Lịch sử đơn hàng</a>
+                        <a href="/Dat/DangXuat" style="color: #dc3545; font-weight: 600;">Đăng xuất</a>
+                    }
+                    else if (isStaff)
+                    {
+                        <div style="padding: 0.25rem 0.5rem; background: var(--dat-cream); border-radius: 4px; font-size: 0.85rem; font-weight: 600;">👔 @tenStaff (@vaiTroStaff)</div>
+                        <a href="/TongQuan" style="color: var(--dat-berry); font-weight: 600;">📊 Vào trang quản lý (Tổng quan)</a>
+                        <a href="/BanHang/DonHang">🛒 Bán hàng & đơn</a>
+                        <a href="/Bep/ThietKe">🎂 Bếp bánh</a>
+                        <form method="post" asp-page="/Account/Logout" style="margin: 0.5rem 0 0;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" style="border: none; background: none; color: #dc3545; font-weight: 600; cursor: pointer; padding: 0;">🚪 Đăng xuất nhân viên</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="/Dat/TaiKhoan">👤 Trang tài khoản</a>
+                        <a href="/Dat/DangNhap" style="font-weight: 600; color: var(--dat-berry);">🔑 Đăng nhập</a>
+                        <a href="/Dat/DangKy">📝 Đăng ký tài khoản</a>
+                        <a href="/Account/Login" style="font-size: 0.8125rem; color: var(--dat-text-secondary);">🏢 Đăng nhập nhân viên</a>
+                    }
                 </div>
             </details>
         </div>
@@ -57,30 +182,48 @@
     <footer class="dat-footer">
         <div class="container">
             <div class="dat-footer-top">
-                <p class="dat-footer-about">Bánh kem làm theo yêu cầu. Bạn tự thiết kế, đặt cọc qua VietQR và theo dõi đơn bằng mã tra cứu.</p>
-                <nav aria-label="Liên kết chân trang">
-                    <p class="dat-footer-title">Đặt bánh</p>
+                <p class="dat-footer-about">
+                    FrendshipBakery – Tiệm bánh kem tươi làm theo yêu cầu. Nguyên liệu sạch cao cấp, đặt bánh trực tuyến, hẹn giờ giao dự kiến và tự thiết kế bánh 2D độc đáo.
+                </p>
+                <nav aria-label="Liên kết khách hàng">
+                    <p class="dat-footer-title">Dành cho khách hàng</p>
                     <ul class="dat-footer-list">
-                        <li><a href="/Dat">Trang chủ</a></li>
-                        <li><a href="/Dat/ThietKe">Thiết kế bánh</a></li>
-                        <li><a href="/Dat/Tim">Tra cứu đơn</a></li>
+                        <li><a href="/">Trang chủ</a></li>
+                        <li><a href="/Dat/Menu">Thực đơn & Thành phần</a></li>
+                        <li><a href="/Dat/DatNhanh">Đặt bánh theo yêu cầu</a></li>
+                        <li><a href="/Dat/ThietKe">Tự thiết kế bánh 2D</a></li>
+                        <li><a href="/Dat/DonHang">Đơn hàng của tôi</a></li>
+                        <li><a href="/Dat/GopY">Góp ý & Đánh giá</a></li>
                     </ul>
                 </nav>
                 <div>
-                    <p class="dat-footer-title">Nhân viên</p>
+                    <p class="dat-footer-title">Tài khoản & Hệ thống</p>
                     <ul class="dat-footer-list">
-                        <li><a href="/Account/Login">Đăng nhập</a></li>
+                        @if (isKhach)
+                        {
+                            <li><a href="/Dat/TaiKhoan">Hồ sơ: @tenKhach</a></li>
+                            <li><a href="/Dat/DonHang">Lịch sử đơn hàng</a></li>
+                            <li><a href="/Dat/DangXuat">Đăng xuất</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="/Dat/TaiKhoan">Khu vực tài khoản</a></li>
+                            <li><a href="/Dat/DangNhap">Đăng nhập khách hàng</a></li>
+                            <li><a href="/Dat/DangKy">Đăng ký tài khoản</a></li>
+                        }
+                        <li><hr style="border-color: rgba(255,255,255,0.15); margin: 0.5rem 0;" /></li>
+                        <li><a href="/Account/Login" style="opacity: 0.7;">Dành cho nhân viên nội bộ</a></li>
                     </ul>
                 </div>
             </div>
             <svg class="dat-footer-mark" viewBox="0 0 1000 140" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
-                <text x="0" y="98" font-size="119" textLength="1000" lengthAdjust="spacing">nongnongBakery</text>
+                <text x="0" y="98" font-size="119" textLength="1000" lengthAdjust="spacing">FrendshipBakery</text>
             </svg>
-            <p class="dat-footer-legal">© 2026 nongnongBakery</p>
+            <p class="dat-footer-legal">© 2026 FrendshipBakery – Hệ thống Quản lý và Đặt bánh tiệm bánh</p>
         </div>
     </footer>
 
-    <!-- Toast: thông báo ngắn do thiet-ke.js ghi vào -->
+    <!-- Toast: thông báo ngắn -->
     <div id="dat-toast-container" class="dat-toast-container" aria-live="polite"></div>
 
     @await RenderSectionAsync("Scripts", required: false)

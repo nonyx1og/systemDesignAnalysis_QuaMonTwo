@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="crust" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDBA74"/>
+      <stop offset="60%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#9A3412"/>
+    </linearGradient>
+    <radialGradient id="egg" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="50%" stop-color="#FACC15"/>
+      <stop offset="90%" stop-color="#CA8A04"/>
+      <stop offset="100%" stop-color="#A16207"/>
+    </radialGradient>
+    <radialGradient id="brulee" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#78350F" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#78350F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="60" cy="102" rx="44" ry="9" fill="#000" opacity="0.12"/>
+  <!-- Crust shell -->
+  <path d="M18,52 Q22,96 60,96 Q98,96 102,52 C104,44 16,44 18,52 Z" fill="url(#crust)"/>
+  <!-- Fluted crust rim -->
+  <ellipse cx="60" cy="52" rx="45" ry="16" fill="#EA580C"/>
+  <ellipse cx="60" cy="51" rx="43" ry="14" fill="#FDBA74"/>
+  <!-- Custard filling -->
+  <ellipse cx="60" cy="53" rx="36" ry="12" fill="url(#egg)"/>
+  <!-- Caramelized spots (creme brulee burnt spots) -->
+  <ellipse cx="50" cy="51" rx="8" ry="4" fill="url(#brulee)"/>
+  <ellipse cx="68" cy="54" rx="7" ry="3.5" fill="url(#brulee)"/>
+  <circle cx="58" cy="55" r="2.5" fill="#451A03" opacity="0.7"/>
+  <circle cx="44" cy="53" r="1.5" fill="#451A03" opacity="0.6"/>
+  <!-- Shine -->
+  <ellipse cx="55" cy="48" rx="14" ry="3" fill="#FFF" opacity="0.45"/>
+</svg>

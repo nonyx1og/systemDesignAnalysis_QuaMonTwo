@@ -1,0 +1,179 @@
+@page
+@model Friendship.Web.Pages.Bep.BaoLoi.IndexModel
+@{
+    ViewData["Title"] = "Báo lỗi mẻ bánh";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="h4 mb-1">Phiếu báo lỗi mẻ bánh / Bánh hỏng</h2>
+        <div class="text-secondary small">Khai báo mẻ bánh bị cháy, sống, hỏng trong ca. Khi quản lý duyệt, định lượng hao phí sẽ được tính vào ca bếp.</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="/Bep/Ca/Index" class="btn btn-outline-secondary btn-sm">
+            @Icons.Svg("clock", 16) Xem ca bếp & Định lượng
+        </a>
+        <a asp-page="/Bep/Index" class="btn btn-outline-primary btn-sm">
+            @Icons.Svg("pot", 16) Danh sách đơn cần làm
+        </a>
+    </div>
+</div>
+
+@if (Model.CaHienTai is null)
+{
+    <div class="alert alert-warning py-3">
+        <strong>⚠️ Chưa mở ca bếp:</strong> Bạn cần <a asp-page="/Bep/Ca/Index" class="alert-link">mở ca làm việc</a> trước khi tạo phiếu báo lỗi mẻ bánh.
+    </div>
+}
+else
+{
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white py-2">
+                    <span class="fw-bold">Lập phiếu báo mẻ lỗi mới</span>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Sản phẩm bị lỗi / hỏng:</label>
+                            <select asp-for="SanPhamId" class="form-select form-select-sm" id="selectBanh" onchange="autoLoadBOM()">
+                                <option value="0">-- Chọn sản phẩm bánh bị hỏng --</option>
+                                @foreach (var sp in Model.SanPhams)
+                                {
+                                    <option value="@sp.Id">@sp.TenBanh (@sp.KichThuoc)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Số lượng bánh hỏng:</label>
+                                <input type="number" asp-for="SoLuongHong" class="form-control form-control-sm" min="1" id="inputSL" onchange="autoLoadBOM()" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Ca bếp hiện tại:</label>
+                                <input type="text" class="form-control form-control-sm bg-light" value="@Model.CaHienTai.Ma" readonly />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Lý do bị lỗi (cháy, sống cốt, chảy kem...):</label>
+                            <textarea asp-for="LyDoLoi" class="form-control form-control-sm" rows="2" placeholder="Ghi rõ nguyên nhân mẻ bánh bị hỏng..." required></textarea>
+                        </div>
+
+                        <h6 class="fw-bold small text-secondary mt-3 mb-2">Định lượng nguyên liệu tiêu hao bị hao phí:</h6>
+                        <div id="danh-sach-nl-loi">
+                            @for (int i = 0; i < Model.ChiTiets.Count; i++)
+                            {
+                                <div class="row g-2 mb-2 align-items-center">
+                                    <div class="col-7">
+                                        <select asp-for="ChiTiets[i].NguyenLieuId" class="form-select form-select-sm">
+                                            <option value="0">-- Chọn nguyên liệu --</option>
+                                            @foreach (var nl in Model.NguyenLieus)
+                                            {
+                                                <option value="@nl.Id">@nl.TenGoi (@nl.DonViTinh)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-5">
+                                        <input type="number" step="0.001" min="0" asp-for="ChiTiets[i].SoLuong" class="form-control form-control-sm text-end" placeholder="Số lượng" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 mt-3 py-2 fw-bold">
+                            @Icons.Svg("send", 18) Gửi phiếu báo lỗi cho Quản lý duyệt
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0 fw-bold">Danh sách các phiếu báo lỗi trong ca</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Bánh & Số lượng</th>
+                                <th>Lý do</th>
+                                <th>Nguyên liệu hao phí</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.DanhSachPhieu.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có phiếu báo lỗi nào trong ca này.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var p in Model.DanhSachPhieu)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@p.Ma</td>
+                                        <td>
+                                            <div class="fw-semibold">@(p.SanPham?.TenBanh ?? "Bánh tự làm")</div>
+                                            <span class="badge bg-danger">@p.SoLuongHong bánh</span>
+                                        </td>
+                                        <td class="small">
+                                            <div>@p.LyDoLoi</div>
+                                            @if (!string.IsNullOrEmpty(p.GhiChuQuanLy))
+                                            {
+                                                <div class="text-secondary fst-italic">Ý kiến QL: @p.GhiChuQuanLy</div>
+                                            }
+                                        </td>
+                                        <td class="small">
+                                            @foreach (var ct in p.ChiTiets)
+                                            {
+                                                <div>@ct.NguyenLieu.TenGoi: <strong>@ct.SoLuong.ToString("0.###")</strong> @ct.NguyenLieu.DonViTinh</div>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (p.TrangThai == TrangThaiPhieu.CHO_DUYET)
+                                            {
+                                                <span class="badge bg-warning text-dark">Chờ QL duyệt</span>
+                                            }
+                                            else if (p.TrangThai == TrangThaiPhieu.DA_DUYET)
+                                            {
+                                                <span class="badge bg-success">Đã duyệt (đã cộng ĐL)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Từ chối</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    function autoLoadBOM() {
+        var spId = document.getElementById('selectBanh').value;
+        var sl = document.getElementById('inputSL').value;
+        if (spId > 0 && sl > 0) {
+            // Khi đổi bánh hoặc số lượng, có thể chuyển query để gợi ý BOM
+            var url = window.location.pathname + '?spId=' + spId + '&slHong=' + sl;
+            // Cho phép người dùng chuyển nhanh nếu chưa nhập liệu nhiều
+        }
+    }
+</script>
+}

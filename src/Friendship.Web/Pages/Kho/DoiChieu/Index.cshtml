@@ -1,0 +1,126 @@
+@page
+@model Friendship.Web.Pages.Kho.DoiChieu.IndexModel
+@{
+    ViewData["Title"] = "Đối chiếu định lượng ca bếp & kho";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="h4 mb-1">Đối chiếu định lượng ca bếp với thực xuất kho</h2>
+        <div class="text-secondary small">Đối chiếu giữa lượng nguyên liệu kho thực xuất trong ca và phiếu định lượng bếp chốt ca gửi sang</div>
+    </div>
+    <div>
+        <a asp-page="/Kho/XuatNguyenLieu" class="btn btn-outline-primary btn-sm">
+            @Icons.Svg("arrow-up", 16) Xuất nguyên liệu cho bếp
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+        <span class="fw-bold">Phiếu định lượng từ ca bếp đang chờ đối chiếu</span>
+        <span class="badge bg-white text-primary">@Model.PhieuChoDoiChieu.Count phiếu</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã phiếu</th>
+                    <th>Ca làm việc</th>
+                    <th>Bếp trưởng / Người xuất</th>
+                    <th>Thời gian xuất</th>
+                    <th>Số loại nguyên liệu</th>
+                    <th>Ghi chú ca</th>
+                    <th class="text-end">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.PhieuChoDoiChieu.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">Hiện không có phiếu định lượng ca nào đang chờ đối chiếu.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var p in Model.PhieuChoDoiChieu)
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@p.Ma</td>
+                            <td>
+                                <div>
+                                    <span class="badge bg-info text-dark">@p.CaNhanVien.Ma</span>
+                                    <span class="badge @(p.CaNhanVien.BuoiCa == BuoiCa.CA_SANG ? "bg-warning text-dark" : "bg-primary")">@p.CaNhanVien.BuoiCa.TenNgan()</span>
+                                </div>
+                                <div class="small text-secondary">@p.CaNhanVien.GioMoCa.ToString("HH:mm") - @(p.CaNhanVien.GioDongCa?.ToString("HH:mm") ?? "—")</div>
+                            </td>
+                            <td class="fw-semibold">@p.NguoiLap.HoTen</td>
+                            <td>@p.ThoiGianXuat.ToString("HH:mm dd/MM/yyyy")</td>
+                            <td><span class="badge bg-secondary">@p.ChiTiets.Count loại</span></td>
+                            <td class="small text-muted">@p.GhiChu</td>
+                            <td class="text-end">
+                                <a asp-page="ChiTiet" asp-route-id="@p.Id" class="btn btn-sm btn-primary fw-bold">
+                                    @Icons.Svg("scale", 16) Tiến hành đối chiếu
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light py-2">
+        <h6 class="mb-0 fw-bold">Lịch sử biên bản đối chiếu định lượng đã hoàn tất</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã biên bản</th>
+                    <th>Phiếu định lượng</th>
+                    <th>Ca bếp</th>
+                    <th>Người đối chiếu (Kho)</th>
+                    <th>Thời gian</th>
+                    <th>Đánh giá kết quả</th>
+                    <th class="text-end">Xem lại</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DanhSachBienBan.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">Chưa có biên bản đối chiếu nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var bb in Model.DanhSachBienBan)
+                    {
+                        var (cls, text) = bb.TrangThai switch
+                        {
+                            TrangThaiDoiChieu.HOP_LE => ("bg-success", "Khớp 100% (Hợp lệ)"),
+                            TrangThaiDoiChieu.LECH_DINH_MUC => ("bg-warning text-dark", "Có lệch định mức"),
+                            _ => ("bg-danger", "Cảnh báo thất thoát")
+                        };
+                        <tr>
+                            <td class="fw-bold">@bb.Ma</td>
+                            <td><span class="badge bg-light text-dark border">@bb.PhieuDinhLuongCa.Ma</span></td>
+                            <td>@bb.PhieuDinhLuongCa.CaNhanVien.Ma (@bb.PhieuDinhLuongCa.CaNhanVien.NhanVien.HoTen)</td>
+                            <td>@bb.NguoiDoiChieu.HoTen</td>
+                            <td>@bb.ThoiGianDoiChieu.ToString("HH:mm dd/MM/yyyy")</td>
+                            <td><span class="badge @cls">@text</span></td>
+                            <td class="text-end">
+                                <a asp-page="ChiTiet" asp-route-id="@bb.PhieuDinhLuongCaId" class="btn btn-sm btn-outline-secondary">
+                                    Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,97 @@
+@page
+@model Friendship.Web.Pages.Bep.NhapDinhLuongDonModel
+@{
+    ViewData["Title"] = "Nhập phiếu định lượng sản phẩm";
+}
+
+<div class="mb-3">
+    <a asp-page="/Bep/Index" class="btn btn-outline-secondary btn-sm mb-2">
+        ← Quay lại danh sách bếp
+    </a>
+    <h2 class="h4 mb-1">Khai báo phiếu định lượng sản phẩm</h2>
+    <div class="text-secondary small">Sản phẩm này chưa có công thức định lượng (BOM). Bếp cần nhập định lượng nguyên liệu thực tế đã tiêu hao để chuyển đơn sang "Chờ giao".</div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0 fw-bold">Thông tin đơn hàng & Bánh</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5 text-secondary">Mã đơn:</dt>
+                    <dd class="col-sm-7 fw-bold">@Model.Don?.Ma</dd>
+
+                    <dt class="col-sm-5 text-secondary">Tên bánh:</dt>
+                    <dd class="col-sm-7 fw-bold text-primary">@Model.SanPham?.TenBanh</dd>
+
+                    <dt class="col-sm-5 text-secondary">Kích thước:</dt>
+                    <dd class="col-sm-7">@Model.SanPham?.KichThuoc</dd>
+
+                    <dt class="col-sm-5 text-secondary">Số lượng làm:</dt>
+                    <dd class="col-sm-7"><span class="badge bg-danger fs-6">@Model.ChiTiet?.SoLuong bánh</span></dd>
+
+                    <dt class="col-sm-5 text-secondary">Hẹn giao:</dt>
+                    <dd class="col-sm-7">@Model.Don?.NgayGioLay?.ToString("HH:mm dd/MM/yyyy")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="alert alert-warning">
+            <strong>Lưu ý:</strong> Số lượng nguyên liệu bên phải là <strong>tổng số lượng nguyên liệu thực tế đã dùng</strong> để làm hoàn thành @(Model.ChiTiet?.SoLuong ?? 1) bánh này trong mẻ vừa qua.
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Phiếu định lượng nguyên liệu tiêu hao</span>
+                <span class="badge bg-white text-primary">Bắt buộc</span>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div id="danh-sach-nguyen-lieu">
+                        @for (int i = 0; i < Model.DongNguyenLieus.Count; i++)
+                        {
+                            <div class="row g-2 mb-2 align-items-center dong-item">
+                                <div class="col-7">
+                                    <label class="form-label small text-muted mb-1">Nguyên liệu @(i + 1)</label>
+                                    <select asp-for="DongNguyenLieus[i].NguyenLieuId" class="form-select form-select-sm">
+                                        <option value="0">-- Chọn nguyên liệu --</option>
+                                        @foreach (var nl in Model.NguyenLieus)
+                                        {
+                                            <option value="@nl.Id">@nl.TenGoi (@nl.DonViTinh)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label small text-muted mb-1">Số lượng đã dùng</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.001" min="0" asp-for="DongNguyenLieus[i].SoLuong" class="form-control form-control-sm text-end" placeholder="0.00" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-check form-switch mt-3 mb-4 p-2 bg-light rounded border">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="luuBOM" asp-for="LuuLamBOMMacDinh" checked>
+                        <label class="form-check-label fw-semibold" for="luuBOM">
+                            Lưu công thức này làm định lượng (BOM) mặc định cho sản phẩm '@Model.SanPham?.TenBanh' để tự động áp dụng cho các lần sau
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success fw-bold px-4 py-2">
+                            @Icons.Svg("check", 18) Xác nhận định lượng & Chuyển Chờ giao
+                        </button>
+                        <a asp-page="/Bep/Index" class="btn btn-outline-secondary py-2">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

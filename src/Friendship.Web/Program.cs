@@ -40,7 +40,10 @@ var thuMucAnh = builder.Configuration["LuuTru:ThuMucAnh"]
     ?? Path.Combine(builder.Environment.ContentRootPath, "App_Data", "anh");
 builder.Services.AddSingleton(new AnhService(thuMucAnh));
 builder.Services.AddScoped<KhachHangService>();
+builder.Services.AddScoped<KhachHangAuthService>();
 builder.Services.AddScoped<CaService>();
+builder.Services.AddScoped<CaNhanVienService>();
+builder.Services.AddScoped<DinhLuongService>();
 builder.Services.AddScoped<ThanhToanService>();
 builder.Services.AddScoped<LoBanhService>();
 builder.Services.AddScoped<XaHangService>();
@@ -111,6 +114,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
             return Task.CompletedTask;
         };
+    })
+    .AddCookie(CustomerAuthHelper.Scheme, o =>
+    {
+        o.Cookie.Name = ".Friendship.Customer";
+        o.LoginPath = "/Dat/DangNhap";
+        o.AccessDeniedPath = "/Dat/DangNhap";
+        o.ExpireTimeSpan = TimeSpan.FromDays(30);
+        o.SlidingExpiration = true;
     });
 
 builder.Services.AddAuthorization(o =>
@@ -120,6 +131,7 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy(Policies.CanhBao, p => p.RequireRole(Policies.Kho, Policies.BanHang, Policies.QuanLy));
     o.AddPolicy(Policies.HuyHang, p => p.RequireRole(Policies.Kho, Policies.BanHang, Policies.SanXuat));
     o.AddPolicy(Policies.DeXuatNhap, p => p.RequireRole(Policies.Kho, Policies.QuanLy));
+    o.AddPolicy("TonKhoPolicy", p => p.RequireRole(Policies.Kho, Policies.QuanLy, Policies.QuanTri));
 });
 
 builder.Services.AddRazorPages(o =>
@@ -130,6 +142,8 @@ builder.Services.AddRazorPages(o =>
     {
         if (model.ViewEnginePath.Equals("/Kho/DeXuatNhap", StringComparison.OrdinalIgnoreCase))
             model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(Policies.DeXuatNhap));
+        else if (model.ViewEnginePath.Equals("/Kho/TonKho", StringComparison.OrdinalIgnoreCase))
+            model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter("TonKhoPolicy"));
         else
             model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(Policies.Kho));
     });
@@ -140,6 +154,7 @@ builder.Services.AddRazorPages(o =>
     o.Conventions.AllowAnonymousToPage("/Account/Login");
     o.Conventions.AllowAnonymousToPage("/Error");
     o.Conventions.AllowAnonymousToFolder("/Dat");
+    o.Conventions.AllowAnonymousToPage("/Dat/Index");
 });
 
 var app = builder.Build();
@@ -179,6 +194,10 @@ app.UseAuthorization();
 app.MapStaticAssets().AllowAnonymous();
 app.MapRazorPages().WithStaticAssets();
 app.MapFriendshipApi();
+
+app.MapGet("/Dat", () => Results.Redirect("/", permanent: false)).AllowAnonymous();
+app.MapGet("/Dat/Index", () => Results.Redirect("/", permanent: false)).AllowAnonymous();
+
 app.Run();
 
 public partial class Program { }

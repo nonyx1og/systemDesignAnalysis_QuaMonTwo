@@ -71,6 +71,11 @@ public class EditModel(NhanVienService nhanVien) : PageModel
         try
         {
             await nhanVien.DatLaiMatKhauAsync(Id!.Value, matKhauMoi ?? "");
+            if (Id == User.NhanVienId())
+            {
+                var nv = await nhanVien.LayAsync(Id.Value);
+                if (nv is not null) await SignInHelper.SignInAsync(HttpContext, nv);
+            }
             TempData["Message"] = "Đã đặt lại mật khẩu.";
         }
         catch (NghiepVuException e) { TempData["Error"] = e.Message; }

@@ -24,6 +24,21 @@ public record DongDeXuatNhap(
     public string TenNguyenLieu => TenGoi;
 }
 public record BangDeXuatNhap(decimal TongTienUocTinh, List<DongDeXuatNhap> Dong);
+public record DongDoiChieuPreview(
+    int NguyenLieuId,
+    string TenNguyenLieu,
+    string DonViTinh,
+    decimal SoLuongXuatKho,
+    decimal SoLuongDinhLuong,
+    decimal ChenhLech
+);
+public record BangXemTruocDoiChieu(
+    PhieuDinhLuongCa PhieuDinhLuong,
+    CaNhanVien Ca,
+    List<PhieuXuatKho> PhieuXuats,
+    List<DongDoiChieuPreview> Dong,
+    TrangThaiDoiChieu TrangThaiUocTinh
+);
 
 public class KhoService(FriendshipDb db, TimeProvider clock)
 {
@@ -105,8 +120,8 @@ public class KhoService(FriendshipDb db, TimeProvider clock)
         return new KeHoachXuat(dong);
     }
 
-    /// <summary>UC12 bước 3: tính lại kế hoạch ở thời điểm xác nhận (không tin số liệu cũ trên màn hình) rồi trừ tồn từng lô.</summary>
-    public async Task<KetQuaXuat> XuatAsync(IReadOnlyList<YeuCauXuat> yeuCau)
+    /// <summary>UC12 bước 3: tính lại kế hoạch ở thời điểm xác nhận (không tin số liệu cũ trên màn hình) rồi trừ tồn từng lô, đồng thời lưu phiếu xuất kho.</summary>
+    public async Task<KetQuaXuat> XuatAsync(IReadOnlyList<YeuCauXuat> yeuCau, int? nhanVienXuatId = null, string? ghiChu = null)
     {
         var kh = await LapKeHoachXuatAsync(yeuCau);
         if (!kh.DuHang)
@@ -114,9 +129,30 @@ public class KhoService(FriendshipDb db, TimeProvider clock)
                 + string.Join("; ", kh.Dong.Where(d => d.Thieu > 0)
                     .Select(d => $"{d.NguyenLieu.TenGoi} thiếu {d.Thieu:0.###} {d.NguyenLieu.DonViTinh}")) + ".");
 
+        var bayGio = clock.GetLocalNow().DateTime;
+
         foreach (var d in kh.Dong)
             foreach (var l in d.Lay)
                 l.Lo.SoLuongCon -= l.SoLuong;
+
+        // Lưu phiếu xuất kho để phục vụ đối chiếu định lượng ca
+        if (nhanVienXuatId.HasValue || await db.NhanViens.AnyAsync(n => n.VaiTro == VaiTro.KHO))
+        {
+            var nvId = nhanVienXuatId ?? (await db.NhanViens.FirstOrDefaultAsync(n => n.VaiTro == VaiTro.KHO))?.Id ?? 1;
+            var phieuXuat = new PhieuXuatKho
+            {
+                NhanVienXuatId = nvId,
+                NgayXuat = bayGio,
+                GhiChu = ghiChu ?? "Xuất nguyên liệu cho bếp làm bánh",
+                ChiTiets = kh.Dong.Select(d => new ChiTietXuatKho
+                {
+                    NguyenLieuId = d.NguyenLieu.Id,
+                    SoLuong = d.Lay.Sum(x => x.SoLuong)
+                }).Where(c => c.SoLuong > 0).ToList()
+            };
+            db.PhieuXuatKhos.Add(phieuXuat);
+        }
+
         try { await db.SaveChangesAsync(); }
         catch (DbUpdateConcurrencyException)
         {
@@ -133,6 +169,106 @@ public class KhoService(FriendshipDb db, TimeProvider clock)
             .ToList();
         return new KetQuaXuat(kh, canhBao);
     }
+
+    /// <summary>
+    /// Xem trước bảng đối chiếu giữa thực xuất kho trong ca và phiếu định lượng bếp gửi sang.
+    /// </summary>
+    public async Task<BangXemTruocDoiChieu> XemTruocDoiChieuAsync(int phieuDinhLuongCaId)
+    {
+        var phieu = await db.PhieuDinhLuongCas
+            .Include(p => p.CaNhanVien).ThenInclude(c => c.NhanVien)
+            .Include(p => p.NguoiLap)
+            .Include(p => p.ChiTiets).ThenInclude(c => c.NguyenLieu)
+            .FirstOrDefaultAsync(p => p.Id == phieuDinhLuongCaId)
+            ?? throw new NghiepVuException("Không tìm thấy phiếu định lượng ca.");
+
+        var ca = phieu.CaNhanVien;
+        var tuGio = ca.GioMoCa;
+        var denGio = ca.GioDongCa ?? phieu.ThoiGianXuat;
+
+        // Lấy các phiếu xuất kho trong khoảng thời gian ca làm việc
+        var phieuXuats = await db.PhieuXuatKhos
+            .Include(px => px.ChiTiets).ThenInclude(c => c.NguyenLieu)
+            .Where(px => px.NgayXuat >= tuGio.AddMinutes(-30) && px.NgayXuat <= denGio.AddMinutes(30))
+            .ToListAsync();
+
+        var xuatKhoDict = phieuXuats
+            .SelectMany(p => p.ChiTiets)
+            .GroupBy(c => c.NguyenLieuId)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.SoLuong));
+
+        var dinhLuongDict = phieu.ChiTiets.ToDictionary(c => c.NguyenLieuId, c => c.SoLuongDinhLuong);
+
+        var allNlIds = xuatKhoDict.Keys.Union(dinhLuongDict.Keys).Distinct().ToList();
+        var nls = await db.NguyenLieus.Where(n => allNlIds.Contains(n.Id)).ToDictionaryAsync(n => n.Id);
+
+        var dong = allNlIds.Select(id =>
+        {
+            var nl = nls.GetValueOrDefault(id);
+            var xk = xuatKhoDict.GetValueOrDefault(id, 0m);
+            var dl = dinhLuongDict.GetValueOrDefault(id, 0m);
+            var chenh = xk - dl;
+            return new DongDoiChieuPreview(
+                id,
+                nl?.TenGoi ?? $"Nguyên liệu #{id}",
+                nl?.DonViTinh ?? "đv",
+                xk,
+                dl,
+                chenh
+            );
+        }).OrderBy(d => d.TenNguyenLieu).ToList();
+
+        var coLech = dong.Any(d => d.ChenhLech != 0);
+        var coThatThoat = dong.Any(d => d.ChenhLech > 0 && (d.SoLuongDinhLuong == 0 || d.ChenhLech / d.SoLuongDinhLuong > 0.15m));
+        var trangThai = coThatThoat ? TrangThaiDoiChieu.CANH_BAO_THAT_THOAT : (coLech ? TrangThaiDoiChieu.LECH_DINH_MUC : TrangThaiDoiChieu.HOP_LE);
+
+        return new BangXemTruocDoiChieu(phieu, ca, phieuXuats, dong, trangThai);
+    }
+
+    /// <summary>
+    /// Thủ kho xác nhận lập biên bản đối chiếu định lượng ca.
+    /// </summary>
+    public async Task<BienBanDoiChieuKho> XacNhanDoiChieuAsync(int phieuDinhLuongCaId, int nguoiDoiChieuId, string? ghiChuGiaiTrinh = null)
+    {
+        var preview = await XemTruocDoiChieuAsync(phieuDinhLuongCaId);
+        if (preview.PhieuDinhLuong.TrangThai == TrangThaiPhieuDinhLuong.DA_DOI_CHIEU)
+            throw new NghiepVuException("Phiếu định lượng này đã được đối chiếu xong trước đó.");
+
+        var bienBan = new BienBanDoiChieuKho
+        {
+            PhieuDinhLuongCaId = phieuDinhLuongCaId,
+            NguoiDoiChieuId = nguoiDoiChieuId,
+            ThoiGianDoiChieu = clock.GetLocalNow().DateTime,
+            TrangThai = preview.TrangThaiUocTinh,
+            GhiChuGiaiTrinh = ghiChuGiaiTrinh,
+            ChiTiets = preview.Dong.Select(d => new ChiTietDoiChieuKho
+            {
+                NguyenLieuId = d.NguyenLieuId,
+                SoLuongXuatKho = d.SoLuongXuatKho,
+                SoLuongDinhLuong = d.SoLuongDinhLuong
+            }).ToList()
+        };
+
+        preview.PhieuDinhLuong.TrangThai = TrangThaiPhieuDinhLuong.DA_DOI_CHIEU;
+        db.BienBanDoiChieuKhos.Add(bienBan);
+        await db.SaveChangesAsync();
+        return bienBan;
+    }
+
+    public Task<BienBanDoiChieuKho?> LayBienBanTheoPhieuDinhLuongAsync(int phieuDinhLuongCaId) =>
+        db.BienBanDoiChieuKhos
+            .Include(b => b.NguoiDoiChieu)
+            .Include(b => b.PhieuDinhLuongCa).ThenInclude(p => p.CaNhanVien).ThenInclude(c => c.NhanVien)
+            .Include(b => b.ChiTiets).ThenInclude(c => c.NguyenLieu)
+            .FirstOrDefaultAsync(b => b.PhieuDinhLuongCaId == phieuDinhLuongCaId);
+
+    public Task<List<BienBanDoiChieuKho>> LayDanhSachBienBanDoiChieuAsync() =>
+        db.BienBanDoiChieuKhos
+            .Include(b => b.NguoiDoiChieu)
+            .Include(b => b.PhieuDinhLuongCa).ThenInclude(p => p.CaNhanVien).ThenInclude(c => c.NhanVien)
+            .Include(b => b.ChiTiets).ThenInclude(c => c.NguyenLieu)
+            .OrderByDescending(b => b.ThoiGianDoiChieu)
+            .ToListAsync();
 
     /// <summary>Đề xuất nhập hàng: liệt kê nguyên liệu có tổng tồn (các lô còn hạn) < mức cảnh báo tồn.</summary>
     public async Task<BangDeXuatNhap> LayDeXuatNhapAsync()

@@ -39,20 +39,37 @@ body.dat-body:has(.di-moi) .dat-footer {
 /* ---------- Màn hình đầu ---------- */
 
 .di-hero {
-  display: grid;
-  gap: 2.5rem;
-  padding-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.di-hero-chu {
+  width: 100%;
+}
+.di-hero-chu .dat-display {
+  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  line-height: 1.2;
+  margin: 0 auto 1.25rem;
+  max-width: 100%;
 }
 .di-hero-chu .dat-lead {
-  margin: 1.5rem 0 0;
+  margin: 0 auto 2rem;
+  max-width: 760px;
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: var(--dat-text-secondary);
 }
 .di-hero-nut {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem 1.5rem;
-  margin-top: 2rem;
+  gap: 1rem 1.25rem;
+  margin-top: 1.5rem;
 }
 
 /* Phiếu ví dụ: thân phiếu, đường đục lỗ, cuống */
@@ -395,13 +412,8 @@ body.dat-body:has(.di-moi) .dat-footer {
 
 @media (min-width: 992px) {
   .di-hero {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 3rem;
-    padding-top: 3rem;
-  }
-  .di-phieu {
-    justify-self: end;
-    max-width: 40rem;
+    padding-top: 4.5rem;
+    padding-bottom: 2.5rem;
   }
   .di-buoc {
     grid-template-columns: repeat(4, minmax(0, 1fr));

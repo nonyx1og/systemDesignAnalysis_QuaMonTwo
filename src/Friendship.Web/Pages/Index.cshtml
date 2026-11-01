@@ -1,4 +1,4 @@
-@page
+@page "/TongQuan"
 @model IndexModel
 @{
     ViewData["Title"] = "Tổng quan";
@@ -27,7 +27,7 @@
         viec.Add(("check", Model.PhieuChoDuyet > 0 ? "warn" : "", "Phiếu kiểm kê chờ duyệt", "Tồn lô chỉ cập nhật sau khi bạn duyệt", $"{Model.PhieuChoDuyet} phiếu", Url.Page("/QuanLy/DuyetKiemKe/Index")));
         viec.Add(("check-file", Model.PhieuHuyChoDuyet > 0 ? "warn" : "", "Phiếu hủy chờ duyệt", "Chỉ trừ kho và ghi chi phí sau khi duyệt", $"{Model.PhieuHuyChoDuyet} phiếu", Url.Page("/QuanLy/DuyetHuy/Index")));
     }
-    var loiTat = Menu.For(vaiTro).Where(m => m.Page != "/Index").Take(6).ToList();
+    var loiTat = Menu.For(vaiTro).Where(m => m.Page != "/TongQuan").Take(6).ToList();
 }
 <h1 class="page-title">Xin chào, @User.Identity!.Name</h1>
 <p class="text-secondary mb-3">@vaiTro.TenHienThi() · @homNay</p>

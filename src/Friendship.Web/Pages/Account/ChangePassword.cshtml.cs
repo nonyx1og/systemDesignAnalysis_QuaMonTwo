@@ -22,7 +22,7 @@ public class ChangePasswordModel(TaiKhoanService taiKhoan) : PageModel
             var nv = await taiKhoan.DoiMatKhauAsync(User.NhanVienId(), MatKhauCu, MatKhauMoi);
             await SignInHelper.SignInAsync(HttpContext, nv); // phiên hiện tại giữ lại, các cookie cũ khác mất hiệu lực
             TempData["Message"] = "Đã đổi mật khẩu.";
-            return RedirectToPage("/Index");
+            return Redirect("/TongQuan");
         }
         catch (NghiepVuException e)
         {

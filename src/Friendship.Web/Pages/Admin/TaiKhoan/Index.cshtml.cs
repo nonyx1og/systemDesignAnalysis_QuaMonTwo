@@ -25,4 +25,28 @@ public class IndexModel(NhanVienService nhanVien) : PageModel
         catch (NghiepVuException e) { TempData["Error"] = e.Message; }
         return RedirectToPage(new { Q, Role });
     }
+
+    public async Task<IActionResult> OnPostDangNhapNhanhAsync(int id)
+    {
+        var nv = await nhanVien.LayAsync(id);
+        if (nv is null || !nv.DangHoatDong)
+        {
+            TempData["Error"] = "Tài khoản không tồn tại hoặc đã bị khóa.";
+            return RedirectToPage(new { Q, Role });
+        }
+
+        await SignInHelper.SignInAsync(HttpContext, nv);
+        TempData["Message"] = $"Đã chuyển phiên làm việc sang: {nv.HoTen} ({nv.VaiTro.TenHienThi()}).";
+
+        var targetUrl = nv.VaiTro switch
+        {
+            VaiTro.QUAN_TRI => "/Admin/TaiKhoan",
+            VaiTro.BAN_HANG => "/BanHang/DonHang",
+            VaiTro.SAN_XUAT => "/Bep/ThietKe",
+            VaiTro.KHO => "/Kho/TonKho",
+            _ => "/TongQuan"
+        };
+
+        return LocalRedirect(targetUrl);
+    }
 }

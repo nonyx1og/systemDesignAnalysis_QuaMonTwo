@@ -14,12 +14,35 @@ public enum TinhTrangKhuyenMai { NGUNG, SAP_TOI, HET_HAN, DANG_AP_DUNG }
 public enum NhomThanhPhan { COT, VIEN, TOPPING, IN_AN, TANG }
 public enum TrangThaiThietKe { NHAP, CHO_DUYET, CAN_SUA, DA_BAO_GIA, DA_DAT, TU_CHOI, HET_HAN, KHACH_HUY }
 
+public enum LoaiCa { BEP_BANH, KHO, BAN_HANG }
+public enum BuoiCa { CA_SANG, CA_CHIEU }
+public enum NguonTieuHao { SAN_PHAM_CO_BOM, PHIEU_BO_SUNG, ME_LOI_DUYET }
+public enum TrangThaiPhieuDinhLuong { CHO_DOI_CHIEU, DA_DOI_CHIEU }
+public enum TrangThaiDoiChieu { HOP_LE, LECH_DINH_MUC, CANH_BAO_THAT_THOAT }
+
+public static class BuoiCaExtensions
+{
+    public static string TenHienThi(this BuoiCa b) => b switch
+    {
+        BuoiCa.CA_SANG => "Ca sáng (06:00 - 14:00)",
+        BuoiCa.CA_CHIEU => "Ca chiều (14:00 - 22:00)",
+        _ => b.ToString()
+    };
+
+    public static string TenNgan(this BuoiCa b) => b switch
+    {
+        BuoiCa.CA_SANG => "Ca sáng",
+        BuoiCa.CA_CHIEU => "Ca chiều",
+        _ => b.ToString()
+    };
+}
+
 public static class VaiTroExtensions
 {
     public static string TenHienThi(this VaiTro v) => v switch
     {
         VaiTro.BAN_HANG => "Nhân viên bán hàng",
-        VaiTro.SAN_XUAT => "Nhân viên sản xuất",
+        VaiTro.SAN_XUAT => "Nhân viên sản xuất (Bếp)",
         VaiTro.KHO => "Nhân viên kho",
         VaiTro.QUAN_LY => "Quản lý cửa hàng",
         VaiTro.QUAN_TRI => "Quản trị viên",

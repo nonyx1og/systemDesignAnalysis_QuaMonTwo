@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cakeCream" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5F7"/>
+      <stop offset="100%" stop-color="#FCE7F3"/>
+    </linearGradient>
+    <linearGradient id="strawberryDrip" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#BE123C"/>
+    </linearGradient>
+    <linearGradient id="candleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#BAE6FD"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="102" rx="46" ry="9" fill="#000" opacity="0.12"/>
+  <!-- Cake Plate -->
+  <ellipse cx="60" cy="98" rx="48" ry="10" fill="#E2E8F0"/>
+  <ellipse cx="60" cy="97" rx="45" ry="8" fill="#F8FAFC"/>
+  <!-- Bottom tier cylinder -->
+  <path d="M22,62 L22,90 C22,102 98,102 98,90 L98,62 Z" fill="url(#cakeCream)"/>
+  <!-- Bottom tier top surface -->
+  <ellipse cx="60" cy="62" rx="38" ry="12" fill="#FDF2F8"/>
+  <!-- Cream dripping on bottom tier -->
+  <path d="M22,62 C26,72 32,70 36,64 C40,74 46,75 52,65 C58,74 66,73 72,64 C78,75 86,72 90,65 C94,70 96,66 98,62 Z" fill="url(#strawberryDrip)"/>
+  <!-- Cream rosettes -->
+  <circle cx="34" cy="60" r="5" fill="#FFF"/>
+  <circle cx="48" cy="58" r="5.5" fill="#FFF"/>
+  <circle cx="62" cy="57" r="6" fill="#FFF"/>
+  <circle cx="76" cy="58" r="5.5" fill="#FFF"/>
+  <circle cx="86" cy="61" r="5" fill="#FFF"/>
+  <!-- Fresh Strawberries -->
+  <path d="M48,54 C46,47 52,43 54,48 C56,43 62,47 60,54 Z" fill="#E11D48"/>
+  <circle cx="53" cy="49" r="0.8" fill="#FEF08A"/>
+  <circle cx="55" cy="51" r="0.8" fill="#FEF08A"/>
+  <!-- Candle -->
+  <rect x="58" y="24" width="4" height="24" rx="2" fill="url(#candleGrad)"/>
+  <!-- Wick -->
+  <line x1="60" y1="24" x2="60" y2="20" stroke="#334155" stroke-width="1.5"/>
+  <!-- Flame -->
+  <path d="M60,10 C57,15 56,18 60,21 C64,18 63,15 60,10 Z" fill="#F59E0B"/>
+  <path d="M60,13 C58.5,16 58,18 60,20 C62,18 61.5,16 60,13 Z" fill="#FEF08A"/>
+</svg>

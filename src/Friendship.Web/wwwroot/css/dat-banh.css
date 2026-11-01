@@ -1,5 +1,5 @@
 /* ==========================================================================
-   nongnongBakery - trang khách /Dat/*
+   FrendshipBakery - trang khách /Dat/*
    Hướng thiết kế: "phiếu đặt bánh". Hợp đồng đầy đủ ở docs/design-khach.md.
    Font tự host (SIL OFL) trong wwwroot/fonts, license đi kèm.
    ========================================================================== */
@@ -884,3 +884,68 @@ textarea.form-control {
   border: 1px solid var(--dat-border-strong);
   border-radius: var(--dat-radius-sm);
 }
+
+/* ==========================================================================
+   DROPDOWN TÀI KHOẢN
+   ========================================================================== */
+.dat-acc-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dat-acc-dropdown > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--dat-radius-sm);
+  background: #fff;
+  border: 1px solid var(--dat-champagne);
+  color: var(--dat-text-main);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+.dat-acc-dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+.dat-acc-dropdown > summary:hover,
+.dat-acc-dropdown[open] > summary {
+  border-color: var(--dat-berry);
+  color: var(--dat-berry);
+  box-shadow: 0 2px 8px rgba(184, 51, 42, 0.08);
+}
+.dat-acc-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 250px;
+  background: #ffffff;
+  border: 1px solid var(--dat-champagne);
+  border-radius: var(--dat-radius-md);
+  box-shadow: 0 10px 28px rgba(61,43,31,0.12);
+  padding: 0.75rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.dat-acc-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--dat-radius-sm);
+  color: var(--dat-text-main);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s ease;
+}
+.dat-acc-link:hover {
+  background: var(--dat-cream);
+  color: var(--dat-berry);
+}
+

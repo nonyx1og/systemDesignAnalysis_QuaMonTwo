@@ -1,0 +1,323 @@
+@page
+@model Friendship.Web.Pages.Dat.DonHangModel
+@using Friendship.Web
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<div class="dat-orders-page" style="margin: 1.5rem 0 3.5rem;">
+    <!-- Header trang đơn hàng -->
+    <header style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem;">
+        <div>
+            <span style="font-size: 0.8125rem; font-weight: 700; color: var(--dat-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                QUẢN LÝ ĐƠN HÀNG
+            </span>
+            <h1 class="dat-h1" style="font-size: 2.125rem; margin: 0.25rem 0 0;">Đơn hàng của bạn</h1>
+            <p style="color: var(--dat-text-secondary); margin: 0.35rem 0 0; font-size: 0.9375rem;">
+                Theo dõi thời gian giao bánh dự kiến, tiến độ làm bánh và xem chi tiết hoá đơn.
+            </p>
+        </div>
+
+        @if (Model.Khach is not null)
+        {
+            <div class="dat-paper" style="padding: 0.75rem 1.25rem; background: #fff; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 0.875rem; color: var(--dat-text-secondary);">Khách hàng: <strong>@Model.Khach.TenKhachHang</strong></span>
+                <span style="background: var(--dat-berry-light); color: var(--dat-berry); padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">
+                    ⭐ @Model.Khach.DiemTichLuy điểm
+                </span>
+            </div>
+        }
+        else
+        {
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="/Dat/DangNhap?returnUrl=/Dat/DonHang" class="dat-btn dat-btn-primary" style="font-size: 0.875rem;">Đăng nhập để xem đầy đủ</a>
+                <a href="/Dat/DangKy" class="dat-btn" style="background:#fff; border: 1px solid var(--dat-champagne); color: var(--dat-text-main); font-size: 0.875rem;">Đăng ký</a>
+            </div>
+        }
+    </header>
+
+    @if (Model.Khach is null && string.IsNullOrEmpty(Model.SdtTraCuu))
+    {
+        <!-- Form tra cứu nhanh nếu chưa đăng nhập -->
+        <div class="dat-paper" style="max-width: 520px; margin: 2rem auto; padding: 2.25rem 2rem; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🎂</div>
+            <h2 class="dat-h2" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Tra cứu đơn hàng bằng Số điện thoại</h2>
+            <p style="color: var(--dat-text-secondary); font-size: 0.9375rem; margin-bottom: 1.5rem;">
+                Nhập số điện thoại bạn đã dùng khi đặt bánh để xem toàn bộ danh sách đơn hàng và thời gian giao dự kiến.
+            </p>
+
+            <form method="get" style="display: flex; gap: 0.5rem; max-width: 380px; margin: 0 auto;">
+                <input type="tel" name="sdt" class="form-control" placeholder="Nhập số điện thoại..." required style="background:#fff; border-color:var(--dat-champagne); border-radius: 999px; padding: 0.65rem 1.25rem;" />
+                <button type="submit" class="dat-btn dat-btn-primary" style="border-radius: 999px; padding: 0 1.25rem;">Tra cứu</button>
+            </form>
+        </div>
+    }
+    else if (Model.DanhSachDon.Count == 0)
+    {
+        <div class="dat-paper" style="text-align: center; padding: 3.5rem 2rem; max-width: 560px; margin: 2rem auto;">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem;">📦</div>
+            <h2 class="dat-h2" style="font-size: 1.375rem; margin-bottom: 0.5rem;">Chưa có đơn hàng nào</h2>
+            <p style="color: var(--dat-text-secondary); font-size: 0.9375rem; margin-bottom: 1.5rem;">
+                Bạn chưa có đơn đặt bánh nào tại FrendshipBakery. Khám phá ngay các mẫu bánh tươi ngon của tiệm nhé!
+            </p>
+            <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <a href="/Dat/Menu" class="dat-btn dat-btn-primary">Xem thực đơn bánh</a>
+                <a href="/Dat/ThietKe" class="dat-btn" style="background:#fff; border: 1px solid var(--dat-champagne); color: var(--dat-text-main);">Tự thiết kế bánh 2D</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Danh sách đơn hàng -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            @foreach (var d in Model.DanhSachDon)
+            {
+                if (d.Loai == "ThietKe")
+                {
+                    <!-- CARD BÁNH TỰ THIẾT KẾ -->
+                    <article class="dat-paper" style="padding: 1.75rem; border-radius: 16px; border: 1.5px solid var(--dat-champagne); box-shadow: 0 4px 20px rgba(0,0,0,0.04); background: #fff;">
+                        <!-- Header thẻ thiết kế -->
+                        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--dat-champagne); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem;">
+                                <span style="background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; font-weight: 700; font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 999px; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                    🎨 BÁNH TỰ THIẾT KẾ
+                                </span>
+                                <span style="font-family: monospace; font-size: 1.05rem; font-weight: 700; color: var(--dat-text-main);">
+                                    @d.MaDon
+                                </span>
+                                <span class="theo-chip theo-chip--@d.TrangThaiClass" style="font-size: 0.8125rem; padding: 0.25rem 0.75rem; font-weight: 650;">
+                                    @d.TrangThai
+                                </span>
+                            </div>
+
+                            <div style="font-size: 0.8125rem; color: var(--dat-text-muted);">
+                                Ngày gửi: <strong>@d.NgayLap.ToString("dd/MM/yyyy HH:mm")</strong>
+                            </div>
+                        </div>
+
+                        <!-- Thanh tiến độ & Trạng thái chi tiết hiện tại của bánh -->
+                        <div style="background: var(--dat-bg-canvas); border: 1px solid var(--dat-champagne); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.1rem;">⏱️</span>
+                                    <strong style="color: var(--dat-text-main); font-size: 0.9375rem;">
+                                        Tiến độ bánh: @d.BuocHienTai
+                                    </strong>
+                                </div>
+                                <span style="font-size: 0.8125rem; font-weight: 700; color: var(--dat-berry);">
+                                    @d.TienDoPhanTram% hoàn thành
+                                </span>
+                            </div>
+
+                            <!-- Progress bar -->
+                            <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 999px; overflow: hidden; margin-bottom: 0.65rem;">
+                                <div style="width: @d.TienDoPhanTram%; height: 100%; background: linear-gradient(90deg, #E65100, var(--dat-berry)); border-radius: 999px; transition: width 0.4s ease;"></div>
+                            </div>
+
+                            <!-- Mô tả chi tiết trạng thái hiện tại -->
+                            <p style="margin: 0; font-size: 0.875rem; color: var(--dat-text-main); line-height: 1.45;">
+                                📍 <strong>Trạng thái hiện tại:</strong> @d.TrangThaiChiTiet
+                            </p>
+                        </div>
+
+                        <!-- Nội dung bánh: Ảnh + Thông tin chi tiết + Giá & Thao tác -->
+                        <div style="display: grid; grid-template-columns: minmax(140px, 180px) 1fr minmax(200px, 240px); gap: 1.5rem; align-items: start;">
+                            <!-- Cột 1: Ảnh thiết kế 2D hoặc ảnh bánh thật -->
+                            <div style="text-align: center;">
+                                @if (!string.IsNullOrEmpty(d.AnhThanhPham))
+                                {
+                                    <div style="position: relative; border-radius: 12px; overflow: hidden; border: 2px solid var(--dat-berry); box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                        <img src="/dat/anh/@d.MaTraCuuThietKe/thanh-pham" alt="Ảnh bánh thật" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                                        <span style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.6875rem; font-weight: 700; padding: 0.25rem 0.4rem;">
+                                            📸 Bánh thật tại bếp
+                                        </span>
+                                    </div>
+                                    <a href="/dat/anh/@d.MaTraCuuThietKe/thiet-ke" target="_blank" style="font-size: 0.75rem; color: var(--dat-text-secondary); text-decoration: underline; margin-top: 0.35rem; display: inline-block;">
+                                        Xem bản vẽ 2D
+                                    </a>
+                                }
+                                else if (!string.IsNullOrEmpty(d.MaTraCuuThietKe))
+                                {
+                                    <div style="border-radius: 12px; overflow: hidden; border: 1px solid var(--dat-champagne); background: #fdfbf7;">
+                                        <img src="/dat/anh/@d.MaTraCuuThietKe/thiet-ke" alt="Bản vẽ thiết kế 2D" style="width: 100%; aspect-ratio: 1/1; object-fit: contain; display: block; padding: 0.5rem;" />
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: var(--dat-text-muted); display: block; margin-top: 0.35rem;">
+                                        Bản vẽ mẫu 2D
+                                    </span>
+                                }
+                            </div>
+
+                            <!-- Cột 2: Thông tin tùy chỉnh của bánh -->
+                            <div>
+                                <h3 style="font-size: 1.1875rem; margin: 0 0 0.5rem; color: var(--dat-text-main); font-weight: 700;">
+                                    @d.TenBanh
+                                </h3>
+
+                                <div style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; background: #fff8f0; border: 1px solid #ffe0b2; padding: 0.4rem 0.8rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                                    <span style="font-size: 0.8125rem; font-weight: 600; color: #b78103;">
+                                        🚚 Hẹn nhận bánh:
+                                    </span>
+                                    <strong style="color: var(--dat-berry); font-size: 0.875rem;">
+                                        @d.DuKienDisplay
+                                    </strong>
+                                    @if (!string.IsNullOrEmpty(d.DemNguoc))
+                                    {
+                                        <span style="font-size: 0.75rem; background: #fff; padding: 0.15rem 0.5rem; border-radius: 999px; color: var(--dat-text-secondary); border: 1px solid #ffd59e;">
+                                            @d.DemNguoc
+                                        </span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(d.ChuTrenBanh))
+                                {
+                                    <div style="margin-bottom: 0.45rem; font-size: 0.875rem; color: var(--dat-text-main);">
+                                        ✍️ <strong>Chữ trên bánh:</strong> <span style="font-style: italic; color: var(--dat-berry);">“@d.ChuTrenBanh”</span>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(d.LoiNhan))
+                                {
+                                    <div style="margin-bottom: 0.45rem; font-size: 0.875rem; color: var(--dat-text-secondary);">
+                                        📝 <strong>Ghi chú cho bếp:</strong> @d.LoiNhan
+                                    </div>
+                                }
+
+                                @if (d.ThanhPhans.Count > 0)
+                                {
+                                    <div style="margin-top: 0.65rem;">
+                                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--dat-text-muted); text-transform: uppercase; letter-spacing: 0.03em; display: block; margin-bottom: 0.35rem;">
+                                            Thành phần tùy chỉnh đã chọn:
+                                        </span>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                                            @foreach (var tp in d.ThanhPhans)
+                                            {
+                                                <span style="background: var(--dat-bg-canvas); border: 1px solid var(--dat-champagne); border-radius: 6px; padding: 0.2rem 0.55rem; font-size: 0.75rem; color: var(--dat-text-main);">
+                                                    @tp
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Cột 3: Giá & Nút hành động -->
+                            <div style="text-align: right; background: #faf8f5; border-radius: 12px; padding: 1.15rem; border: 1px solid var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                                <div>
+                                    <div style="margin-bottom: 0.35rem;">
+                                        <span style="font-size: 0.75rem; color: var(--dat-text-muted); display: block;">Tổng tiền bánh</span>
+                                        <span class="dat-money" style="font-size: 1.5rem; font-weight: 800; color: var(--dat-berry);">
+                                            @Fmt.Tien(d.TongTien)
+                                        </span>
+                                    </div>
+
+                                    @if (d.PhuPhi > 0)
+                                    {
+                                        <div style="font-size: 0.75rem; color: #d97706; margin-bottom: 0.35rem;">
+                                            + Phụ phí: <strong>@Fmt.Tien(d.PhuPhi)</strong>
+                                            @if (!string.IsNullOrEmpty(d.LyDoPhuPhi))
+                                            {
+                                                <span style="display: block; font-size: 0.6875rem; color: var(--dat-text-muted);">(@d.LyDoPhuPhi)</span>
+                                            }
+                                        </div>
+                                    }
+
+                                    <div style="font-size: 0.8125rem; color: var(--dat-text-secondary); border-top: 1px dashed var(--dat-champagne); padding-top: 0.4rem; margin-top: 0.4rem;">
+                                        <div>Đã cọc: <strong style="color: #16a34a;">@Fmt.Tien(d.DaThanhToan)</strong></div>
+                                        @if (d.ConLai > 0)
+                                        {
+                                            <div>Còn lại: <strong style="color: var(--dat-berry);">@Fmt.Tien(d.ConLai)</strong></div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+                                    @if (d.TrangThaiClass == "tin" && d.DaThanhToan == 0)
+                                    {
+                                        <a href="/Dat/Theo/@d.MaTraCuuThietKe" class="dat-btn dat-btn-primary" style="background: linear-gradient(135deg, var(--dat-berry), #e63956); color: #fff; font-size: 0.875rem; font-weight: 700; text-align: center; padding: 0.6rem 1rem; border-radius: 8px;">
+                                            👉 Xem báo giá & Đặt cọc
+                                        </a>
+                                    }
+                                    else if (d.TrangThaiClass == "loi" && d.TrangThai.Contains("sửa", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <a href="/Dat/ThietKe/@d.MaTraCuuThietKe" class="dat-btn" style="background: #fff; border: 1.5px solid #dc3545; color: #dc3545; font-size: 0.875rem; font-weight: 700; text-align: center; padding: 0.55rem 1rem; border-radius: 8px;">
+                                            ✏️ Sửa lại thiết kế
+                                        </a>
+                                    }
+                                    else if (!string.IsNullOrEmpty(d.MaTraCuuThietKe))
+                                    {
+                                        <a href="/Dat/Theo/@d.MaTraCuuThietKe" class="dat-btn dat-btn-primary" style="font-size: 0.875rem; font-weight: 600; text-align: center; padding: 0.55rem 1rem; border-radius: 8px;">
+                                            🔍 Xem chi tiết tiến độ
+                                        </a>
+                                    }
+
+                                    @if (d.DonHangId.HasValue)
+                                    {
+                                        <a href="/Dat/HoaDon?id=@d.DonHangId" class="dat-btn" style="background: #fff; border: 1px solid var(--dat-champagne); color: var(--dat-text-main); font-size: 0.8125rem; font-weight: 600; text-align: center; padding: 0.45rem 0.85rem; border-radius: 8px;">
+                                            🧾 Xem hoá đơn
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                }
+                else
+                {
+                    <!-- CARD BÁNH TIỆM / BÁN SẴN -->
+                    <article class="dat-paper" style="padding: 1.5rem 1.75rem; border-radius: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.25rem;">
+                        <div style="flex: 1 1 340px;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.45rem;">
+                                <span style="font-family: monospace; font-size: 1.125rem; font-weight: 700; color: var(--dat-text-main);">@d.MaDon</span>
+                                <span class="theo-chip theo-chip--@d.TrangThaiClass" style="font-size: 0.75rem; padding: 0.2rem 0.65rem;">
+                                    @d.TrangThai
+                                </span>
+                            </div>
+
+                            <h3 style="font-size: 1.1875rem; margin: 0 0 0.4rem; color: var(--dat-text-main); font-weight: 650;">
+                                @d.TenBanh
+                            </h3>
+
+                            <div style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; background: var(--dat-bg-canvas); padding: 0.45rem 0.85rem; border-radius: 8px; margin-top: 0.25rem; border: 1px solid var(--dat-champagne);">
+                                <span style="font-size: 0.8125rem; font-weight: 600; color: var(--dat-text-main);">
+                                    🚚 Giao / Nhận dự kiến:
+                                </span>
+                                <strong style="color: var(--dat-berry); font-size: 0.875rem;">
+                                    @d.DuKienDisplay
+                                </strong>
+                                @if (!string.IsNullOrEmpty(d.DemNguoc))
+                                {
+                                    <span style="font-size: 0.75rem; background: #fff; padding: 0.15rem 0.5rem; border-radius: 999px; color: var(--dat-text-secondary); border: 1px solid var(--dat-champagne);">
+                                        @d.DemNguoc
+                                    </span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(d.TrangThaiChiTiet))
+                            {
+                                <p style="font-size: 0.8125rem; color: var(--dat-text-secondary); margin: 0.45rem 0 0;">
+                                    📍 @d.TrangThaiChiTiet
+                                </p>
+                            }
+                        </div>
+
+                        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; min-width: 180px;">
+                            <div>
+                                <span style="font-size: 0.75rem; color: var(--dat-text-muted); display: block;">Tổng tiền đơn</span>
+                                <span class="dat-money" style="font-size: 1.375rem; font-weight: 700; color: var(--dat-berry);">
+                                    @Fmt.Tien(d.TongTien)
+                                </span>
+                            </div>
+
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="/Dat/HoaDon?id=@d.Id" class="dat-btn dat-btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600;">
+                                    Xem hoá đơn
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            }
+        </div>
+    }
+</div>
+

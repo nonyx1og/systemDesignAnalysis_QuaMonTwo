@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Friendship.Web.Pages.QuanLy.SanPham;
 
-public class EditModel(SanPhamService sanPham, NguyenLieuService nguyenLieu) : PageModel
+public class EditModel(SanPhamService sanPham, NguyenLieuService nguyenLieu, IWebHostEnvironment env) : PageModel
 {
     [BindProperty(SupportsGet = true)] public int? Id { get; set; }
     [BindProperty] public InputModel Input { get; set; } = new();
+    [BindProperty] public IFormFile? TepAnh { get; set; }
     public bool IsNew => Id is null;
     public List<NguyenLieuTon> NguyenLieus { get; set; } = [];
     public GiaVonUocTinh? GiaVon { get; set; }
@@ -20,6 +21,7 @@ public class EditModel(SanPhamService sanPham, NguyenLieuService nguyenLieu) : P
         [Required(ErrorMessage = "Nhập kích thước")] public string KichThuoc { get; set; } = "";
         [Range(1, 999999999, ErrorMessage = "Đơn giá phải lớn hơn 0")] public decimal DonGia { get; set; }
         [Range(1, 100000, ErrorMessage = "Hạn sử dụng (giờ) phải lớn hơn 0")] public int HanSuDungGio { get; set; }
+        public string? HinhAnh { get; set; }
         public List<BomRow> Bom { get; set; } = [];
     }
 
@@ -38,6 +40,7 @@ public class EditModel(SanPhamService sanPham, NguyenLieuService nguyenLieu) : P
         Input = new InputModel
         {
             TenBanh = sp.TenBanh, KichThuoc = sp.KichThuoc, DonGia = sp.DonGia, HanSuDungGio = sp.HanSuDungGio,
+            HinhAnh = sp.HinhAnh,
             Bom = sp.DinhLuongs.OrderBy(d => d.NguyenLieu.TenGoi)
                 .Select(d => new BomRow { NguyenLieuId = d.NguyenLieuId, DinhMuc = d.DinhMuc }).ToList()
         };
@@ -57,11 +60,43 @@ public class EditModel(SanPhamService sanPham, NguyenLieuService nguyenLieu) : P
             return Page();
         }
         Input.Bom = Input.Bom.Where(b => b.NguyenLieuId != 0).ToList();
+
+        // Xử lý upload file hình ảnh sản phẩm từ máy tính (nếu có tải lên)
+        if (TepAnh is { Length: > 0 })
+        {
+            var exts = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var ext = Path.GetExtension(TepAnh.FileName).ToLowerInvariant();
+            if (!exts.Contains(ext))
+            {
+                ModelState.AddModelError("TepAnh", "Chỉ nhận định dạng ảnh JPG, JPEG, PNG, WEBP.");
+                return Page();
+            }
+
+            if (TepAnh.Length > 10 * 1024 * 1024)
+            {
+                ModelState.AddModelError("TepAnh", "Dung lượng ảnh tối đa 10 MB.");
+                return Page();
+            }
+
+            var thuMucUpload = Path.Combine(env.WebRootPath, "uploads", "san-pham");
+            Directory.CreateDirectory(thuMucUpload);
+            var tenFileMoi = $"sp_{Guid.NewGuid():N}{ext}";
+            var duongDanGhi = Path.Combine(thuMucUpload, tenFileMoi);
+
+            await using (var stream = new FileStream(duongDanGhi, FileMode.Create))
+            {
+                await TepAnh.CopyToAsync(stream);
+            }
+
+            Input.HinhAnh = $"/uploads/san-pham/{tenFileMoi}";
+        }
+
         if (!ModelState.IsValid) return Page();
         try
         {
             var sp = await sanPham.LuuAsync(new SanPhamInput(Id, Input.TenBanh, Input.KichThuoc, Input.DonGia,
-                Input.HanSuDungGio, Input.Bom.Select(b => new DinhLuongInput(b.NguyenLieuId, b.DinhMuc ?? 0)).ToList()));
+                Input.HanSuDungGio, Input.Bom.Select(b => new DinhLuongInput(b.NguyenLieuId, b.DinhMuc ?? 0)).ToList(),
+                Input.HinhAnh));
             var gv = await sanPham.GiaVonAsync(sp.Id);
             TempData["Message"] = $"Đã lưu sản phẩm. Giá vốn ước tính {Fmt.Tien(gv.GiaVon)}, biên lợi nhuận ước tính {Fmt.So(Math.Round((sp.DonGia - gv.GiaVon) / sp.DonGia * 100, 1))}%.";
             return RedirectToPage("Edit", new { id = sp.Id });

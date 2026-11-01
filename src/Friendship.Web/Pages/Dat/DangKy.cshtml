@@ -1,0 +1,69 @@
+@page
+@model Friendship.Web.Pages.Dat.DangKyModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản khách hàng";
+}
+
+<div class="dat-auth-container" style="max-width: 520px; margin: 2rem auto;">
+    <div class="dat-paper" style="padding: 2.25rem 2rem;">
+        <header style="text-align: center; margin-bottom: 1.75rem;">
+            <p style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8125rem; color: var(--dat-text-muted); margin-bottom: 0.25rem;">Thành viên FrendshipBakery</p>
+            <h1 class="dat-h1" style="font-size: 1.875rem; margin-bottom: 0.5rem;">Tạo tài khoản mới</h1>
+            <p style="color: var(--dat-text-secondary); font-size: 0.9375rem;">Đăng ký để tích điểm thưởng, lưu địa chỉ giao hàng và theo dõi đơn bánh dễ dàng.</p>
+        </header>
+
+        <form method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="dat-flash dat-flash-err mb-3" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="HoTen" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Họ và tên <span style="color:var(--dat-berry);">*</span></label>
+                <input asp-for="HoTen" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" autofocus style="background:#fff; border-color:var(--dat-champagne);" />
+                <span asp-validation-for="HoTen" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SoDienThoai" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Số điện thoại <span style="color:var(--dat-berry);">*</span></label>
+                <input asp-for="SoDienThoai" type="tel" inputmode="tel" class="form-control" placeholder="10 chữ số (bắt đầu bằng 0)" style="background:#fff; border-color:var(--dat-champagne);" />
+                <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-sm-6">
+                    <label asp-for="MatKhau" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Mật khẩu <span style="color:var(--dat-berry);">*</span></label>
+                    <input asp-for="MatKhau" type="password" class="form-control" placeholder="Tối thiểu 6 ký tự" style="background:#fff; border-color:var(--dat-champagne);" />
+                    <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                </div>
+                <div class="col-sm-6">
+                    <label asp-for="NhapLaiMatKhau" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Nhập lại mật khẩu <span style="color:var(--dat-berry);">*</span></label>
+                    <input asp-for="NhapLaiMatKhau" type="password" class="form-control" placeholder="Nhập lại mật khẩu" style="background:#fff; border-color:var(--dat-champagne);" />
+                    <span asp-validation-for="NhapLaiMatKhau" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Email (không bắt buộc)</label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="nhanbanh@gmail.com" style="background:#fff; border-color:var(--dat-champagne);" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DiaChi" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Địa chỉ nhận bánh mặc định</label>
+                <input asp-for="DiaChi" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện" style="background:#fff; border-color:var(--dat-champagne);" />
+                <span asp-validation-for="DiaChi" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="dat-btn dat-btn-primary w-100" style="padding: 0.75rem; font-size: 1.0625rem; font-weight: 600;">Đăng ký tài khoản</button>
+
+            <div style="text-align: center; margin-top: 1.5rem; border-top: 1px dashed var(--dat-champagne); padding-top: 1.25rem;">
+                <p style="margin: 0; color: var(--dat-text-secondary); font-size: 0.9375rem;">
+                    Đã có tài khoản? <a href="/Dat/DangNhap" style="font-weight: 700; color: var(--dat-berry); text-decoration: underline;">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

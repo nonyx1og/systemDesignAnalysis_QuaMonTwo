@@ -1,0 +1,53 @@
+@page
+@model Friendship.Web.Pages.Dat.DangNhapModel
+@{
+    ViewData["Title"] = "Đăng nhập khách hàng";
+}
+
+<div class="dat-auth-container" style="max-width: 440px; margin: 3rem auto;">
+    <div class="dat-paper" style="padding: 2.5rem 2rem;">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <div style="margin-bottom: 0.75rem;">@Icons.Logo(36)</div>
+            <h1 class="dat-h1" style="font-size: 1.875rem; margin-bottom: 0.5rem;">Đăng nhập</h1>
+            <p style="color: var(--dat-text-secondary); font-size: 0.9375rem;">Để xem đơn hàng, hoá đơn và thiết kế của bạn</p>
+        </header>
+
+        <form method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="dat-flash dat-flash-err mb-3" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="SoDienThoai" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Số điện thoại hoặc Tên đăng nhập</label>
+                <input asp-for="SoDienThoai" class="form-control" placeholder="SĐT khách hàng hoặc tên đăng nhập nhân viên" autofocus style="background:#fff; border-color:var(--dat-champagne);" />
+                <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="MatKhau" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Mật khẩu</label>
+                <input asp-for="MatKhau" type="password" class="form-control" placeholder="Mật khẩu của bạn" style="background:#fff; border-color:var(--dat-champagne);" />
+                <span asp-validation-for="MatKhau" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="dat-btn dat-btn-primary w-100" style="padding: 0.75rem; font-size: 1.0625rem; font-weight: 600;">Đăng nhập</button>
+
+            <div style="text-align: center; margin-top: 1.75rem; border-top: 1px dashed var(--dat-champagne); padding-top: 1.25rem;">
+                <p style="margin: 0 0 0.5rem; color: var(--dat-text-secondary); font-size: 0.9375rem;">
+                    Chưa có tài khoản? <a href="/Dat/DangKy@(string.IsNullOrEmpty(Model.ReturnUrl) ? "" : $"?returnUrl={Uri.EscapeDataString(Model.ReturnUrl)}")" style="font-weight: 700; color: var(--dat-berry); text-decoration: underline;">Đăng ký ngay</a>
+                </p>
+                <p style="margin: 0; font-size: 0.8125rem; color: var(--dat-text-muted);">
+                    Hoặc dùng mã tra cứu để <a href="/Dat/Tim" style="color: inherit; text-decoration: underline;">Tra cứu đơn lẻ</a>
+                </p>
+            </div>
+
+            <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--dat-champagne); text-align: center;">
+                <a href="/Account/Login" style="font-size: 0.8125rem; color: var(--dat-text-secondary); text-decoration: none;">
+                    🏢 Bạn là nhân viên tiệm bánh? Đăng nhập nội bộ tại đây
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

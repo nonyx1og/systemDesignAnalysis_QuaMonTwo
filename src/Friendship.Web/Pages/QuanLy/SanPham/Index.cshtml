@@ -32,7 +32,15 @@ else
         @foreach (var sp in Model.Items)
         {
             <tr>
-                <td data-label="Bánh">@sp.TenBanh</td>
+                <td data-label="Bánh">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="@sp.AnhHienThi" alt="@sp.TenBanh" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #e0d5cb; flex-shrink: 0;" />
+                        <div>
+                            <div class="fw-semibold">@sp.TenBanh</div>
+                            <div class="text-secondary small">Mã #@sp.Id</div>
+                        </div>
+                    </div>
+                </td>
                 <td data-label="Kích thước">@sp.KichThuoc</td>
                 <td data-label="Đơn giá" class="text-end">@Fmt.Tien(sp.DonGia)</td>
                 <td data-label="HSD (giờ)" class="text-end">@sp.HanSuDungGio</td>

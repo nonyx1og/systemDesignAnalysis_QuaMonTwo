@@ -12,7 +12,11 @@
         {
             <div class="col-6 col-md-4 col-xl-3">
                 <input type="radio" class="btn-check" name="SanPhamId" id="sp@(sp.Id)" value="@sp.Id" data-gio="@sp.HanSuDungGio" checked="@(Model.SanPhamId == sp.Id)" />
-                <label class="btn btn-outline-primary btn-bep w-100" for="sp@(sp.Id)">@sp.TenBanh<br /><small>@sp.KichThuoc · HSD @sp.HanSuDungGio giờ</small></label>
+                <label class="btn btn-outline-primary btn-bep w-100 d-flex flex-column align-items-center justify-content-center p-2" for="sp@(sp.Id)">
+                    <img src="@sp.AnhHienThi" alt="@sp.TenBanh" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; margin-bottom: 6px;" />
+                    <span>@sp.TenBanh</span>
+                    <small class="text-muted">@sp.KichThuoc · HSD @sp.HanSuDungGio giờ</small>
+                </label>
             </div>
         }
     </div>

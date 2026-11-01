@@ -1,0 +1,239 @@
+@page
+@model Friendship.Web.Pages.Kho.TonKhoModel
+@{
+    ViewData["Title"] = "Quản lý tồn kho";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="page-title mb-0">Quản lý tồn kho</h1>
+        <p class="text-secondary mb-0 small">Theo dõi tồn kho nguyên liệu sản xuất và các lô bánh thành phẩm tại tiệm</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-page="/Kho/NhapKho" class="btn btn-primary btn-sm">
+            @Icons.Svg("arrow-down", 16) + Nhập kho
+        </a>
+        <a asp-page="/Kho/XuatNguyenLieu" class="btn btn-outline-primary btn-sm">
+            @Icons.Svg("arrow-up", 16) Xuất nguyên liệu
+        </a>
+        <a asp-page="/Kho/DeXuatNhap" class="btn btn-outline-warning btn-sm">
+            @Icons.Svg("list", 16) Đề xuất nhập
+        </a>
+        <a asp-page="/Kho/KiemKe/Index" class="btn btn-outline-secondary btn-sm">
+            @Icons.Svg("clipboard", 16) Kiểm kê
+        </a>
+    </div>
+</div>
+
+<!-- Thống kê KPI tồn kho -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="so text-primary">@Model.TongNguyenLieu</div>
+            <div class="nhan">Loại nguyên liệu trong kho</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="so @(Model.SoNguyenLieuCanhBao > 0 ? "text-danger" : "text-success")">
+                @Model.SoNguyenLieuCanhBao
+            </div>
+            <div class="nhan">Nguyên liệu dưới mức an toàn</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="so text-dark">@Model.TongLoBanh</div>
+            <div class="nhan">Lô bánh thành phẩm còn tồn</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="so @(Model.SoLoBanhCanDate > 0 ? "text-warning" : "text-success")">
+                @Model.SoLoBanhCanDate
+            </div>
+            <div class="nhan">Lô bánh cận date / hết hạn</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs & Bộ lọc tìm kiếm -->
+<div class="card-f mb-3 p-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <ul class="nav nav-pills" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link @(Model.Tab != "lobanh" ? "active" : "")" href="?Tab=nguyenlieu@(string.IsNullOrEmpty(Model.TuKhoa) ? "" : $"&TuKhoa={Uri.EscapeDataString(Model.TuKhoa)}")">
+                    🌾 Nguyên liệu sản xuất (@Model.TongNguyenLieu)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(Model.Tab == "lobanh" ? "active" : "")" href="?Tab=lobanh@(string.IsNullOrEmpty(Model.TuKhoa) ? "" : $"&TuKhoa={Uri.EscapeDataString(Model.TuKhoa)}")">
+                    🎂 Bánh thành phẩm / Lô bánh (@Model.TongLoBanh)
+                </a>
+            </li>
+        </ul>
+
+        <form method="get" class="d-flex gap-2">
+            <input type="hidden" name="Tab" value="@Model.Tab" />
+            <input type="text" name="TuKhoa" value="@Model.TuKhoa" class="form-control form-control-sm" placeholder="Tìm kiếm theo tên..." style="width: 240px;" />
+            <button type="submit" class="btn btn-outline-primary btn-sm">Tìm</button>
+            @if (!string.IsNullOrWhiteSpace(Model.TuKhoa))
+            {
+                <a href="?Tab=@Model.Tab" class="btn btn-outline-secondary btn-sm">Xóa</a>
+            }
+        </form>
+    </div>
+</div>
+
+@if (Model.Tab != "lobanh")
+{
+    <!-- Bảng tồn kho nguyên liệu -->
+    @if (Model.DanhSachNguyenLieu.Count == 0)
+    {
+        <div class="card-f text-center py-4 text-muted">Không tìm thấy nguyên liệu nào phù hợp.</div>
+    }
+    else
+    {
+        <div class="card-f p-0">
+            <table class="table table-cards align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Nguyên liệu</th>
+                        <th>ĐVT</th>
+                        <th class="text-end">Mức cảnh báo</th>
+                        <th class="text-end">Tồn còn hạn</th>
+                        <th class="text-end">Tồn hết hạn</th>
+                        <th class="text-end">Đơn giá BQ</th>
+                        <th>Tình trạng</th>
+                        <th class="text-end">Chi tiết lô</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.DanhSachNguyenLieu)
+                    {
+                        <tr class="@(item.DuoiMucCanhBao ? "table-warning" : "")">
+                            <td data-label="Nguyên liệu">
+                                <strong class="text-dark">@item.TenGoi</strong>
+                            </td>
+                            <td data-label="ĐVT">@item.DonViTinh</td>
+                            <td data-label="Mức cảnh báo" class="text-end">@Fmt.So(item.MucCanhBaoTon)</td>
+                            <td data-label="Tồn còn hạn" class="text-end">
+                                <strong class="@(item.DuoiMucCanhBao ? "text-danger" : "text-success")">
+                                    @Fmt.So(item.TonConHan)
+                                </strong>
+                            </td>
+                            <td data-label="Tồn hết hạn" class="text-end">
+                                @if (item.TonHetHan > 0)
+                                {
+                                    <span class="text-danger fw-bold">@Fmt.So(item.TonHetHan)</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">0</span>
+                                }
+                            </td>
+                            <td data-label="Đơn giá BQ" class="text-end">@Fmt.Tien(item.DonGiaBinhQuan)</td>
+                            <td data-label="Tình trạng">
+                                @if (item.DuoiMucCanhBao)
+                                {
+                                    <span class="badge bg-danger text-white">⚠️ Dưới mức an toàn</span>
+                                }
+                                else if (item.TonHetHan > 0)
+                                {
+                                    <span class="badge bg-warning text-dark">Có lô hết hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success text-white">Đủ hàng</span>
+                                }
+                            </td>
+                            <td data-label="Chi tiết lô" class="text-end">
+                                @if (item.ChiTietLos.Count > 0)
+                                {
+                                    <details>
+                                        <summary class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                            Xem @item.ChiTietLos.Count lô
+                                        </summary>
+                                        <div class="mt-2 text-start p-2 bg-light border rounded small">
+                                            @foreach (var l in item.ChiTietLos)
+                                            {
+                                                var isHetHan = l.HanSuDung < Model.HomNay;
+                                                <div class="d-flex justify-content-between gap-2 border-bottom py-1 @(isHetHan ? "text-danger" : "")">
+                                                    <span>Lô #@l.Id (HSD: @Fmt.Ngay(l.HanSuDung))</span>
+                                                    <span><strong>@Fmt.So(l.SoLuongCon)</strong> @item.DonViTinh (@Fmt.Tien(l.DonGiaNhap))</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </details>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Hết hàng</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+else
+{
+    <!-- Bảng tồn kho bánh thành phẩm (Lô bánh) -->
+    @if (Model.DanhSachLoBanh.Count == 0)
+    {
+        <div class="card-f text-center py-4 text-muted">Không có lô bánh thành phẩm nào đang tồn kho.</div>
+    }
+    else
+    {
+        <div class="card-f p-0">
+            <table class="table table-cards align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã lô</th>
+                        <th>Sản phẩm</th>
+                        <th>Kích thước</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Tồn kho / Sản xuất</th>
+                        <th>Ngày sản xuất</th>
+                        <th>Hạn sử dụng</th>
+                        <th>Tình trạng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lo in Model.DanhSachLoBanh)
+                    {
+                        <tr>
+                            <td data-label="Mã lô">
+                                <code>#@lo.Id</code>
+                            </td>
+                            <td data-label="Sản phẩm">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="@lo.HinhAnh" alt="@lo.TenBanh" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e0d5cb; flex-shrink: 0;" />
+                                    <strong class="text-dark">@lo.TenBanh</strong>
+                                </div>
+                            </td>
+                            <td data-label="Kích thước">@lo.KichThuoc</td>
+                            <td data-label="Đơn giá" class="text-end">@Fmt.Tien(lo.DonGia)</td>
+                            <td data-label="Tồn kho" class="text-end">
+                                <strong class="text-primary">@lo.SoLuongTon</strong> / @lo.SoLuongSanXuat
+                            </td>
+                            <td data-label="Ngày SX">@Fmt.NgayGio(lo.NgaySanXuat)</td>
+                            <td data-label="HSD">
+                                <strong>@Fmt.NgayGio(lo.HanSuDung)</strong>
+                            </td>
+                            <td data-label="Tình trạng">
+                                <span class="badge @lo.CssBadge">@lo.TinhTrang</span>
+                                @if (lo.TyLeGiamXaHang > 0)
+                                {
+                                    <span class="badge bg-danger ms-1">-@((int)(lo.TyLeGiamXaHang * 100))% xả hàng</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}

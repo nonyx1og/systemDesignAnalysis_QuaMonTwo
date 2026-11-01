@@ -45,7 +45,7 @@ public static class Icons
     public static IHtmlContent Svg(string ten, int size = 20, string? css = null) =>
         new HtmlString($"<svg class='ico{(css is null ? "" : " " + css)}' width='{size}' height='{size}' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' focusable='false'>{Paths.GetValueOrDefault(ten, Paths["home"])}</svg>");
 
-    // Logo nongnongBakery: ô vuông bo góc màu hồng, hình bánh kem nhiều tầng nét trắng.
+    // Logo FrendshipBakery: ô vuông bo góc màu hồng, hình bánh kem nhiều tầng nét trắng.
     public static IHtmlContent Logo(int size = 28) =>
         new HtmlString($"<svg class='logo-mark' width='{size}' height='{size}' viewBox='0 0 32 32' aria-hidden='true' focusable='false'><rect width='32' height='32' rx='8' fill='#E0457B'/><g fill='none' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 24.5h16v-5a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 8 19.5z'/><path d='M10.5 18v-3a1.5 1.5 0 0 1 1.5-1.5h8a1.5 1.5 0 0 1 1.5 1.5v3'/><path d='M16 13.5V11'/><path d='M16 8.6c-.7-.7-.7-1.5 0-2.2.7.7.7 1.5 0 2.2z' fill='#fff'/></g></svg>");
 }

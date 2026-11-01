@@ -1,6 +1,7 @@
 using Friendship.Domain;
 using Friendship.Domain.Entities;
 using Friendship.Infrastructure.Services;
+using Friendship.Web.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -76,7 +77,8 @@ public class XuatNguyenLieuModel(KhoService kho, SanPhamService sanPham, BepServ
         }
         try
         {
-            var kq = await kho.XuatAsync(YeuCau());   // service tính lại ở thời điểm xác nhận
+            var nvId = User.Identity?.IsAuthenticated == true ? User.NhanVienId() : (int?)null;
+            var kq = await kho.XuatAsync(YeuCau(), nvId);   // service tính lại ở thời điểm xác nhận và lưu phiếu xuất kho
             TempData["Message"] = "Đã xuất nguyên liệu. " + string.Join(" ", kq.CanhBaoTon);
             return RedirectToPage();
         }

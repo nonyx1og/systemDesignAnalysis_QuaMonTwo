@@ -1,0 +1,152 @@
+@page "{id:int?}"
+@model Friendship.Web.Pages.Dat.HoaDonModel
+@using Friendship.Domain
+@using Friendship.Web
+@{
+    var d = Model.Don!;
+    ViewData["Title"] = $"Hoá đơn {d.Ma}";
+}
+
+<div class="dat-invoice-container" style="max-width: 720px; margin: 2rem auto 4rem;">
+    <!-- Nút điều hướng & In -->
+    <div class="dat-no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <a href="/Dat/DonHang" class="dat-btn" style="background:#fff; border: 1px solid var(--dat-champagne); color: var(--dat-text-main); font-size: 0.875rem;">
+            &larr; Xem các đơn khác
+        </a>
+        <button type="button" onclick="window.print();" class="dat-btn dat-btn-primary" style="font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span>🖨️ In hoá đơn</span>
+        </button>
+    </div>
+
+    <!-- Tờ phiếu hoá đơn -->
+    <article class="dat-paper" style="padding: 2.75rem 2.5rem; border-radius: 12px; background: #FFF8F4; position: relative;">
+        <!-- Đầu hoá đơn -->
+        <header style="text-align: center; border-bottom: 2px dashed var(--dat-champagne); padding-bottom: 1.75rem; margin-bottom: 1.75rem;">
+            <div style="margin-bottom: 0.5rem;">@Icons.Logo(36)</div>
+            <h1 class="dat-h1" style="font-size: 1.875rem; margin: 0 0 0.25rem; letter-spacing: 0.05em;">HOÁ ĐƠN ĐẶT BÁNH</h1>
+            <p style="font-size: 0.9375rem; font-weight: 700; color: var(--dat-berry); margin: 0 0 0.25rem;">FrendshipBakery – Tiệm bánh tươi thủ công</p>
+            <p style="font-size: 0.8125rem; color: var(--dat-text-muted); margin: 0;">Hotline: 0900 000 001 | Website: frendshipbakery.vn</p>
+        </header>
+
+        <!-- Thông tin số phiếu & Thời gian giao hàng dự kiến -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+            <div>
+                <p style="margin: 0 0 0.25rem; font-size: 0.8125rem; color: var(--dat-text-muted);">Số hoá đơn / Mã đơn:</p>
+                <p style="margin: 0; font-family: monospace; font-size: 1.25rem; font-weight: 700; color: var(--dat-text-main);">@d.Ma</p>
+
+                <p style="margin: 0.75rem 0 0.25rem; font-size: 0.8125rem; color: var(--dat-text-muted);">Ngày giờ tạo đơn:</p>
+                <p style="margin: 0; font-size: 0.875rem; font-weight: 600; color: var(--dat-text-main);">@Fmt.NgayGio(d.NgayLap)</p>
+            </div>
+
+            <div style="background: var(--dat-bg-canvas); padding: 1rem; border-radius: 8px; border: 1px solid var(--dat-champagne);">
+                <p style="margin: 0 0 0.25rem; font-size: 0.8125rem; color: var(--dat-berry); font-weight: 700; text-transform: uppercase;">
+                    🚚 Thời gian giao / nhận dự kiến:
+                </p>
+                <p style="margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--dat-berry);">
+                    @(d.NgayGioLay.HasValue ? Fmt.NgayGio(d.NgayGioLay.Value) : "Đang cập nhật")
+                </p>
+
+                <p style="margin: 0.5rem 0 0.25rem; font-size: 0.8125rem; color: var(--dat-text-muted);">Trạng thái:</p>
+                <span class="theo-chip theo-chip--tin" style="font-size: 0.8125rem; font-weight: 600;">
+                    @d.TrangThai
+                </span>
+            </div>
+        </div>
+
+        <!-- Thông tin khách hàng & Địa chỉ -->
+        <div style="background: #fff; padding: 1rem 1.25rem; border-radius: 8px; border: 1px solid var(--dat-champagne); margin-bottom: 1.75rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div>
+                    <span style="font-size: 0.8125rem; color: var(--dat-text-muted); display: block;">Khách hàng:</span>
+                    <strong style="color: var(--dat-text-main);">@(d.KhachHang?.TenKhachHang ?? "Khách vãng lai")</strong>
+                </div>
+                <div>
+                    <span style="font-size: 0.8125rem; color: var(--dat-text-muted); display: block;">Số điện thoại:</span>
+                    <strong style="color: var(--dat-text-main); font-family: monospace;">@(d.KhachHang?.SoDienThoai ?? "-")</strong>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(d.LyDoTra))
+            {
+                <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--dat-champagne);">
+                    <span style="font-size: 0.8125rem; color: var(--dat-text-muted); display: block;">Địa chỉ / Ghi chú giao hàng:</span>
+                    <span style="font-size: 0.875rem; color: var(--dat-text-main);">@d.LyDoTra</span>
+                </div>
+            }
+        </div>
+
+        <!-- Bảng chi tiết sản phẩm bánh -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9375rem;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--dat-accent); text-align: left;">
+                    <th style="padding: 0.65rem 0; color: var(--dat-text-main);">Tên bánh & Lời chúc</th>
+                    <th style="padding: 0.65rem 0.5rem; text-align: center; color: var(--dat-text-main);">SL</th>
+                    <th style="padding: 0.65rem 0.5rem; text-align: right; color: var(--dat-text-main);">Đơn giá</th>
+                    <th style="padding: 0.65rem 0; text-align: right; color: var(--dat-text-main);">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in d.ChiTiets)
+                {
+                    <tr style="border-bottom: 1px solid var(--dat-champagne);">
+                        <td style="padding: 0.75rem 0; vertical-align: top;">
+                            <strong style="color: var(--dat-text-main); display: block;">@c.SanPham.TenBanh</strong>
+                            <span style="font-size: 0.8125rem; color: var(--dat-text-muted);">Kích thước: @c.SanPham.KichThuoc</span>
+                            @if (!string.IsNullOrEmpty(c.LoiChuc))
+                            {
+                                <div style="font-size: 0.8125rem; color: var(--dat-berry); margin-top: 0.2rem; font-style: italic;">
+                                    Lời chúc: “@c.LoiChuc”
+                                </div>
+                            }
+                        </td>
+                        <td style="padding: 0.75rem 0.5rem; text-align: center; vertical-align: top; font-weight: 600;">@c.SoLuong</td>
+                        <td style="padding: 0.75rem 0.5rem; text-align: right; vertical-align: top;" class="dat-money">@Fmt.Tien(c.DonGia)</td>
+                        <td style="padding: 0.75rem 0; text-align: right; vertical-align: top; font-weight: 700; color: var(--dat-text-main);" class="dat-money">@Fmt.Tien(c.ThanhTien)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Bảng tổng hợp tiền -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem;">
+            <div style="min-width: 280px; font-size: 0.9375rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; color: var(--dat-text-secondary);">
+                    <span>Tổng tiền hàng:</span>
+                    <span class="dat-money">@Fmt.Tien(d.TongTienHang)</span>
+                </div>
+                @if (d.TienGiamGia > 0)
+                {
+                    <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; color: var(--dat-berry);">
+                        <span>Giảm giá:</span>
+                        <span class="dat-money">-@Fmt.Tien(d.TienGiamGia)</span>
+                    </div>
+                }
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-top: 2px solid var(--dat-accent); font-size: 1.125rem; font-weight: 700; color: var(--dat-text-main);">
+                    <span>Tổng thanh toán:</span>
+                    <span class="dat-money" style="color: var(--dat-berry);">@Fmt.Tien(d.TongThanhToan)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; color: var(--dat-text-secondary);">
+                    <span>Đã thanh toán / cọc:</span>
+                    <span class="dat-money">@Fmt.Tien(d.DaThanhToan)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; background: var(--dat-bg-canvas); border-radius: 6px; padding: 0.5rem 0.75rem; margin-top: 0.35rem; font-weight: 700; color: var(--dat-text-main);">
+                    <span>Còn lại khi nhận bánh:</span>
+                    <span class="dat-money" style="color: var(--dat-berry);">@Fmt.Tien(d.ConLai)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lời cảm ơn chân trang hoá đơn -->
+        <footer style="text-align: center; border-top: 1px dashed var(--dat-champagne); padding-top: 1.5rem;">
+            <p style="font-size: 0.9375rem; font-weight: 600; color: var(--dat-text-main); margin-bottom: 0.25rem;">Cảm ơn bạn đã lựa chọn bánh tươi tại FrendshipBakery!</p>
+            <p style="font-size: 0.8125rem; color: var(--dat-text-muted); margin: 0;">Chúc bạn và người thân có những khoảnh khắc ngọt ngào trọn vẹn.</p>
+        </footer>
+    </article>
+</div>
+
+<style>
+@@media print {
+    .dat-header, .dat-footer, .dat-no-print { display: none !important; }
+    .dat-invoice-container { margin: 0 !important; max-width: 100% !important; }
+    .dat-paper { box-shadow: none !important; border: 1px solid #ddd !important; }
+}
+</style>

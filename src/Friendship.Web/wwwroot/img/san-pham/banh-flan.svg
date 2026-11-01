@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="custard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="60%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#EAB308"/>
+    </linearGradient>
+    <linearGradient id="caramel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9A3412"/>
+      <stop offset="60%" stop-color="#7C2D12"/>
+      <stop offset="100%" stop-color="#451A03"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="102" rx="46" ry="10" fill="#000" opacity="0.12"/>
+  <!-- Caramel pool on plate -->
+  <ellipse cx="60" cy="94" rx="44" ry="10" fill="#9A3412" opacity="0.75"/>
+  <!-- Custard body (truncated cone) -->
+  <path d="M26,50 L20,92 C20,100 100,100 100,92 L94,50 Z" fill="url(#custard)"/>
+  <!-- Caramel top cap -->
+  <ellipse cx="60" cy="50" rx="34" ry="12" fill="url(#caramel)"/>
+  <!-- Caramel drip down the sides -->
+  <path d="M28,52 C32,68 36,66 38,54 C42,76 46,72 50,53 C54,66 58,62 62,52 C66,74 72,70 76,53 C80,64 84,60 88,52 C94,62 94,50 94,50 Z" fill="url(#caramel)"/>
+  <!-- Caramel Gloss highlight -->
+  <ellipse cx="54" cy="46" rx="14" ry="4" fill="#FFF" opacity="0.45"/>
+  <ellipse cx="72" cy="48" rx="6" ry="2" fill="#FFF" opacity="0.3"/>
+</svg>

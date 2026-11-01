@@ -1,4 +1,4 @@
-/* nongnongBakery – giao diện nội bộ theo chuẩn Shopify Admin (Polaris). Ghi đè biến Bootstrap 5. */
+/* FrendshipBakery – giao diện nội bộ theo chuẩn Shopify Admin (Polaris). Ghi đè biến Bootstrap 5. */
 :root {
   --bg: #f1f1f1; --bg-nav: #ebebeb; --surface: #fff; --surface-2: #f7f7f7; --surface-hover: #f7f7f7; --surface-active: #f3f3f3;
   --ink: #303030; --ink-soft: #616161; --ink-faint: #8a8a8a; --line: #e3e3e3; --line-soft: #ebebeb; --line-input: #8a8a8a;

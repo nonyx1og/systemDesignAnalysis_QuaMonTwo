@@ -1,4 +1,4 @@
-// thiet-ke-3d-trangtri.js - Quản lý Topping và Nến 3D cho nongnongBakery
+// thiet-ke-3d-trangtri.js - Quản lý Topping và Nến 3D cho FrendshipBakery
 // Tích hợp với Three.js WebGL và Fabric.js 2D Canvas
 // Tham khảo nến và ngọn lửa 3D: VIDAKHOSHPEY22/3D-Birthday-Cake (Giấy phép MIT)
 

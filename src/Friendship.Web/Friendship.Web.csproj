@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\Friendship.Domain\Friendship.Domain.csproj" />
@@ -17,6 +17,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>99b47183-f189-4f23-a717-e6b96b4ebe5a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

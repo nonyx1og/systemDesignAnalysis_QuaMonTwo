@@ -1,0 +1,188 @@
+@page
+@model Friendship.Web.Pages.Dat.DatNhanhModel
+@using Friendship.Web
+@{
+    ViewData["Title"] = "Đặt bánh theo yêu cầu";
+}
+
+<div class="dat-order-container" style="max-width: 680px; margin: 2rem auto 3.5rem;">
+    <div class="dat-paper" style="padding: 2.25rem 2rem;">
+        <header style="margin-bottom: 2rem; border-bottom: 1px dashed var(--dat-champagne); padding-bottom: 1.25rem;">
+            <a href="/Dat/Menu" style="font-size: 0.875rem; color: var(--dat-berry); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+                &larr; Quay lại Thực đơn
+            </a>
+            <h1 class="dat-h1" style="font-size: 1.875rem; margin: 0 0 0.35rem;">Đặt bánh tại FrendshipBakery</h1>
+            <p style="color: var(--dat-text-secondary); margin: 0; font-size: 0.9375rem;">
+                Điền thông tin nhận bánh, lời chúc ghi lên bánh và thời gian dự kiến để bếp chuẩn bị chu đáo nhất.
+            </p>
+        </header>
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="dat-flash dat-flash-err mb-3" role="alert"></div>
+
+            <!-- 1. Chọn loại bánh & số lượng -->
+            <fieldset style="border: 0; padding: 0; margin: 0 0 1.75rem;">
+                <legend style="font-size: 1.125rem; font-weight: 700; color: var(--dat-text-main); margin-bottom: 1rem;">
+                    1. Chiếc bánh bạn muốn đặt
+                </legend>
+
+                <div class="mb-3">
+                    <label asp-for="SanPhamId" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Loại bánh & Kích thước <span style="color:var(--dat-berry);">*</span></label>
+                    <select asp-for="SanPhamId" id="selectSanPham" class="form-select" style="background:#fff; border-color:var(--dat-champagne); font-weight: 550; padding: 0.65rem 1rem;">
+                        <option value="">-- Vui lòng chọn bánh --</option>
+                        @foreach (var b in Model.DanhSachBanh)
+                        {
+                            <option value="@b.Id" data-is-cake="@b.LaBanhKem.ToString().ToLower()" selected="@(Model.SanPhamId == b.Id)">
+                                @b.Ten (@b.KichThuoc) – @b.DonGia.ToString("N0") ₫ @(b.LaBanhKem ? "🎂 [Bánh kem]" : "")
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="SanPhamId" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-sm-4">
+                        <label asp-for="SoLuong" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Số lượng</label>
+                        <input asp-for="SoLuong" type="number" min="1" max="20" class="form-control" style="background:#fff; border-color:var(--dat-champagne);" />
+                        <span asp-validation-for="SoLuong" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-8" id="wrapperLoiChuc">
+                        <label asp-for="LoiChuc" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">
+                            Lời chúc viết lên bánh
+                            <span id="badgeBanhKem" style="font-size: 0.75rem; font-weight: 600; color: var(--dat-berry); margin-left: 0.25rem;">(Chỉ áp dụng cho bánh kem)</span>
+                        </label>
+                        <input asp-for="LoiChuc" id="inputLoiChuc" class="form-control" placeholder="Ví dụ: Happy Birthday Tuấn 20 tuổi" style="background:#fff; border-color:var(--dat-champagne);" />
+                        <span asp-validation-for="LoiChuc" class="text-danger small"></span>
+                        <div id="hintKhongPhaiBanhKem" style="display: none; font-size: 0.8125rem; color: #b8332a; margin-top: 0.35rem; font-weight: 500;">
+                            ⚠️ Sản phẩm này không phải bánh kem, tiệm không hỗ trợ viết lời chúc.
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- 2. Thời gian giao / nhận bánh -->
+            <fieldset style="border: 0; padding: 0; margin: 0 0 1.75rem;">
+                <legend style="font-size: 1.125rem; font-weight: 700; color: var(--dat-text-main); margin-bottom: 1rem;">
+                    2. Thời gian & Hình thức nhận bánh
+                </legend>
+
+                <div class="mb-3">
+                    <label asp-for="NgayGioLay" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">
+                        Thời gian giao / lấy bánh dự kiến <span style="color:var(--dat-berry);">*</span>
+                    </label>
+                    <input asp-for="NgayGioLay" type="datetime-local" class="form-control" style="background:#fff; border-color:var(--dat-champagne); padding: 0.65rem 1rem;" />
+                    <span asp-validation-for="NgayGioLay" class="text-danger small"></span>
+                    <small style="color: var(--dat-text-muted); display: block; margin-top: 0.25rem;">
+                        🕒 Thời gian lấy bánh nên cách ít nhất 1–2 giờ để bếp làm mới và đóng hộp cẩn thận.
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; color: var(--dat-text-main); display: block;">Hình thức nhận</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; background: var(--dat-bg-canvas); border: 1px solid var(--dat-champagne); border-radius: 8px; padding: 0.75rem 1rem; cursor: pointer;">
+                            <input type="radio" asp-for="HinhThucNhan" value="GiaoHang" checked onchange="document.getElementById('khuVucDiaChi').style.display = 'block';" />
+                            <div>
+                                <strong style="display: block; font-size: 0.9375rem; color: var(--dat-text-main);">Giao hàng tận nơi</strong>
+                                <span style="font-size: 0.75rem; color: var(--dat-text-muted);">Shipper giao trong giờ hẹn</span>
+                            </div>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; background: var(--dat-bg-canvas); border: 1px solid var(--dat-champagne); border-radius: 8px; padding: 0.75rem 1rem; cursor: pointer;">
+                            <input type="radio" asp-for="HinhThucNhan" value="TaiTiem" onchange="document.getElementById('khuVucDiaChi').style.display = 'none';" />
+                            <div>
+                                <strong style="display: block; font-size: 0.9375rem; color: var(--dat-text-main);">Lấy tại tiệm</strong>
+                                <span style="font-size: 0.75rem; color: var(--dat-text-muted);">Nhận trực tiếp tại quầy</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="khuVucDiaChi" class="mb-3" style="display: @(Model.HinhThucNhan == "TaiTiem" ? "none" : "block");">
+                    <label asp-for="DiaChiGiao" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Địa chỉ giao hàng <span style="color:var(--dat-berry);">*</span></label>
+                    <input asp-for="DiaChiGiao" class="form-control" placeholder="Số nhà, tên đường, phường, quận..." style="background:#fff; border-color:var(--dat-champagne);" />
+                    <span asp-validation-for="DiaChiGiao" class="text-danger small"></span>
+                </div>
+            </fieldset>
+
+            <!-- 3. Thông tin người nhận -->
+            <fieldset style="border: 0; padding: 0; margin: 0 0 1.75rem;">
+                <legend style="font-size: 1.125rem; font-weight: 700; color: var(--dat-text-main); margin-bottom: 1rem;">
+                    3. Thông tin người nhận
+                </legend>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="HoTen" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Họ tên người nhận <span style="color:var(--dat-berry);">*</span></label>
+                        <input asp-for="HoTen" class="form-control" placeholder="Tên của bạn" style="background:#fff; border-color:var(--dat-champagne);" />
+                        <span asp-validation-for="HoTen" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="SoDienThoai" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Số điện thoại <span style="color:var(--dat-berry);">*</span></label>
+                        <input asp-for="SoDienThoai" type="tel" class="form-control" placeholder="Số điện thoại nhận bánh" style="background:#fff; border-color:var(--dat-champagne);" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="GhiChu" class="form-label" style="font-weight: 600; color: var(--dat-text-main);">Ghi chú thêm cho tiệm</label>
+                    <textarea asp-for="GhiChu" rows="2" class="form-control" placeholder="Ví dụ: Ít ngọt, thêm nến số 25, bọc giấy bóng kính..." style="background:#fff; border-color:var(--dat-champagne);"></textarea>
+                </div>
+            </fieldset>
+
+            <!-- Nút gửi đơn -->
+            <button type="submit" class="dat-btn dat-btn-primary w-100" style="padding: 0.85rem; font-size: 1.125rem; font-weight: 700; letter-spacing: 0.02em;">
+                Xác nhận đặt bánh &rarr;
+            </button>
+            <p style="text-align: center; font-size: 0.8125rem; color: var(--dat-text-muted); margin-top: 0.75rem;">
+                Sau khi đặt, hệ thống sẽ tạo hoá đơn và cấp mã theo dõi tiến độ bếp làm bánh cho bạn.
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function updateLoiChucState() {
+            const sel = document.getElementById('selectSanPham');
+            const opt = sel ? sel.options[sel.selectedIndex] : null;
+            const isCake = opt && opt.getAttribute('data-is-cake') === 'true';
+            const input = document.getElementById('inputLoiChuc');
+            const hint = document.getElementById('hintKhongPhaiBanhKem');
+            const badge = document.getElementById('badgeBanhKem');
+
+            if (!input) return;
+
+            if (isCake) {
+                input.disabled = false;
+                input.placeholder = "Ví dụ: Happy Birthday Tuấn 20 tuổi";
+                input.style.backgroundColor = "#fff";
+                input.style.cursor = "text";
+                if (hint) hint.style.display = "none";
+                if (badge) {
+                    badge.textContent = "(Được viết lời chúc nghệ thuật lên bánh)";
+                    badge.style.color = "var(--dat-berry)";
+                }
+            } else {
+                input.value = "";
+                input.disabled = true;
+                input.placeholder = "(Chỉ bánh kem mới được ghi lời chúc viết lên bánh)";
+                input.style.backgroundColor = "#f4ece6";
+                input.style.cursor = "not-allowed";
+                if (hint) hint.style.display = "block";
+                if (badge) {
+                    badge.textContent = "(Không áp dụng cho sản phẩm này)";
+                    badge.style.color = "var(--dat-text-muted)";
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const sel = document.getElementById('selectSanPham');
+            if (sel) {
+                sel.addEventListener('change', updateLoiChucState);
+                updateLoiChucState();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,202 @@
+@page
+@model Friendship.Web.Pages.Dat.TaiKhoanModel
+@{
+    ViewData["Title"] = Model.DaDangNhap ? "Tài khoản của tôi" : "Đăng nhập & Tài khoản";
+}
+
+<div class="container" style="max-width: 860px; margin: 2rem auto;">
+    @if (Model.DaDangNhap && Model.Khach is not null)
+    {
+        <div class="dat-paper" style="padding: 2rem; margin-bottom: 2rem;">
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--dat-champagne); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--dat-rose-100); color: var(--dat-berry); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 700;">
+                        @(string.IsNullOrEmpty(Model.Khach.TenKhachHang) ? "K" : Model.Khach.TenKhachHang[0].ToString().ToUpperInvariant())
+                    </div>
+                    <div>
+                        <h1 class="dat-h1" style="font-size: 1.5rem; margin: 0 0 0.25rem;">@Model.Khach.TenKhachHang</h1>
+                        <p style="margin: 0; color: var(--dat-text-secondary); font-size: 0.875rem;">
+                            📞 @Model.Khach.SoDienThoai · Tham gia từ: @(Model.Khach.NgayTao?.ToString("dd/MM/yyyy") ?? "Gần đây")
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span style="display: inline-block; padding: 0.35rem 0.75rem; background: #fff; border: 1px solid var(--dat-champagne); border-radius: 20px; font-size: 0.875rem; font-weight: 600; color: var(--dat-berry);">
+                        ⭐ @Model.Khach.DiemTichLuy điểm tích lũy
+                    </span>
+                    <form method="post" action="/Dat/DangXuat" style="margin: 0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dat-btn" style="background: #fff; border: 1px solid #ffccd2; color: #dc3545; padding: 0.4rem 0.85rem; font-size: 0.8125rem;">
+                            Đăng xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Phím tắt nhanh -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <a href="/Dat/DonHang" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">📦</span>
+                        <span class="badge" style="background: var(--dat-rose-100); color: var(--dat-berry); font-weight: 700; border-radius: 12px; padding: 0.2rem 0.5rem;">@Model.SoDonHang đơn</span>
+                    </div>
+                    <div>
+                        <strong style="color: var(--dat-text-main); font-size: 1rem; display: block;">Đơn hàng của tôi</strong>
+                        <span style="font-size: 0.8125rem; color: var(--dat-text-secondary);">Xem lịch sử và thời gian giao bánh</span>
+                    </div>
+                </a>
+
+                <a href="/Dat/Menu" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎂</div>
+                    <div>
+                        <strong style="color: var(--dat-text-main); font-size: 1rem; display: block;">Thực đơn & Đặt bánh</strong>
+                        <span style="font-size: 0.8125rem; color: var(--dat-text-secondary);">Chọn mẫu bánh và thành phần nguyên liệu</span>
+                    </div>
+                </a>
+
+                <a href="/Dat/ThietKe" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎨</div>
+                    <div>
+                        <strong style="color: var(--dat-text-main); font-size: 1rem; display: block;">Tự thiết kế bánh</strong>
+                        <span style="font-size: 0.8125rem; color: var(--dat-text-secondary);">Tự chọn cốt, kem, viền và chữ chúc</span>
+                    </div>
+                </a>
+
+                <a href="/Dat/GopY" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">💬</span>
+                        <span class="badge" style="background: #e8f5e9; color: #2e7d32; font-weight: 700; border-radius: 12px; padding: 0.2rem 0.5rem;">@Model.SoGopY góp ý</span>
+                    </div>
+                    <div>
+                        <strong style="color: var(--dat-text-main); font-size: 1rem; display: block;">Góp ý cho tiệm</strong>
+                        <span style="font-size: 0.8125rem; color: var(--dat-text-secondary);">Đánh giá hương vị và phục vụ</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Form cập nhật thông tin -->
+            <div style="background: var(--dat-cream); border-radius: var(--dat-radius-md); padding: 1.5rem;">
+                <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: var(--dat-text-main);">
+                    Cập nhật thông tin giao hàng & liên hệ
+                </h2>
+                <form method="post" asp-page-handler="CapNhat">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">Họ và tên</label>
+                            <input asp-for="HoSo.TenKhachHang" class="form-control" style="background:#fff; border-color:var(--dat-champagne);" />
+                            <span asp-validation-for="HoSo.TenKhachHang" class="text-danger small"></span>
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">Số điện thoại (định danh)</label>
+                            <input value="@Model.Khach.SoDienThoai" disabled class="form-control" style="background:#f4ece6; border-color:var(--dat-champagne);" />
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">Email nhận thông báo</label>
+                            <input asp-for="HoSo.Email" type="email" placeholder="ví dụ: email@gmail.com" class="form-control" style="background:#fff; border-color:var(--dat-champagne);" />
+                            <span asp-validation-for="HoSo.Email" class="text-danger small"></span>
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-weight: 600; font-size: 0.875rem;">Địa chỉ nhận bánh mặc định</label>
+                            <input asp-for="HoSo.DiaChi" placeholder="Số nhà, tên đường, phường/xã..." class="form-control" style="background:#fff; border-color:var(--dat-champagne);" />
+                            <span asp-validation-for="HoSo.DiaChi" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <button type="submit" class="dat-btn dat-btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.875rem;">
+                        Lưu thay đổi
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else if (Model.LaNhanVien)
+    {
+        <!-- Đã đăng nhập với tư cách nhân viên -->
+        <div style="max-width: 600px; margin: 2rem auto;">
+            <div class="dat-paper" style="padding: 2.5rem 2rem; text-align: center;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--dat-berry); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem;">
+                    👔
+                </div>
+                <h1 class="dat-h1" style="font-size: 1.75rem; margin-bottom: 0.25rem;">Chào @Model.TenNhanVien</h1>
+                <p style="color: var(--dat-text-secondary); margin-bottom: 1.5rem;">
+                    Bạn đang đăng nhập tài khoản nhân viên với vai trò: <strong style="color: var(--dat-berry);">@Model.VaiTroNhanVien</strong>
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 360px; margin: 0 auto 1.5rem;">
+                    <a href="/TongQuan" class="dat-btn dat-btn-primary" style="padding: 0.75rem 1rem; font-weight: 600;">
+                        📊 Vào Bàn làm việc / Tổng quan
+                    </a>
+                    <a href="/BanHang/DonHang" class="dat-btn" style="background:#fff; border:1px solid var(--dat-champagne); padding: 0.75rem 1rem;">
+                        🛒 Quản lý bán hàng & Đơn đặt
+                    </a>
+                    <a href="/Bep/ThietKe" class="dat-btn" style="background:#fff; border:1px solid var(--dat-champagne); padding: 0.75rem 1rem;">
+                        🎂 Quản lý sản xuất & Bếp bánh
+                    </a>
+                </div>
+
+                <form method="post" asp-page="/Account/Logout" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--dat-champagne);">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dat-btn" style="background: none; border: 1px solid #dc3545; color: #dc3545; padding: 0.5rem 1.25rem; font-size: 0.875rem;">
+                        🚪 Đăng xuất tài khoản nhân viên
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Chưa đăng nhập: Phần tài khoản hiển thị đăng nhập khách hàng, đăng ký và đăng nhập nhân viên -->
+        <div style="max-width: 520px; margin: 1rem auto;">
+            <div class="dat-paper" style="padding: 2.5rem 2rem;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="margin-bottom: 0.5rem;">@Icons.Logo(40)</div>
+                    <h1 class="dat-h1" style="font-size: 1.75rem; margin-bottom: 0.5rem;">Tài khoản</h1>
+                    <p style="color: var(--dat-text-secondary); font-size: 0.9375rem;">
+                        Đăng nhập để theo dõi đơn hàng, thời gian giao bánh hoặc truy cập hệ thống quản trị tiệm bánh
+                    </p>
+                </div>
+
+                <form method="post" asp-page-handler="DangNhap">
+                    <div asp-validation-summary="ModelOnly" class="dat-flash dat-flash-err mb-3" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 600;">Số điện thoại hoặc Tên đăng nhập</label>
+                        <input asp-for="LoginInput.SoDienThoai" class="form-control" placeholder="SĐT khách hoặc tên đăng nhập nhân viên" autofocus style="background:#fff; border-color:var(--dat-champagne);" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" style="font-weight: 600;">Mật khẩu</label>
+                        <input asp-for="LoginInput.MatKhau" type="password" class="form-control" placeholder="••••••••" style="background:#fff; border-color:var(--dat-champagne);" />
+                    </div>
+
+                    <button type="submit" class="dat-btn dat-btn-primary w-100" style="padding: 0.75rem; font-size: 1.0625rem; font-weight: 600;">
+                        Đăng nhập
+                    </button>
+
+                    <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--dat-champagne);">
+                        <p style="margin: 0 0 0.5rem; color: var(--dat-text-secondary); font-size: 0.9375rem;">
+                            Chưa có tài khoản? <a href="/Dat/DangKy" style="font-weight: 700; color: var(--dat-berry); text-decoration: underline;">Đăng ký tài khoản mới</a>
+                        </p>
+                        <p style="margin: 0; font-size: 0.8125rem; color: var(--dat-text-muted);">
+                            Hoặc bạn có thể <a href="/Dat/Tim" style="color: inherit; text-decoration: underline;">Tra cứu đơn lẻ bằng mã phiếu</a>
+                        </p>
+                    </div>
+                </form>
+
+                <!-- Lối vào dành cho nhân viên nội bộ -->
+                <div style="margin-top: 2rem; padding: 1rem; background: var(--dat-cream); border-radius: var(--dat-radius-sm); border: 1px solid var(--dat-champagne); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                    <div>
+                        <strong style="font-size: 0.875rem; color: var(--dat-text-main); display: block;">🏢 Dành cho nhân viên tiệm bánh</strong>
+                        <span style="font-size: 0.75rem; color: var(--dat-text-secondary);">Thu ngân, thợ làm bánh, quản lý kho & quản trị</span>
+                    </div>
+                    <a href="/Account/Login" class="dat-btn" style="background:#fff; border:1px solid var(--dat-champagne); font-size: 0.8125rem; white-space: nowrap; padding: 0.35rem 0.75rem;">
+                        Vào trang nhân viên →
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

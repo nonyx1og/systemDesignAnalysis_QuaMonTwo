@@ -8,8 +8,17 @@ public class SanPham
     public decimal DonGia { get; set; }
     public int HanSuDungGio { get; set; }
     public bool DangKinhDoanh { get; set; } = true;
+    public string? HinhAnh { get; set; }
+    public string AnhHienThi => SanPhamHinhAnhHelper.LayHinhAnh(TenBanh, HinhAnh);
     public List<DinhLuong> DinhLuongs { get; set; } = [];
     public List<LoSanPham> Los { get; set; } = [];
+
+    /// <summary>Chỉ bánh kem mới được ghi lời chúc viết lên bánh.</summary>
+    public bool LaBanhKem =>
+        (TenBanh.Contains("Bánh kem", StringComparison.OrdinalIgnoreCase) ||
+         TenBanh.Contains("Bánh sinh nhật", StringComparison.OrdinalIgnoreCase) ||
+         TenBanh.Contains("Gato", StringComparison.OrdinalIgnoreCase)) &&
+        !TenBanh.Contains("su kem", StringComparison.OrdinalIgnoreCase);
 }
 
 public class NguyenLieu

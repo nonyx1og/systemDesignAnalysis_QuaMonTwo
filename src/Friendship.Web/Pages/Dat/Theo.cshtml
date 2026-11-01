@@ -161,6 +161,16 @@
                     }
                 </dl>
                 <p class="theo-coc-sau">Ghi đúng nội dung chuyển khoản. Thu ngân đối chiếu rồi xác nhận cọc, đơn sẽ chuyển sang bếp.</p>
+
+                <form method="post" asp-page-handler="XacNhanCoc" style="margin-top: 1.25rem; text-align: center;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dat-btn dat-btn-primary" style="width: 100%; padding: 0.75rem 1.25rem; font-size: 0.9375rem; font-weight: 700; background: linear-gradient(135deg, var(--dat-berry), #e63956); border-radius: 8px;">
+                        💳 Tôi đã chuyển khoản xong — Xác nhận cọc ngay
+                    </button>
+                    <p style="font-size: 0.75rem; color: var(--dat-text-muted); margin-top: 0.4rem;">
+                        Nhấn xác nhận sau khi chuyển khoản để hệ thống ghi nhận và chuyển đơn sang bếp làm bánh.
+                    </p>
+                </form>
             </section>
         }
 

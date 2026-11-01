@@ -1,0 +1,107 @@
+@page
+@model Friendship.Web.Pages.Dat.MenuModel
+@using Friendship.Web
+@{
+    ViewData["Title"] = "Thực đơn bánh & Thành phần";
+}
+
+<div class="dat-menu-page" style="margin: 1.5rem 0 3rem;">
+    <!-- Banner Giới thiệu Thực đơn -->
+    <header style="text-align: center; max-width: 720px; margin: 0 auto 2.5rem;">
+        <span style="display: inline-block; padding: 0.35rem 0.85rem; background: var(--dat-berry-light); color: var(--dat-berry); font-weight: 700; border-radius: 999px; font-size: 0.8125rem; margin-bottom: 0.75rem;">
+            TIỆM BÁNH TƯƠI MỖI NGÀY
+        </span>
+        <h1 class="dat-h1" style="font-size: 2.25rem; margin-bottom: 0.75rem;">Thực đơn & Thành phần bánh</h1>
+        <p class="dat-lead" style="font-size: 1.0625rem; color: var(--dat-text-secondary);">
+            Tất cả bánh tại FrendshipBakery đều được nướng tươi từ nguồn nguyên liệu thượng hạng, hoàn toàn không chất bảo quản. Bạn có thể xem thành phần chi tiết của từng loại bánh dưới đây.
+        </p>
+
+        <!-- Thanh tìm kiếm -->
+        <form method="get" style="display: flex; gap: 0.5rem; max-width: 480px; margin: 1.5rem auto 0;">
+            <input type="text" name="q" value="@Model.TuKhoa" class="form-control" placeholder="Tìm tên bánh hoặc kích cỡ..." style="background:#fff; border-color:var(--dat-champagne); border-radius: 999px; padding: 0.65rem 1.25rem;" />
+            <button type="submit" class="dat-btn dat-btn-primary" style="border-radius: 999px; padding: 0 1.5rem;">Tìm</button>
+            @if (!string.IsNullOrEmpty(Model.TuKhoa))
+            {
+                <a href="/Dat/Menu" class="dat-btn" style="border-radius: 999px; background: #fff; border: 1px solid var(--dat-champagne); color: var(--dat-text-main);">Xóa</a>
+            }
+        </form>
+    </header>
+
+    @if (Model.DanhSachBanh.Count == 0)
+    {
+        <div class="dat-paper" style="text-align: center; padding: 3rem 1.5rem; max-width: 560px; margin: 0 auto;">
+            <p style="font-size: 1.125rem; color: var(--dat-text-secondary); margin-bottom: 1rem;">Không tìm thấy bánh nào phù hợp với từ khóa "@Model.TuKhoa".</p>
+            <a href="/Dat/Menu" class="dat-btn dat-btn-primary">Xem tất cả bánh</a>
+        </div>
+    }
+    else
+    {
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            @foreach (var b in Model.DanhSachBanh)
+            {
+                <article class="dat-paper" style="display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; border-radius: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid rgba(226, 209, 195, 0.55); overflow: hidden;">
+                    <div>
+                        <!-- Hình ảnh chụp bánh thực tế -->
+                        <div style="border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; position: relative; height: 180px; background: #faf4ed; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                            <img src="@b.HinhAnh" alt="@b.TenBanh" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" />
+                            <span style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.92); backdrop-filter: blur(4px); border: 1px solid rgba(226, 209, 195, 0.8); font-size: 0.75rem; font-weight: 700; color: var(--dat-berry); padding: 0.25rem 0.65rem; border-radius: 999px; box-shadow: 0 2px 5px rgba(0,0,0,0.08);">
+                                @b.KichThuoc
+                            </span>
+                        </div>
+
+                        <!-- Header thẻ bánh -->
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; gap: 0.5rem;">
+                            <div>
+                                <h2 class="dat-h2" style="font-size: 1.25rem; margin: 0; color: var(--dat-text-main); font-weight: 700;">@b.TenBanh</h2>
+                            </div>
+                            <span class="dat-money" style="font-size: 1.25rem; font-weight: 700; color: var(--dat-berry); white-space: nowrap;">
+                                @Fmt.Tien(b.DonGia)
+                            </span>
+                        </div>
+
+                        <!-- Thông tin bảo quản / HSD -->
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--dat-text-secondary); margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px dashed var(--dat-champagne);">
+                            <span style="font-weight: 600;">Hạn sử dụng:</span>
+                            <span>@b.HanSuDungGio giờ (bảo quản ngăn mát 2°C – 6°C)</span>
+                        </div>
+
+                        <!-- Phần Thành phần nguyên liệu (Không lộ định lượng) -->
+                        <div style="background: var(--dat-bg-canvas); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <strong style="font-size: 0.875rem; color: var(--dat-text-main);">Thành phần nguyên liệu:</strong>
+                                <span style="font-size: 0.75rem; color: var(--dat-text-muted); font-style: italic;">(Bí quyết độc quyền)</span>
+                            </div>
+
+                            @if (b.DanhSachThanhPhan.Count > 0)
+                            {
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                                    @foreach (var tp in b.DanhSachThanhPhan)
+                                    {
+                                        <span style="background: #fff; border: 1px solid var(--dat-champagne); border-radius: 999px; padding: 0.2rem 0.65rem; font-size: 0.8125rem; color: var(--dat-text-secondary); font-weight: 550;">
+                                            @tp
+                                        </span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p style="font-size: 0.8125rem; color: var(--dat-text-muted); margin: 0;">Bột mì cao cấp, bơ tươi, trứng gà organic và sữa tươi nguyên chất.</p>
+                            }
+
+                        </div>
+                    </div>
+
+                    <!-- Nút thao tác -->
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <a href="/Dat/DatNhanh?sanPhamId=@b.Id" class="dat-btn dat-btn-primary" style="flex: 1; text-align: center; padding: 0.65rem 0.5rem; font-size: 0.9375rem; font-weight: 600;">
+                            Đặt bánh ngay
+                        </a>
+                        <a href="/Dat/ThietKe" class="dat-btn" style="background: #fff; border: 1px solid var(--dat-champagne); color: var(--dat-text-main); padding: 0.65rem 0.85rem; font-size: 0.9375rem; font-weight: 600;" title="Tự thiết kế bánh theo ý bạn">
+                            Tự trang trí
+                        </a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</div>

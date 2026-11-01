@@ -1,0 +1,196 @@
+@page "{id:int}"
+@model Friendship.Web.Pages.Kho.DoiChieu.ChiTietModel
+@{
+    ViewData["Title"] = "Chi tiết đối chiếu định lượng ca";
+    var p = Model.Preview?.PhieuDinhLuong;
+    var ca = Model.Preview?.Ca;
+    var daLap = Model.BienBanDaLap is not null;
+}
+
+<div class="mb-3">
+    <a asp-page="Index" class="btn btn-outline-secondary btn-sm mb-2">
+        ← Quay lại danh sách đối chiếu
+    </a>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="h4 mb-1">Biên bản đối chiếu định lượng ca: @(p?.Ma ?? $"#{Model.Id}")</h2>
+            <div class="text-secondary small">Đối chiếu giữa xuất kho thực tế và phiếu định lượng ca bếp</div>
+        </div>
+        <div>
+            @if (daLap)
+            {
+                <span class="badge bg-success fs-6 py-2 px-3">@Icons.Svg("check", 16) ĐÃ HOÀN TẤT ĐỐI CHIẾU</span>
+            }
+            else
+            {
+                <span class="badge bg-warning text-dark fs-6 py-2 px-3">CHỜ THỦ KHO XÁC NHẬN</span>
+            }
+        </div>
+    </div>
+</div>
+
+@if (Model.Preview is not null)
+{
+    var preview = Model.Preview;
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light py-2">
+                    <span class="fw-bold small">THÔNG TIN CA BẾP</span>
+                </div>
+                <div class="card-body">
+                    <div>Mã ca: <strong>@ca?.Ma</strong></div>
+                    <div>Bếp trưởng: <strong>@ca?.NhanVien.HoTen</strong></div>
+                    <div>Thời gian ca: <strong>@ca?.GioMoCa.ToString("HH:mm") – @(ca?.GioDongCa?.ToString("HH:mm") ?? "—")</strong></div>
+                    <div class="small text-muted">Ngày: @ca?.GioMoCa.ToString("dd/MM/yyyy")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light py-2">
+                    <span class="fw-bold small">PHIẾU ĐỊNH LƯỢNG CA</span>
+                </div>
+                <div class="card-body">
+                    <div>Mã phiếu: <strong>@p?.Ma</strong></div>
+                    <div>Người xuất: <strong>@p?.NguoiLap.HoTen</strong></div>
+                    <div>Thời gian xuất: <strong>@p?.ThoiGianXuat.ToString("HH:mm dd/MM/yyyy")</strong></div>
+                    <div class="small text-muted">Ghi chú: @(p?.GhiChu ?? "Không có")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light py-2">
+                    <span class="fw-bold small">PHIẾU XUẤT KHO TRONG CA</span>
+                </div>
+                <div class="card-body">
+                    <div>Số phiếu xuất: <strong>@preview.PhieuXuats.Count phiếu</strong></div>
+                    @if (preview.PhieuXuats.Count > 0)
+                    {
+                        <div class="small text-secondary mt-1">
+                            Các mã phiếu: @string.Join(", ", preview.PhieuXuats.Select(x => x.Ma))
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="small text-danger mt-1">Chưa có phiếu xuất nguyên liệu nào được ghi nhận trong ca này.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    var tt = daLap ? Model.BienBanDaLap!.TrangThai : preview.TrangThaiUocTinh;
+    var (alertCls, alertTitle, alertDesc) = tt switch
+    {
+        TrangThaiDoiChieu.HOP_LE => ("alert-success", "Khớp 100% - Hợp lệ", "Số lượng nguyên liệu xuất kho và định lượng bếp tiêu hao hoàn toàn trùng khớp."),
+        TrangThaiDoiChieu.LECH_DINH_MUC => ("alert-warning", "Có chênh lệch định mức", "Có sự chênh lệch giữa số lượng thực xuất kho và định lượng tính theo BOM của bếp."),
+        _ => ("alert-danger", "Cảnh báo thất thoát nguyên liệu", "Mức chênh lệch thực xuất cao hơn định lượng bếp trên 15%. Cần kiểm tra kỹ nguyên nhân.")
+    };
+
+    <div class="alert @alertCls py-2 px-3 mb-4 d-flex align-items-center gap-3">
+        <div class="fs-4">
+            @(tt == TrangThaiDoiChieu.HOP_LE ? "✅" : (tt == TrangThaiDoiChieu.LECH_DINH_MUC ? "⚠️" : "🚨"))
+        </div>
+        <div>
+            <strong>@alertTitle:</strong> @alertDesc
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light py-2">
+            <h6 class="mb-0 fw-bold">Bảng so sánh chi tiết giữa Thực xuất kho và Tiêu hao định lượng bếp</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">STT</th>
+                        <th>Nguyên liệu</th>
+                        <th>Đơn vị tính</th>
+                        <th class="text-end">1. Thực xuất kho</th>
+                        <th class="text-end">2. Định lượng bếp dùng</th>
+                        <th class="text-end">Chênh lệch (1 - 2)</th>
+                        <th>Đánh giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < preview.Dong.Count; i++)
+                    {
+                        var d = preview.Dong[i];
+                        var chenh = d.ChenhLech;
+                        var rowCls = chenh > 0 ? "table-warning" : (chenh < 0 ? "table-info" : "");
+                        <tr class="@rowCls">
+                            <td>@(i + 1)</td>
+                            <td class="fw-semibold">@d.TenNguyenLieu</td>
+                            <td><span class="badge bg-secondary">@d.DonViTinh</span></td>
+                            <td class="text-end fw-bold">@d.SoLuongXuatKho.ToString("0.###")</td>
+                            <td class="text-end fw-bold text-primary">@d.SoLuongDinhLuong.ToString("0.###")</td>
+                            <td class="text-end fw-bold @(chenh > 0 ? "text-danger" : (chenh < 0 ? "text-info" : "text-success"))">
+                                @(chenh > 0 ? $"+{chenh:0.###}" : chenh.ToString("0.###"))
+                            </td>
+                            <td>
+                                @if (chenh == 0)
+                                {
+                                    <span class="badge bg-success">Khớp</span>
+                                }
+                                else if (chenh > 0)
+                                {
+                                    <span class="badge bg-danger">Hao hụt (Kho > Bếp)</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info text-dark">Dôi dư (Bếp > Kho)</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (!daLap)
+    {
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white py-2">
+                <span class="fw-bold">Xác nhận hoàn tất đối chiếu và lập biên bản</span>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="XacNhan">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Ghi chú giải trình chênh lệch / ý kiến của thủ kho:</label>
+                        <textarea asp-for="GhiChuGiaiTrinh" class="form-control" rows="2" placeholder="Ghi chú nguyên nhân lệch định mức (nếu có) hoặc xác nhận số liệu hợp lệ..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary fw-bold px-4 py-2" onclick="return confirm('Xác nhận lập biên bản đối chiếu định lượng cho ca này?');">
+                        @Icons.Svg("check", 18) Xác nhận lập biên bản đối chiếu
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        var bb = Model.BienBanDaLap!;
+        <div class="card shadow-sm border-success">
+            <div class="card-header bg-success text-white py-2">
+                <span class="fw-bold">Biên bản đối chiếu đã lập: @bb.Ma</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>Thủ kho đối chiếu: <strong>@bb.NguoiDoiChieu.HoTen</strong></div>
+                        <div>Thời gian lập biên bản: <strong>@bb.ThoiGianDoiChieu.ToString("HH:mm dd/MM/yyyy")</strong></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="small text-secondary">Ý kiến giải trình thủ kho:</div>
+                        <div class="p-2 bg-light rounded border mt-1">@(bb.GhiChuGiaiTrinh ?? "Không có ghi chú")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

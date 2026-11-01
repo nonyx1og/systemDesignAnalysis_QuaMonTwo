@@ -7,7 +7,7 @@ namespace Friendship.Infrastructure.Services;
 public record DinhLuongInput(int NguyenLieuId, decimal DinhMuc);
 
 public record SanPhamInput(int? Id, string TenBanh, string KichThuoc, decimal DonGia, int HanSuDungGio,
-    IReadOnlyList<DinhLuongInput> Bom);
+    IReadOnlyList<DinhLuongInput> Bom, string? HinhAnh = null);
 
 public record GiaVonUocTinh(decimal GiaVon, List<string> ThieuGiaNhap);
 
@@ -65,6 +65,7 @@ public class SanPhamService(FriendshipDb db)
         sp.KichThuoc = kichThuoc;
         sp.DonGia = i.DonGia;
         sp.HanSuDungGio = i.HanSuDungGio;
+        sp.HinhAnh = string.IsNullOrWhiteSpace(i.HinhAnh) ? null : i.HinhAnh.Trim();
 
         foreach (var cu in sp.DinhLuongs.Where(d => !nlIds.Contains(d.NguyenLieuId)).ToList())
             db.DinhLuongs.Remove(cu);

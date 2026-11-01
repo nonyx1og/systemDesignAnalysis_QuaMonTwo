@@ -65,8 +65,9 @@ public class DonDatService(FriendshipDb db, TimeProvider clock, KhachHangService
         foreach (var d in y.Dong)
         {
             var sp = sps.GetValueOrDefault(d.SanPhamId) ?? throw new NghiepVuException("Không tìm thấy sản phẩm.");
-            if (!sp.DangKinhDoanh) throw new NghiepVuException($"Sản phẩm '{sp.TenBanh}' đã ngừng kinh doanh.");
             var loiChuc = (d.LoiChuc ?? "").Trim();
+            if (loiChuc.Length > 0 && !sp.LaBanhKem)
+                throw new NghiepVuException($"Chỉ bánh kem mới được ghi lời chúc viết lên bánh (sản phẩm '{sp.TenBanh}' không hỗ trợ).");
             if (d.ThietKeBanhId is { } tkId)
             {
                 var tk = await db.ThietKeBanhs.FindAsync(tkId)

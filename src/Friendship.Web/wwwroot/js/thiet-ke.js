@@ -1,4 +1,4 @@
-// thiet-ke.js - Trình thiết kế bánh kem 2D với Fabric.js (nongnongBakery)
+// thiet-ke.js - Trình thiết kế bánh kem 2D với Fabric.js (FrendshipBakery)
 (function () {
     'use strict';
     // Tên thành phần do quản lý nhập: escape trước khi đưa vào innerHTML.

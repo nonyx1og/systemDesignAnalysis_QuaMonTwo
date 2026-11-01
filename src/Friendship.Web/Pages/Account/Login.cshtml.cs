@@ -20,7 +20,10 @@ public class LoginModel(TaiKhoanService taiKhoan) : PageModel
         {
             var nv = await taiKhoan.DangNhapAsync(TenDangNhap, MatKhau);
             await SignInHelper.SignInAsync(HttpContext, nv);
-            return LocalRedirect(Url.IsLocalUrl(ReturnUrl) ? ReturnUrl! : "/");
+            var target = !string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl) && ReturnUrl != "/" 
+                ? ReturnUrl 
+                : "/TongQuan";
+            return LocalRedirect(target);
         }
         catch (NghiepVuException e)
         {
