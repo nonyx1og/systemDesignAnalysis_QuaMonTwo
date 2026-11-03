@@ -21,33 +21,57 @@
         '#8B0000', '#C2185B', '#E91E63', '#1565C0', '#2E7D32', '#5D4037', '#FF6F00', '#212121'
     ];
 
-    // 3 mẫu thiết kế gợi ý (trỏ tới thành phần theo TÊN)
+    // 3 mẫu thiết kế gợi ý cầu kỳ, sang trọng, sẵn sàng đặt bánh ngay
     const MAU_THIET_KE = {
         1: {
-            ten: 'Dâu tây cổ điển',
+            ten: 'Dâu tây & Macaron Hoàng Gia',
             tenCot: 'Cốt vani',
             tenVien: 'Viền kem xoắn',
-            mauKem: '#FFF8DC',
-            toppings: [{ ten: 'Dâu tây', soLuong: 6 }],
-            chu: 'Happy Day',
+            mauKem: '#FFFDF5',
+            toppings: [
+                { ten: 'Dâu tây', x: 200, y: 112 },
+                { ten: 'Macaron', x: 160, y: 125 },
+                { ten: 'Macaron', x: 240, y: 125 },
+                { ten: 'Dâu tây', x: 125, y: 155 },
+                { ten: 'Dâu tây', x: 275, y: 155 },
+                { ten: 'Macaron', x: 105, y: 195 },
+                { ten: 'Dâu tây', x: 295, y: 195 }
+            ],
+            chu: 'Happy Birthday',
             fontChu: "'Dancing Script', cursive",
-            mauChu: '#E91E63'
+            mauChu: '#8B0000'
         },
         2: {
-            ten: 'Socola sinh nhật',
+            ten: 'Socola & Cherry Dạ Tiệc',
             tenCot: 'Cốt socola',
             tenVien: 'Viền kem xoắn',
             mauKem: '#5D4037',
-            toppings: [{ ten: 'Dâu tây', soLuong: 4 }],
+            toppings: [
+                { ten: 'Socola miếng', x: 200, y: 110 },
+                { ten: 'Cherry', x: 168, y: 125 },
+                { ten: 'Cherry', x: 232, y: 125 },
+                { ten: 'Socola miếng', x: 135, y: 155 },
+                { ten: 'Socola miếng', x: 265, y: 155 },
+                { ten: 'Dâu tây', x: 110, y: 195 },
+                { ten: 'Dâu tây', x: 290, y: 195 },
+                { ten: 'Cherry', x: 200, y: 165 }
+            ],
             chu: 'Happy Birthday!',
             fontChu: "'Pacifico', cursive",
             mauChu: '#FF6F00'
         },
         3: {
-            ten: 'Ảnh gia đình',
+            ten: 'Khung Kỷ Niệm Bách Hoa',
             tenCot: 'Cốt vani',
+            tenVien: 'Viền kem xoắn',
             inAn: true,
             mauKem: '#FFFDF5',
+            toppings: [
+                { ten: 'Macaron', x: 105, y: 115 },
+                { ten: 'Cherry', x: 120, y: 88 },
+                { ten: 'Macaron', x: 295, y: 115 },
+                { ten: 'Cherry', x: 280, y: 88 }
+            ],
             chu: 'Family Love',
             fontChu: "'Dancing Script', cursive",
             mauChu: '#1565C0'
@@ -384,10 +408,10 @@
                 thanhPhanId: tp.id,
                 strawberryStyle: currentStyle,
                 shadow: new fabric.Shadow({
-                    color: 'rgba(50, 10, 20, 0.32)',
-                    blur: 10,
-                    offsetX: 0,
-                    offsetY: 4
+                    color: 'rgba(45, 15, 20, 0.32)',
+                    blur: 8,
+                    offsetX: 1.5,
+                    offsetY: 4.5
                 })
             });
         } else {
@@ -395,8 +419,8 @@
                 left: posX,
                 top: posY,
                 radius: KICH_THUOC_TOPPING / 2,
-                fill: '#ff4d4f',
-                stroke: '#ffffff',
+                fill: '#E53935',
+                stroke: '#FFFFFF',
                 strokeWidth: 2,
                 originX: 'center',
                 originY: 'center',
@@ -408,6 +432,12 @@
                 borderDashArray: [4, 4],
                 padding: 6,
                 hasRotatingPoint: true,
+                shadow: new fabric.Shadow({
+                    color: 'rgba(45, 15, 20, 0.32)',
+                    blur: 8,
+                    offsetX: 1.5,
+                    offsetY: 4.5
+                }),
                 customType: 'topping',
                 thanhPhanId: tp.id
             });
@@ -440,9 +470,13 @@
 
     let cakeBaseObj = null;
     let cakeBoardObj = null;
+    let cakeBoardRimObj = null;
+    let cakeRimObj = null;
     let cakeSwirlsObj = null;
     let cakeVienObj = null;
     let cakeTier2Obj = null;
+    let cakeTier2RimObj = null;
+    let cakeTier2SwirlsObj = null;
     let cakeTier2VienObj = null;
     let printAreaBorder = null;
     let printAreaClip = null;
@@ -551,10 +585,14 @@
 
     function dongBoSauKhiKhoiPhuc() {
         cakeBoardObj = null;
+        cakeBoardRimObj = null;
         cakeBaseObj = null;
+        cakeRimObj = null;
         cakeSwirlsObj = null;
         cakeVienObj = null;
         cakeTier2Obj = null;
+        cakeTier2RimObj = null;
+        cakeTier2SwirlsObj = null;
         cakeTier2VienObj = null;
         printAreaBorder = null;
         printImageObj = null;
@@ -564,13 +602,25 @@
             if (o.customType === 'base_board') {
                 cakeBoardObj = o;
                 o.set({ selectable: false, evented: false });
+            } else if (o.customType === 'base_board_rim') {
+                cakeBoardRimObj = o;
+                o.set({ selectable: false, evented: false });
             } else if (o.customType === 'base_circle') {
                 cakeBaseObj = o;
                 o.set({ selectable: false, evented: false });
                 const stop = o.fill && o.fill.colorStops && o.fill.colorStops.find(c => c.offset === 0.65);
                 if (stop) currentKemColor = stop.color;
+            } else if (o.customType === 'base_rim') {
+                cakeRimObj = o;
+                o.set({ selectable: false, evented: false });
             } else if (o.customType === 'tier2_circle') {
                 cakeTier2Obj = o;
+                o.set({ selectable: false, evented: false });
+            } else if (o.customType === 'tier2_rim') {
+                cakeTier2RimObj = o;
+                o.set({ selectable: false, evented: false });
+            } else if (o.customType === 'tier2_swirls') {
+                cakeTier2SwirlsObj = o;
                 o.set({ selectable: false, evented: false });
             } else if (o.customType === 'base_swirls') {
                 cakeSwirlsObj = o;
@@ -595,10 +645,16 @@
                 if (o.fontFamily) currentFontChu = o.fontFamily;
                 if (typeof o.fill === 'string') currentMauChu = o.fill;
                 o.set({
-                    cornerSize: 6,
+                    cornerSize: 8,
                     cornerColor: '#FFFFFF',
                     cornerStrokeColor: '#3A1B26',
-                    borderColor: '#3A1B26'
+                    borderColor: '#3A1B26',
+                    shadow: new fabric.Shadow({
+                        color: 'rgba(45, 18, 12, 0.32)',
+                        blur: 3.5,
+                        offsetX: 1,
+                        offsetY: 2
+                    })
                 });
                 o.setCoords();
             } else if (o.customType === 'topping') {
@@ -616,7 +672,13 @@
                     lockUniScaling: false,
                     lockScalingFlip: true,
                     lockScalingX: true,
-                    lockScalingY: true
+                    lockScalingY: true,
+                    shadow: new fabric.Shadow({
+                        color: 'rgba(45, 15, 20, 0.32)',
+                        blur: 8,
+                        offsetX: 1.5,
+                        offsetY: 4.5
+                    })
                 });
                 o.setCoords();
             }
@@ -672,17 +734,19 @@
         return new fabric.Gradient({
             type: 'radial',
             coords: {
-                r1: 15,
+                r1: 12,
                 r2: 155,
-                x1: 175,
-                y1: 170,
+                x1: 160,
+                y1: 155,
                 x2: 200,
                 y2: 200
             },
             colorStops: [
-                { offset: 0, color: adjustColor(hex, 10) },
+                { offset: 0, color: adjustColor(hex, 12) },
+                { offset: 0.32, color: adjustColor(hex, 6) },
                 { offset: 0.65, color: hex },
-                { offset: 1, color: adjustColor(hex, -8) }
+                { offset: 0.88, color: adjustColor(hex, -6) },
+                { offset: 1, color: adjustColor(hex, -14) }
             ]
         });
     }
@@ -690,15 +754,19 @@
     let debounceTimer = null;
 
     // Thứ tự phân lớp (z-index) chuẩn:
-    // Khay vàng (5) < Thân kem bánh (10) < Vân xoáy kem (15) < Viền kem sò (20) < Vùng in (30) < Ảnh in (35) < Nét vẽ (40) < Chữ (60) < Topping (70)
+    // Khay vàng (5) < Vòng dập gờ khay (7) < Thân kem bánh (10) < Gờ mép kem (12) < Vân xoáy kem (15) < Viền kem sò (20) < Thân kem tầng 2 (22) < Gờ tầng 2 (23) < Vân tầng 2 (23.5) < Viền sò tầng 2 (24) < Vùng in (30) < Ảnh in (35) < Nét vẽ (40) < Chữ (60) < Topping (70)
     function layTrongSoLop(obj) {
         if (!obj) return 0;
         const type = obj.customType;
         if (type === 'base_board' || obj === cakeBoardObj) return 5;
+        if (type === 'base_board_rim' || obj === cakeBoardRimObj) return 7;
         if (type === 'base_circle' || obj === cakeBaseObj) return 10;
+        if (type === 'base_rim' || obj === cakeRimObj) return 12;
         if (type === 'base_swirls' || obj === cakeSwirlsObj) return 15;
         if (type === 'cake_vien' || obj === cakeVienObj) return 20;
         if (type === 'tier2_circle' || obj === cakeTier2Obj) return 22;
+        if (type === 'tier2_rim' || obj === cakeTier2RimObj) return 23;
+        if (type === 'tier2_swirls' || obj === cakeTier2SwirlsObj) return 23.5;
         if (type === 'tier2_vien' || obj === cakeTier2VienObj) return 24;
         if (type === 'in_an_border' || obj === printAreaBorder) return 30;
         if (type === 'print_image' || obj === printImageObj) return 35;
@@ -933,10 +1001,57 @@
         canvas.renderAll();
     }
 
+    function taoVanKemBo(cx, cy, radius) {
+        const scale = radius / 155;
+        // Đường xoáy lượn sóng tự nhiên từ rìa bánh vào tâm (Archimedean spatula sweep)
+        const pathData = 'M 88 200 C 88 138, 138 88, 200 88 C 262 88, 312 138, 312 200 C 312 250, 275 292, 225 304 C 180 314, 132 290, 118 248 C 106 210, 126 168, 164 154 C 196 142, 234 158, 242 190 C 250 218, 228 244, 200 244 C 178 244, 165 228, 168 208 C 171 192, 186 182, 200 184 C 208 185, 214 192, 212 198';
+
+        const shadowPath = new fabric.Path(pathData, {
+            fill: 'transparent',
+            stroke: 'rgba(45, 20, 10, 0.07)',
+            strokeWidth: 8 * scale,
+            strokeLineCap: 'round',
+            strokeLineJoin: 'round',
+            originX: 'center',
+            originY: 'center',
+            left: cx + 1.2 * scale,
+            top: cy + 1.6 * scale,
+            scaleX: scale,
+            scaleY: scale,
+            selectable: false,
+            evented: false
+        });
+
+        const highlightPath = new fabric.Path(pathData, {
+            fill: 'transparent',
+            stroke: 'rgba(255, 255, 255, 0.30)',
+            strokeWidth: 5.5 * scale,
+            strokeLineCap: 'round',
+            strokeLineJoin: 'round',
+            originX: 'center',
+            originY: 'center',
+            left: cx - 0.8 * scale,
+            top: cy - 0.8 * scale,
+            scaleX: scale,
+            scaleY: scale,
+            selectable: false,
+            evented: false
+        });
+
+        return new fabric.Group([shadowPath, highlightPath], {
+            left: cx,
+            top: cy,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false
+        });
+    }
+
     function drawCakeBase() {
         if (!canvas) return;
 
-        // 1. Khay đế bánh mạ vàng sang trọng (Gold Foil Cake Board)
+        // 1. Khay đế bánh mạ kim sang trọng (Luxury Gold Foil Cake Board)
         if (cakeBoardObj) {
             canvas.remove(cakeBoardObj);
             cakeBoardObj = null;
@@ -949,28 +1064,57 @@
                 type: 'linear',
                 coords: { x1: 28, y1: 28, x2: 372, y2: 372 },
                 colorStops: [
-                    { offset: 0, color: '#E5C06E' },
-                    { offset: 0.25, color: '#FFF3CF' },
-                    { offset: 0.5, color: '#B5872E' },
-                    { offset: 0.75, color: '#FCE7B3' },
-                    { offset: 1, color: '#9E711E' }
+                    { offset: 0, color: '#E8C779' },
+                    { offset: 0.22, color: '#FFF8E1' },
+                    { offset: 0.45, color: '#C89B3C' },
+                    { offset: 0.68, color: '#FDF1C9' },
+                    { offset: 0.88, color: '#A67722' },
+                    { offset: 1, color: '#7D5412' }
                 ]
             }),
-            stroke: '#E2BD68',
-            strokeWidth: 2,
+            stroke: '#D4A843',
+            strokeWidth: 1.5,
             originX: 'center',
             originY: 'center',
             selectable: false,
             evented: false,
             shadow: new fabric.Shadow({
-                color: 'rgba(50, 20, 10, 0.18)',
-                blur: 16,
+                color: 'rgba(40, 15, 10, 0.20)',
+                blur: 18,
                 offsetX: 0,
-                offsetY: 6
+                offsetY: 7
             }),
             customType: 'base_board'
         });
         canvas.add(cakeBoardObj);
+
+        // 1b. Vòng gờ dập nổi đế lót bánh (Embossed Foil Ring)
+        if (cakeBoardRimObj) {
+            canvas.remove(cakeBoardRimObj);
+            cakeBoardRimObj = null;
+        }
+        cakeBoardRimObj = new fabric.Circle({
+            left: 200,
+            top: 200,
+            radius: 164,
+            fill: 'transparent',
+            stroke: new fabric.Gradient({
+                type: 'linear',
+                coords: { x1: 40, y1: 40, x2: 360, y2: 360 },
+                colorStops: [
+                    { offset: 0, color: 'rgba(255, 255, 255, 0.55)' },
+                    { offset: 0.5, color: 'rgba(180, 135, 46, 0.40)' },
+                    { offset: 1, color: 'rgba(100, 60, 15, 0.50)' }
+                ]
+            }),
+            strokeWidth: 1.2,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false,
+            customType: 'base_board_rim'
+        });
+        canvas.add(cakeBoardRimObj);
 
         // 2. Thân kem bánh satin (Frosting Base)
         if (cakeBaseObj) {
@@ -982,21 +1126,64 @@
             top: 200,
             radius: 155,
             fill: createCakeGradient(currentKemColor),
-            stroke: adjustColor(currentKemColor, -14),
-            strokeWidth: 1.5,
+            stroke: adjustColor(currentKemColor, -12),
+            strokeWidth: 1.2,
             originX: 'center',
             originY: 'center',
             selectable: false,
             evented: false,
             hoverCursor: 'default',
+            shadow: new fabric.Shadow({
+                color: 'rgba(55, 22, 14, 0.24)',
+                blur: 14,
+                offsetX: 2,
+                offsetY: 6
+            }),
             customType: 'base_circle'
         });
         canvas.add(cakeBaseObj);
+
+        // 2a. Gờ bo tròn mép kem (Frosting Crown / Bevel Ring)
+        if (cakeRimObj) {
+            canvas.remove(cakeRimObj);
+            cakeRimObj = null;
+        }
+        cakeRimObj = new fabric.Circle({
+            left: 200,
+            top: 200,
+            radius: 154,
+            fill: 'transparent',
+            stroke: new fabric.Gradient({
+                type: 'linear',
+                coords: { x1: 60, y1: 60, x2: 340, y2: 340 },
+                colorStops: [
+                    { offset: 0, color: 'rgba(255, 255, 255, 0.50)' },
+                    { offset: 0.45, color: 'rgba(255, 255, 255, 0.10)' },
+                    { offset: 0.75, color: 'rgba(0, 0, 0, 0.03)' },
+                    { offset: 1, color: 'rgba(0, 0, 0, 0.12)' }
+                ]
+            }),
+            strokeWidth: 2,
+            originX: 'center',
+            originY: 'center',
+            selectable: false,
+            evented: false,
+            customType: 'base_rim'
+        });
+        canvas.add(cakeRimObj);
 
         // 2b. Thân kem tầng 2 (nếu chọn bánh 2 tầng)
         if (cakeTier2Obj) {
             canvas.remove(cakeTier2Obj);
             cakeTier2Obj = null;
+        }
+        if (cakeTier2RimObj) {
+            canvas.remove(cakeTier2RimObj);
+            cakeTier2RimObj = null;
+        }
+        if (cakeTier2SwirlsObj) {
+            canvas.remove(cakeTier2SwirlsObj);
+            cakeTier2SwirlsObj = null;
         }
         if (soTangState === 2) {
             const r2 = layBanKinhTang2();
@@ -1005,22 +1192,50 @@
                 top: 200,
                 radius: r2,
                 fill: createCakeGradient(currentKemColor),
-                stroke: adjustColor(currentKemColor, -14),
-                strokeWidth: 1.5,
+                stroke: adjustColor(currentKemColor, -12),
+                strokeWidth: 1.2,
                 originX: 'center',
                 originY: 'center',
                 selectable: false,
                 evented: false,
                 hoverCursor: 'default',
                 shadow: new fabric.Shadow({
-                    color: 'rgba(50, 20, 10, 0.22)',
-                    blur: 14,
-                    offsetX: 0,
-                    offsetY: 5
+                    color: 'rgba(50, 20, 10, 0.26)',
+                    blur: 16,
+                    offsetX: 2,
+                    offsetY: 6
                 }),
                 customType: 'tier2_circle'
             });
             canvas.add(cakeTier2Obj);
+
+            cakeTier2RimObj = new fabric.Circle({
+                left: 200,
+                top: 200,
+                radius: r2 - 1,
+                fill: 'transparent',
+                stroke: new fabric.Gradient({
+                    type: 'linear',
+                    coords: { x1: 200 - r2, y1: 200 - r2, x2: 200 + r2, y2: 200 + r2 },
+                    colorStops: [
+                        { offset: 0, color: 'rgba(255, 255, 255, 0.50)' },
+                        { offset: 0.45, color: 'rgba(255, 255, 255, 0.10)' },
+                        { offset: 0.75, color: 'rgba(0, 0, 0, 0.03)' },
+                        { offset: 1, color: 'rgba(0, 0, 0, 0.12)' }
+                    ]
+                }),
+                strokeWidth: 1.8,
+                originX: 'center',
+                originY: 'center',
+                selectable: false,
+                evented: false,
+                customType: 'tier2_rim'
+            });
+            canvas.add(cakeTier2RimObj);
+
+            cakeTier2SwirlsObj = taoVanKemBo(200, 200, r2);
+            cakeTier2SwirlsObj.customType = 'tier2_swirls';
+            canvas.add(cakeTier2SwirlsObj);
         }
 
         // 3. Vân kem bơ chà láng thủ công (Artisan Spatula Swirls)
@@ -1028,61 +1243,76 @@
             canvas.remove(cakeSwirlsObj);
             cakeSwirlsObj = null;
         }
-        cakeSwirlsObj = new fabric.Path('M 120 180 C 130 130, 260 120, 280 180 C 260 250, 150 250, 140 210', {
-            fill: 'transparent',
-            stroke: '#FFFFFF',
-            strokeWidth: 14,
-            opacity: 0.16,
-            strokeLineCap: 'round',
-            originX: 'center',
-            originY: 'center',
-            left: 200,
-            top: 200,
-            selectable: false,
-            evented: false,
-            customType: 'base_swirls'
-        });
+        cakeSwirlsObj = taoVanKemBo(200, 200, 155);
+        cakeSwirlsObj.customType = 'base_swirls';
         canvas.add(cakeSwirlsObj);
 
         sapXepCacLopCanvas();
     }
 
     function taoNhomRosette(x, y, rotDeg, scale, creamColor, shadeColor) {
-        const shellBase = new fabric.Path('M 0 -10 C 6 -10, 9 -5, 7 2 C 5 7, 2 11, 0 13 C -2 11, -5 7, -7 2 C -9 -5, -6 -10, 0 -10 Z', {
+        // Cánh sò kem bơ tạo hình từ đui sao Pháp (French Star Piping Tip)
+        const shellBase = new fabric.Path('M 0 -11 C 7 -11, 10 -5, 8 3 C 6 8, 3 12, 0 14 C -3 12, -6 8, -8 3 C -10 -5, -7 -11, 0 -11 Z', {
             fill: creamColor,
             stroke: shadeColor,
-            strokeWidth: 0.6,
+            strokeWidth: 0.7,
             originX: 'center',
             originY: 'center',
             left: 0,
             top: 0
         });
 
-        const ridge = new fabric.Path('M 0 -8 L 0 9 M -3 -6 C -2 0, 0 4, 0 8', {
+        // Rãnh khía đui sao trung tâm và hai cánh bên (Star fluting ridges)
+        const spineRidge = new fabric.Path('M 0 -9 C 0 -2, 0 4, 0 11', {
             fill: 'transparent',
             stroke: shadeColor,
-            strokeWidth: 1.0,
+            strokeWidth: 1.2,
             strokeLineCap: 'round',
             originX: 'center',
             originY: 'center',
             left: 0,
             top: 0,
-            opacity: 0.6
+            opacity: 0.55
         });
 
-        const highlight = new fabric.Path('M 2 -7 C 3 -2, 2 3, 0 7', {
+        const leftRidge = new fabric.Path('M -4 -7 C -3.5 -1, -2 4, 0 10', {
             fill: 'transparent',
-            stroke: '#FFFFFF',
-            strokeWidth: 1.2,
+            stroke: shadeColor,
+            strokeWidth: 0.9,
             strokeLineCap: 'round',
             originX: 'center',
             originY: 'center',
-            left: 1,
-            top: 0,
+            left: -1.5,
+            top: 0.5,
+            opacity: 0.45
+        });
+
+        const rightRidge = new fabric.Path('M 4 -7 C 3.5 -1, 2 4, 0 10', {
+            fill: 'transparent',
+            stroke: shadeColor,
+            strokeWidth: 0.9,
+            strokeLineCap: 'round',
+            originX: 'center',
+            originY: 'center',
+            left: 1.5,
+            top: 0.5,
+            opacity: 0.45
+        });
+
+        // Vệt bắt sáng bóng mượt trên sống lưng sò kem (Specular highlight)
+        const highlight = new fabric.Path('M 1.5 -8 C 2.2 -3, 1.8 3, 0 9', {
+            fill: 'transparent',
+            stroke: '#FFFFFF',
+            strokeWidth: 1.3,
+            strokeLineCap: 'round',
+            originX: 'center',
+            originY: 'center',
+            left: 0.8,
+            top: -0.2,
             opacity: 0.85
         });
 
-        return new fabric.Group([shellBase, ridge, highlight], {
+        return new fabric.Group([shellBase, leftRidge, rightRidge, spineRidge, highlight], {
             left: x,
             top: y,
             angle: rotDeg,
@@ -1124,6 +1354,12 @@
             cakeVienObj = new fabric.Group(rosettes, {
                 selectable: false,
                 evented: false,
+                shadow: new fabric.Shadow({
+                    color: 'rgba(50, 18, 25, 0.22)',
+                    blur: 5,
+                    offsetX: 1,
+                    offsetY: 2.5
+                }),
                 customType: 'cake_vien'
             });
             canvas.add(cakeVienObj);
@@ -1146,6 +1382,12 @@
                 cakeTier2VienObj = new fabric.Group(rosettes2, {
                     selectable: false,
                     evented: false,
+                    shadow: new fabric.Shadow({
+                        color: 'rgba(50, 18, 25, 0.22)',
+                        blur: 4,
+                        offsetX: 1,
+                        offsetY: 2
+                    }),
                     customType: 'tier2_vien'
                 });
                 canvas.add(cakeTier2VienObj);
@@ -1654,14 +1896,36 @@
         const inputChu = document.getElementById('input-chu-canvas');
         const formChu = document.querySelector('input[name="Input.ChuTrenBanh"]');
 
+        const charCounter = document.getElementById('char-counter');
+        function updateCharCounter(val) {
+            if (charCounter) {
+                const len = (val || '').length;
+                charCounter.textContent = `${len}/30 ký tự`;
+                charCounter.style.color = len >= 30 ? 'var(--dat-danger)' : 'var(--dat-text-muted)';
+            }
+        }
+
         if (inputChu) {
+            updateCharCounter(inputChu.value);
             inputChu.addEventListener('input', function () {
                 const val = this.value;
+                updateCharCounter(val);
                 if (formChu && formChu.value !== val) formChu.value = val;
                 capNhatChuCanvas(val);
                 if (currentStep === 5) capNhatBangTomTat();
             });
         }
+
+        // Kích hoạt các nút gợi ý câu chúc nhanh
+        document.querySelectorAll('.btn-suggestion-chip').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const txt = this.getAttribute('data-text') || '';
+                if (inputChu) {
+                    inputChu.value = txt;
+                    inputChu.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        });
 
         if (formChu) {
             formChu.addEventListener('input', function () {
@@ -2265,7 +2529,17 @@
         }
 
         if (textObj) {
-            textObj.set({ text: val, fontFamily: currentFontChu, fill: currentMauChu });
+            textObj.set({
+                text: val,
+                fontFamily: currentFontChu,
+                fill: currentMauChu,
+                shadow: new fabric.Shadow({
+                    color: 'rgba(45, 18, 12, 0.32)',
+                    blur: 3.5,
+                    offsetX: 1,
+                    offsetY: 2
+                })
+            });
         } else {
             textObj = new fabric.IText(val, {
                 left: 200,
@@ -2275,7 +2549,20 @@
                 fontSize: 22,
                 fontFamily: currentFontChu,
                 fill: currentMauChu,
-                cornerSize: 6,
+                cornerSize: 8,
+                cornerColor: '#FFFFFF',
+                cornerStrokeColor: '#3A1B26',
+                cornerStyle: 'circle',
+                transparentCorners: false,
+                borderColor: '#3A1B26',
+                borderDashArray: [4, 4],
+                padding: 6,
+                shadow: new fabric.Shadow({
+                    color: 'rgba(45, 18, 12, 0.32)',
+                    blur: 3.5,
+                    offsetX: 1,
+                    offsetY: 2
+                }),
                 customType: 'chu'
             });
             ganSuKienTextObj(textObj);
@@ -2319,10 +2606,16 @@
                     originY: 'center',
                     rx: 6,
                     ry: 6,
-                    fill: 'rgba(255, 255, 255, 0.5)',
-                    stroke: '#0d6efd',
+                    fill: 'rgba(255, 255, 248, 0.65)',
+                    stroke: '#9E8A78',
                     strokeDashArray: [6, 4],
-                    strokeWidth: 2,
+                    strokeWidth: 1.5,
+                    shadow: new fabric.Shadow({
+                        color: 'rgba(40, 20, 10, 0.16)',
+                        blur: 6,
+                        offsetX: 0,
+                        offsetY: 2
+                    }),
                     selectable: false,
                     evented: false,
                     customType: 'in_an_border'
@@ -2394,10 +2687,17 @@
         if (isDrawingMode) {
             canvas.freeDrawingBrush.width = 4;
             canvas.freeDrawingBrush.color = '#333333';
+            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+                color: 'rgba(50, 20, 15, 0.25)',
+                blur: 2.5,
+                offsetX: 0.8,
+                offsetY: 1.5
+            });
             canvas.on('path:created', function (e) {
-                // Giới hạn nét vẽ trong vùng in bằng clipPath
                 e.path.clipPath = printAreaClip;
                 e.path.customType = 'in_an_draw';
+                e.path.strokeLineCap = 'round';
+                e.path.strokeLineJoin = 'round';
                 sapXepCacLopCanvas();
                 if (currentStep === 5) capNhatBangTomTat();
             });
@@ -2476,7 +2776,7 @@
         // 3. Màu kem
         if (mauObj.mauKem) {
             currentKemColor = mauObj.mauKem;
-            if (cakeBaseObj) cakeBaseObj.set('fill', currentKemColor);
+            if (cakeBaseObj) cakeBaseObj.set('fill', createCakeGradient(currentKemColor));
             const labelKem = document.getElementById('label-ten-mau-kem');
             const kemObj = MAU_KEM.find(m => m.hex.toLowerCase() === currentKemColor.toLowerCase());
             if (labelKem && kemObj) labelKem.textContent = kemObj.ten;
@@ -2510,9 +2810,17 @@
             mauObj.toppings.forEach(topReq => {
                 const tp = thanhPhans.find(t => t.nhom === 'TOPPING' && t.ten.toLowerCase().includes(topReq.ten.toLowerCase()));
                 if (tp) {
-                    for (let i = 0; i < topReq.soLuong && i < tp.toiDa && totalAdded < MAX_TOPPING_CAKE; i++) {
-                        themToppingVaoCanvas(tp, null, null, false);
-                        totalAdded++;
+                    if (typeof topReq.x === 'number' && typeof topReq.y === 'number') {
+                        if (totalAdded < MAX_TOPPING_CAKE) {
+                            themToppingVaoCanvas(tp, topReq.x, topReq.y, false);
+                            totalAdded++;
+                        }
+                    } else {
+                        const count = topReq.soLuong || 1;
+                        for (let i = 0; i < count && i < tp.toiDa && totalAdded < MAX_TOPPING_CAKE; i++) {
+                            themToppingVaoCanvas(tp, null, null, false);
+                            totalAdded++;
+                        }
                     }
                 }
             });

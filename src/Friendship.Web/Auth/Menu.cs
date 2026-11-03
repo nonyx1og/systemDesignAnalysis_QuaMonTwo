@@ -21,6 +21,7 @@ public static class Menu
         new("Duyệt thiết kế", "/Bep/ThietKe/Index", [VaiTro.SAN_XUAT], "Bếp", "palette"),
         new("Ghi nhận mẻ bánh", "/Bep/MeBanh", [VaiTro.SAN_XUAT], "Bếp", "layers"),
         new("Tồn kho", "/Kho/TonKho", [VaiTro.KHO, VaiTro.QUAN_LY, VaiTro.QUAN_TRI], "Kho", "package"),
+        new("Giá vốn & Dự trù", "/Kho/GiaVon", [VaiTro.KHO, VaiTro.SAN_XUAT, VaiTro.QUAN_LY, VaiTro.QUAN_TRI], "Kho", "calculator"),
         new("Nhập kho","/Kho/NhapKho", [VaiTro.KHO], "Kho", "arrow-down"),
         new("Xuất nguyên liệu", "/Kho/XuatNguyenLieu", [VaiTro.KHO], "Kho", "arrow-up"),
         new("Đối chiếu định lượng", "/Kho/DoiChieu/Index", [VaiTro.KHO, VaiTro.QUAN_LY], "Kho", "scale"),

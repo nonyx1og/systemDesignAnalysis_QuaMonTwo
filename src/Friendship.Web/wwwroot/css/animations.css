@@ -1,0 +1,515 @@
+/* ==========================================================================
+   FrendshipBakery - Master Motion & Interaction Stylesheet (animations.css)
+   Triết lý: Chuyển động có chủ đích, xúc giác chân thực (tactile), dứt khoát.
+   Không dùng gradient, tuân thủ nguyên tắc đường cong Emil Kowalski & Spring Physics.
+   ========================================================================== */
+
+:root {
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-punchy: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-soft: cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  --dur-micro: 110ms;
+  --dur-fast: 160ms;
+  --dur-norm: 220ms;
+  --dur-enter: 300ms;
+}
+
+/* ==========================================================================
+   1. HIỆU ỨNG XUẤT HIỆN TỪNG LỚP (STAGGERED ENTRANCE ANIMATIONS)
+   ========================================================================== */
+
+@keyframes fFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fPopScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes cakeBreathe {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.02);
+  }
+}
+
+/* Áp dụng xuất hiện mượt mà cho các vùng nội dung chính */
+main, .dat-main, .content {
+  animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) both;
+}
+
+/* Hiệu ứng bậc thang (Stagger) cho các khối trong trang */
+.content > *:nth-child(1), .dat-main > *:nth-child(1) { animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) 0ms both; }
+.content > *:nth-child(2), .dat-main > *:nth-child(2) { animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) 40ms both; }
+.content > *:nth-child(3), .dat-main > *:nth-child(3) { animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) 80ms both; }
+.content > *:nth-child(4), .dat-main > *:nth-child(4) { animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) 120ms both; }
+.content > *:nth-child(5), .dat-main > *:nth-child(5) { animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) 160ms both; }
+.content > *:nth-child(6), .dat-main > *:nth-child(6) { animation: fFadeSlideUp var(--dur-enter) var(--ease-spring) 200ms both; }
+
+/* ==========================================================================
+   2. HIỆU ỨNG HOVER ĐỘC ĐÁO CHO THẺ BÁNH & THỰC ĐƠN (CAKE CARDS & SHOWCASE)
+   ========================================================================== */
+
+/* Thẻ mẫu bánh ở trang chủ */
+.di-mau {
+  transition: transform var(--dur-norm) var(--ease-spring),
+              box-shadow var(--dur-norm) var(--ease-spring),
+              border-color var(--dur-fast) ease !important;
+  will-change: transform, box-shadow;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .di-mau:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 16px 32px -4px rgba(58, 27, 38, 0.14), 0 4px 10px -2px rgba(58, 27, 38, 0.06) !important;
+  }
+  
+  .di-mau:hover .di-mau-hinh {
+    transform: scale(1.03) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(58, 27, 38, 0.08);
+  }
+
+  .di-mau:hover .di-mau-hinh svg {
+    animation: cakeBreathe 2.8s ease-in-out infinite;
+  }
+
+  .di-mau:hover .di-mau-gia {
+    transform: scale(1.06);
+    color: var(--dat-berry, #A3194A) !important;
+  }
+
+  .di-mau:hover .di-mau-ten {
+    color: var(--dat-berry, #A3194A);
+  }
+
+  .di-mau:hover .di-mau-link {
+    transform: translateX(4px);
+    color: var(--dat-berry, #A3194A) !important;
+  }
+}
+
+.di-mau:active {
+  transform: scale(0.98) translateY(0) !important;
+}
+
+.di-mau-hinh {
+  transition: transform var(--dur-norm) var(--ease-spring),
+              box-shadow var(--dur-norm) var(--ease-spring) !important;
+}
+
+.di-mau-gia {
+  transition: transform var(--dur-fast) var(--ease-spring), color var(--dur-fast) ease;
+  transform-origin: left center;
+  display: inline-block;
+}
+
+.di-mau-ten {
+  transition: color var(--dur-fast) ease;
+}
+
+.di-mau-link {
+  transition: transform var(--dur-fast) var(--ease-spring), color var(--dur-fast) ease;
+  display: inline-inline-flex;
+}
+
+/* Thẻ bài viết / Thẻ bánh trong thực đơn / Thẻ danh mục */
+.dat-paper, article.dat-paper, .dat-menu-page article {
+  transition: transform var(--dur-norm) var(--ease-spring),
+              box-shadow var(--dur-norm) var(--ease-spring),
+              border-color var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dat-paper:hover, article.dat-paper:hover, .dat-menu-page article:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 16px 32px -4px rgba(58, 27, 38, 0.12), 0 4px 12px -2px rgba(58, 27, 38, 0.06) !important;
+    border-color: #DDB9AA !important;
+  }
+
+  .dat-paper:hover img, article.dat-paper:hover img, .dat-menu-page article:hover img {
+    transform: scale(1.055);
+  }
+}
+
+.dat-paper img, article.dat-paper img, .dat-menu-page article img {
+  transition: transform 380ms var(--ease-spring) !important;
+}
+
+/* ==========================================================================
+   3. HIỆU ỨNG TƯƠNG TÁC XÚC GIÁC CHO NÚT (TACTILE BUTTON PRESS)
+   ========================================================================== */
+
+.btn, .dat-btn, .dat-btn-primary, .dat-btn-secondary, .di-hero-nut .dat-btn {
+  transition: transform var(--dur-micro) var(--ease-spring),
+              box-shadow var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              border-color var(--dur-fast) ease,
+              color var(--dur-fast) ease !important;
+  will-change: transform, box-shadow;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled),
+  .dat-btn:hover:not(:disabled),
+  .dat-btn-primary:hover:not(:disabled),
+  .dat-btn-secondary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Cảm giác ấn phím vật lý rõ nét */
+.btn:active:not(:disabled),
+.dat-btn:active:not(:disabled),
+.dat-btn-primary:active:not(:disabled),
+.dat-btn-secondary:active:not(:disabled) {
+  transform: scale(0.96) translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ==========================================================================
+   4. CÁC BƯỚC ĐẶT BÁNH TRANG CHỦ (STEP CARDS)
+   ========================================================================== */
+
+.di-buoc li {
+  position: relative;
+  transition: transform var(--dur-norm) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              box-shadow var(--dur-norm) var(--ease-spring) !important;
+  border-radius: var(--dat-radius-sm, 4px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .di-buoc li:hover {
+    transform: translateY(-4px) !important;
+    background-color: #FFFFFF !important;
+    box-shadow: 0 10px 24px -4px rgba(58, 27, 38, 0.08) !important;
+  }
+
+  .di-buoc li:hover h3 {
+    color: var(--dat-berry, #A3194A) !important;
+    transform: translateX(3px);
+  }
+}
+
+.di-buoc h3 {
+  transition: color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-spring);
+}
+
+/* ==========================================================================
+   5. BẢNG DỮ LIỆU & BẢNG NỘI BỘ (TABLE ROWS WITH ACCENT INDICATOR)
+   ========================================================================== */
+
+.table tbody tr {
+  transition: background-color var(--dur-fast) ease,
+              box-shadow var(--dur-fast) ease,
+              transform var(--dur-fast) var(--ease-spring) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .table tbody tr:hover {
+    background-color: #F8F6F2 !important;
+    box-shadow: inset 3.5px 0 0 var(--dark-2, #303030);
+  }
+  
+  .table tbody tr:hover td strong {
+    color: #1a1a1a;
+  }
+}
+
+/* ==========================================================================
+   6. BẢNG ĐIỀU KHIỂN & CHỈ SỐ STAT-CARD (METRIC CARDS)
+   ========================================================================== */
+
+.stat-card, .card-f {
+  transition: transform var(--dur-norm) var(--ease-spring),
+              box-shadow var(--dur-norm) var(--ease-spring) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .stat-card:hover {
+    transform: translateY(-3.5px) !important;
+    box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .stat-card:hover .so {
+    transform: scale(1.06);
+  }
+
+  .card-f:hover {
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), var(--shadow-card, none) !important;
+  }
+}
+
+.stat-card .so {
+  transition: transform var(--dur-fast) var(--ease-spring);
+  display: inline-block;
+  transform-origin: left bottom;
+}
+
+/* ==========================================================================
+   7. THANH ĐIỀU HƯỚNG BÊN & TRÊN (NAV & TOPBAR)
+   ========================================================================== */
+
+.nav-link-f {
+  position: relative;
+  transition: transform var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              color var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link-f:hover {
+    transform: translateX(4px) !important;
+    background: var(--surface-active, #f3f3f3) !important;
+  }
+
+  .nav-link-f:hover .ico {
+    transform: scale(1.15);
+  }
+}
+
+.nav-link-f .ico {
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.nav-link-f:active {
+  transform: translateX(2px) scale(0.98) !important;
+}
+
+.nav-link-f.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3.5px;
+  border-radius: 2px;
+  background: var(--dark-2, #303030);
+  transition: height var(--dur-fast) ease;
+}
+
+/* Header link underline effect trên trang khách */
+.dat-nav a:not(.dat-btn) {
+  position: relative;
+  transition: color var(--dur-fast) ease;
+}
+
+.dat-nav a:not(.dat-btn)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background: var(--dat-berry, #A3194A);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.dat-nav a:not(.dat-btn):hover::after,
+.dat-nav a:not(.dat-btn)[aria-current="page"]::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* Topbar user chip & nút chuông thông báo */
+.user-chip, .topbar-btn {
+  transition: transform var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              color var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .user-chip:hover, .topbar-btn:hover {
+    transform: translateY(-1.5px);
+  }
+  
+  .topbar-btn:hover .ico {
+    transform: rotate(10deg);
+  }
+}
+
+.topbar-btn .ico {
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.user-chip:active, .topbar-btn:active {
+  transform: scale(0.94) !important;
+}
+
+/* ==========================================================================
+   8. Ô NHẬP & BỘ LỌC (FORM CONTROLS)
+   ========================================================================== */
+
+.form-control, .form-select, .dat-input, .dat-select {
+  transition: border-color var(--dur-fast) ease,
+              box-shadow var(--dur-fast) var(--ease-spring),
+              transform var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) ease !important;
+}
+
+.form-control:focus, .form-select:focus {
+  transform: translateY(-1.5px);
+  box-shadow: 0 0 0 1px var(--surface, #fff), 0 0 0 3px rgba(0, 91, 211, 0.18) !important;
+}
+
+.dat-input:focus, .dat-select:focus {
+  transform: translateY(-1.5px);
+  border-color: var(--dat-accent, #3A1B26) !important;
+  box-shadow: 0 0 0 3px rgba(58, 27, 38, 0.14) !important;
+}
+
+/* ==========================================================================
+   9. CÔNG CỤ THIẾT KẾ BÁNH 2D/3D (/Dat/ThietKe)
+   ========================================================================== */
+
+.dat-view-tab {
+  transition: transform var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              color var(--dur-fast) ease,
+              box-shadow var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dat-view-tab:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 10px rgba(58, 27, 38, 0.08);
+  }
+}
+
+.dat-view-tab:active {
+  transform: scale(0.97) !important;
+}
+
+.dat-btn-tool {
+  transition: transform var(--dur-micro) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              box-shadow var(--dur-fast) ease,
+              color var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dat-btn-tool:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(58, 27, 38, 0.1);
+  }
+}
+
+.dat-btn-tool:active:not(:disabled) {
+  transform: scale(0.95) !important;
+}
+
+/* Các bước tiến trình stepper */
+.dat-step {
+  transition: transform var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) ease,
+              color var(--dur-fast) ease,
+              box-shadow var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dat-step:hover:not(.active) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(58, 27, 38, 0.06);
+  }
+}
+
+.dat-step:active {
+  transform: scale(0.97) !important;
+}
+
+.dat-step.active {
+  box-shadow: 0 3px 8px rgba(58, 27, 38, 0.15);
+}
+
+/* Màu và topping options */
+.dat-swatch, .dat-topping-item, .dat-radio-pill {
+  transition: transform var(--dur-micro) var(--ease-spring),
+              box-shadow var(--dur-fast) ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dat-swatch:hover, .dat-topping-item:hover {
+    transform: scale(1.14);
+    box-shadow: 0 4px 10px rgba(58, 27, 38, 0.15);
+  }
+}
+
+.dat-swatch:active, .dat-topping-item:active {
+  transform: scale(0.94) !important;
+}
+
+/* Khung canvas preview bánh */
+.dat-canvas-card {
+  transition: box-shadow var(--dur-norm) var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dat-canvas-card:hover {
+    box-shadow: 0 12px 28px -4px rgba(58, 27, 38, 0.1), 0 2px 8px rgba(58, 27, 38, 0.04);
+  }
+}
+
+/* ==========================================================================
+   10. HUY HIỆU & POPUP / DROPDOWN (BADGES, TOOLTIPS, DROPDOWNS)
+   ========================================================================== */
+
+.badge, .badge-f {
+  transition: transform var(--dur-micro) var(--ease-spring), filter var(--dur-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .badge:hover, .badge-f:hover {
+    transform: scale(1.06);
+  }
+}
+
+/* Menu Dropdown mượt mà */
+.dropdown-menu, .user-menu {
+  animation: fPopScale var(--dur-fast) var(--ease-spring) both !important;
+  transform-origin: top right;
+}
+
+/* Toast thông báo */
+.dat-toast, .toast {
+  animation: fFadeSlideUp var(--dur-norm) var(--ease-spring) both !important;
+}
+
+/* Accordion bung chi tiết (collapse) */
+.collapse {
+  transition: height 240ms var(--ease-spring) !important;
+}
+
+/* ==========================================================================
+   11. BẢO VỆ KHẢ NĂNG TRUY CẬP (ACCESSIBILITY - REDUCED MOTION)
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transform: none !important;
+  }
+}

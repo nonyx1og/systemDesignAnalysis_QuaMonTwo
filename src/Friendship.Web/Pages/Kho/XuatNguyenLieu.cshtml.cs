@@ -15,6 +15,8 @@ public class XuatNguyenLieuModel(KhoService kho, SanPhamService sanPham, BepServ
     public KeHoachXuat? KeHoach { get; set; }
     public List<DonBep> DonCho { get; set; } = [];
     [BindProperty(SupportsGet = true)] public int? DonId { get; set; }
+    [BindProperty(SupportsGet = true)] public int? SanPhamId { get; set; }
+    [BindProperty(SupportsGet = true)] public int? SoLuong { get; set; }
 
     // Nullable: dòng trống gửi chuỗi rỗng không được gây lỗi bind (xem ledger Task 3).
     public class Line
@@ -51,6 +53,11 @@ public class XuatNguyenLieuModel(KhoService kho, SanPhamService sanPham, BepServ
                 }).ToList();
             }
             catch (NghiepVuException e) { ModelState.AddModelError("", e.Message); }
+        }
+
+        if (SanPhamId is { } spId && spId > 0 && Lines.Count == 0)
+        {
+            Lines.Add(new Line { SanPhamId = spId, SoLuongBanh = SoLuong ?? 1 });
         }
         if (Lines.Count == 0) Lines.Add(new Line());
     }
@@ -116,6 +123,11 @@ public class XuatNguyenLieuModel(KhoService kho, SanPhamService sanPham, BepServ
         }
 
         Lines = Lines.Where(l => l.SanPhamId != 0 || l.ThanhPhanId.HasValue).ToList();
+
+        if (SanPhamId is { } spId && spId > 0 && Lines.Count == 0)
+        {
+            Lines.Add(new Line { SanPhamId = spId, SoLuongBanh = SoLuong ?? 1 });
+        }
         if (Lines.Count == 0) Lines.Add(new Line());
         return true;
     }

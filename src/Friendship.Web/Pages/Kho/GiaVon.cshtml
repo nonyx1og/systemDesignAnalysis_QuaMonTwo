@@ -1,0 +1,323 @@
+@page
+@model Friendship.Web.Pages.Kho.GiaVonModel
+@{
+    ViewData["Title"] = "Định lượng Giá vốn & Dự trù Mẻ bánh";
+}
+
+<div class="container-fluid py-3 px-md-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-dark fw-bold">Định lượng Giá vốn & Dự trù Mẻ bánh</h1>
+            <p class="text-muted mb-0 small">
+                Tự động tính giá vốn nguyên liệu (Food Cost) theo thời giá kho thực tế và giả lập khả dụng nguyên liệu cho mẻ sản xuất.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-page="/Kho/TonKho" class="btn btn-outline-secondary btn-sm">
+                Xem tồn kho
+            </a>
+            <a asp-page="/Kho/XuatNguyenLieu" class="btn btn-primary btn-sm">
+                Xuất kho nguyên liệu
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card-f p-3 h-100">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Tỷ lệ Food Cost TB</div>
+                <div class="h3 mb-1 text-primary fw-bold">@Model.TyLeFoodCostBinhQuan%</div>
+                <div class="small text-muted">Mục tiêu ngành bánh: 25% – 35%</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card-f p-3 h-100">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Bánh có công thức</div>
+                <div class="h3 mb-1 text-dark fw-bold">@Model.SoBanhCoDinhLuong <span class="fs-6 text-muted fw-normal">/ @Model.TongBanhKinhDoanh</span></div>
+                <div class="small text-muted">Đã cấu hình định lượng BOM</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card-f p-3 h-100">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Biên lãi cao nhất</div>
+                <div class="h4 mb-1 text-success fw-bold text-truncate" title="@Model.BanhLaiCaoNhat">@Model.BanhLaiCaoNhat</div>
+                <div class="small text-success">Lãi gộp: <strong>@Model.LaiCaoNhatPhanTram%</strong></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card-f p-3 h-100">
+                <div class="text-muted small text-uppercase fw-semibold mb-1">Cơ sở tính giá vốn</div>
+                <div class="h4 mb-1 text-dark fw-bold">Đơn giá bình quân</div>
+                <div class="small text-muted">Dựa trên các lô kho còn hạn</div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.DuTruHienTai != null)
+    {
+        var dt = Model.DuTruHienTai;
+        <!-- Interactive Batch Simulator Card -->
+        <div class="card-f p-4 mb-4 border-primary">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-2 border-bottom">
+                <div>
+                    <span class="badge bg-primary text-white mb-1">Công cụ giả lập mẻ sản xuất</span>
+                    <h2 class="h5 mb-0 fw-bold text-dark">Dự trù & Kiểm tra tồn kho theo mẻ bánh</h2>
+                </div>
+                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+                    <input type="hidden" name="TuKhoa" value="@Model.TuKhoa" />
+                    <input type="hidden" name="LocDanhGia" value="@Model.LocDanhGia" />
+                    <label class="small text-muted fw-semibold">Chọn bánh:</label>
+                    <select name="BanhId" class="form-select form-select-sm" style="min-width: 220px;" onchange="this.form.submit()">
+                        @foreach (var b in Model.DanhSachBanh)
+                        {
+                            <option value="@b.Id" selected="@(b.Id == dt.SanPhamId ? "selected" : null)">
+                                @b.TenBanh (@b.KichThuoc) - @Fmt.Tien(b.DonGiaBan)
+                            </option>
+                        }
+                    </select>
+                    <label class="small text-muted fw-semibold ms-md-2">Số lượng nướng:</label>
+                    <input type="number" name="SoLuong" class="form-control form-select-sm" style="width: 90px;" min="1" max="1000" value="@dt.SoLuongBanh" />
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Tính toán</button>
+                </form>
+            </div>
+
+            <div class="row g-4 align-items-center mb-3">
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="@dt.HinhAnh" alt="@dt.TenBanh" style="width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid #e0d5cb;" />
+                        <div>
+                            <div class="fw-bold text-dark fs-6">@dt.TenBanh</div>
+                            <div class="text-muted small">Quy cách: @dt.KichThuoc</div>
+                            <div class="text-primary small fw-semibold">Mẻ: @dt.SoLuongBanh chiếc</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="row g-2 text-center">
+                        <div class="col-6 col-sm-3">
+                            <div class="p-2 bg-light border rounded">
+                                <div class="text-muted small">Doanh thu dự kiến</div>
+                                <div class="fw-bold text-dark">@Fmt.Tien(dt.TongDoanhThuDuKien)</div>
+                                <div class="small text-muted">@Fmt.Tien(dt.GiaBanMotBanh) / bánh</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-2 bg-light border rounded">
+                                <div class="text-muted small">Vốn nguyên liệu mẻ</div>
+                                <div class="fw-bold text-danger">@Fmt.Tien(dt.TongChiPhiNguyenLieu)</div>
+                                <div class="small text-muted">@Fmt.Tien(dt.GiaVonMotBanh) / bánh</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-2 bg-light border rounded">
+                                <div class="text-muted small">Lãi gộp dự kiến</div>
+                                <div class="fw-bold text-success">@Fmt.Tien(dt.TongLoiNhuanGop)</div>
+                                <div class="small text-success">Tỷ suất: @dt.TyLeLoiNhuan%</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-2 border rounded @(dt.DuNguyenLieuToanMe ? "bg-light text-success border-success" : "bg-light text-danger border-danger")">
+                                <div class="small fw-semibold">Khả dụng kho</div>
+                                <div class="fw-bold fs-6">@(dt.DuNguyenLieuToanMe ? "Đủ nguyên liệu" : "Thiếu nguyên liệu")</div>
+                                <div class="small">@(dt.DuNguyenLieuToanMe ? "Có thể nướng ngay" : "Cần bổ sung kho")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng chi tiết nguyên liệu cần dùng cho mẻ -->
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle mb-2">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Nguyên liệu</th>
+                            <th class="text-end">Định mức/bánh</th>
+                            <th class="text-end">Cần cho @dt.SoLuongBanh bánh</th>
+                            <th class="text-end">Tồn kho khả dụng</th>
+                            <th class="text-end">Tình trạng kho</th>
+                            <th class="text-end">Chi phí trong mẻ</th>
+                            <th class="text-end">% Chi phí mẻ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        @foreach (var nvl in dt.ChiTietNguyenLieu)
+                        {
+                            <tr class="@(!nvl.DuHang ? "table-danger" : "")">
+                                <td><strong>@nvl.TenNguyenLieu</strong></td>
+                                <td class="text-end">@Fmt.So(nvl.DinhMucMotBanh) @nvl.DonViTinh</td>
+                                <td class="text-end fw-semibold">@Fmt.So(nvl.CanDungChoMe) @nvl.DonViTinh</td>
+                                <td class="text-end">@Fmt.So(nvl.TonKhoHienCo) @nvl.DonViTinh</td>
+                                <td class="text-end">
+                                    @if (nvl.DuHang)
+                                    {
+                                        <span class="badge bg-success text-white">Đủ (dư @Fmt.So(nvl.ChenhLech))</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger text-white">Thiếu @Fmt.So(Math.Abs(nvl.ChenhLech)) @nvl.DonViTinh</span>
+                                    }
+                                </td>
+                                <td class="text-end">@Fmt.Tien(nvl.ChiPhiTrongMe)</td>
+                                <td class="text-end text-muted">@nvl.TyLeChiPhi%</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-2">
+                @if (dt.DuNguyenLieuToanMe)
+                {
+                    <a asp-page="/Kho/XuatNguyenLieu" asp-route-SanPhamId="@dt.SanPhamId" asp-route-SoLuong="@dt.SoLuongBanh" class="btn btn-success btn-sm">
+                        Xuất kho nguyên liệu cho mẻ này
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Kho/DeXuatNhap" class="btn btn-outline-danger btn-sm">
+                        Lập đề xuất nhập hàng còn thiếu
+                    </a>
+                    <a asp-page="/Kho/XuatNguyenLieu" asp-route-SanPhamId="@dt.SanPhamId" asp-route-SoLuong="@dt.SoLuongBanh" class="btn btn-outline-secondary btn-sm">
+                        Vẫn xuất nguyên liệu có sẵn
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Bảng phân tích Giá vốn toàn bộ Menu bánh -->
+    <div class="card-f p-0">
+        <div class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="h5 mb-0 fw-bold text-dark">Bảng phân tích Giá vốn & Biên lợi nhuận từng loại bánh</h3>
+                <span class="small text-muted">Hiển thị @Model.DanhSachBanh.Count sản phẩm</span>
+            </div>
+            <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+                <input type="hidden" name="BanhId" value="@Model.BanhId" />
+                <input type="hidden" name="SoLuong" value="@Model.SoLuong" />
+                <select name="LocDanhGia" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
+                    <option value="" selected="@(string.IsNullOrEmpty(Model.LocDanhGia) ? "selected" : null)">Tất cả mức biên lãi</option>
+                    <option value="cao" selected="@(Model.LocDanhGia == "cao" ? "selected" : null)">Biên lợi nhuận cao (&le;30%)</option>
+                    <option value="tieuchuan" selected="@(Model.LocDanhGia == "tieuchuan" ? "selected" : null)">Tiêu chuẩn (30% - 40%)</option>
+                    <option value="canhbao" selected="@(Model.LocDanhGia == "canhbao" ? "selected" : null)">Chi phí cao (&gt;40%)</option>
+                    <option value="chuaco" selected="@(Model.LocDanhGia == "chuaco" ? "selected" : null)">Chưa có công thức</option>
+                </select>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" name="TuKhoa" class="form-control" placeholder="Tìm tên bánh..." value="@Model.TuKhoa" />
+                    <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Quy cách</th>
+                        <th class="text-end">Giá bán</th>
+                        <th class="text-end">Giá vốn nguyên liệu</th>
+                        <th class="text-end">Lãi gộp / bánh</th>
+                        <th class="text-end">Tỷ lệ Food Cost</th>
+                        <th>Đánh giá</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.DanhSachBanh)
+                    {
+                        var collapseId = $"collapse-{b.Id}";
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="@b.HinhAnh" alt="@b.TenBanh" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e0d5cb;" />
+                                    <div>
+                                        <strong class="text-dark">@b.TenBanh</strong>
+                                        <div class="text-muted small">@b.SoLuongNguyenLieu thành phần nguyên liệu</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@b.KichThuoc</td>
+                            <td class="text-end fw-semibold">@Fmt.Tien(b.DonGiaBan)</td>
+                            <td class="text-end text-danger fw-bold">@Fmt.Tien(b.GiaVonNguyenLieu)</td>
+                            <td class="text-end text-success fw-bold">
+                                @Fmt.Tien(b.LoiNhuanGop)
+                                <div class="small text-muted font-monospace">(@b.TyLeLoiNhuan%)</div>
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold @(b.TyLeFoodCost <= 30 ? "text-success" : b.TyLeFoodCost <= 40 ? "text-primary" : "text-danger")">
+                                    @b.TyLeFoodCost%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="@b.CssClassDanhGia">@b.DanhGia</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <button class="btn btn-outline-secondary btn-sm py-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" style="font-size: 0.75rem;">
+                                        Xem công thức
+                                    </button>
+                                    <a asp-page="/Kho/GiaVon" asp-route-BanhId="@b.Id" asp-route-SoLuong="@Model.SoLuong" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                        Dự trù mẻ
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Dòng bung chi tiết công thức định lượng -->
+                        <tr class="collapse bg-light" id="@collapseId">
+                            <td colspan="8" class="p-3">
+                                <div class="p-3 bg-white border rounded shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h4 class="h6 mb-0 fw-bold text-dark">Bảng thành phần định lượng cho 1 chiếc @b.TenBanh</h4>
+                                        <span class="small text-muted">Tổng vốn: <strong>@Fmt.Tien(b.GiaVonNguyenLieu)</strong> / chiếc</span>
+                                    </div>
+                                    @if (b.ChiTiets.Count == 0)
+                                    {
+                                        <p class="text-muted small mb-0">Chưa có dữ liệu định lượng nguyên liệu cho sản phẩm này.</p>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered align-middle mb-2">
+                                                <thead class="table-light small">
+                                                    <tr>
+                                                        <th>Nguyên liệu</th>
+                                                        <th class="text-end">Định mức</th>
+                                                        <th class="text-end">Đơn vị</th>
+                                                        <th class="text-end">Đơn giá BQ kho</th>
+                                                        <th class="text-end">Thành tiền</th>
+                                                        <th class="text-end">% Giá vốn</th>
+                                                        <th class="text-end">Tồn kho hiện tại</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="small">
+                                                    @foreach (var ct in b.ChiTiets)
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ct.TenNguyenLieu</strong></td>
+                                                            <td class="text-end">@Fmt.So(ct.DinhMuc)</td>
+                                                            <td class="text-end">@ct.DonViTinh</td>
+                                                            <td class="text-end">@Fmt.Tien(ct.DonGiaBq)</td>
+                                                            <td class="text-end fw-semibold">@Fmt.Tien(ct.ThanhTien)</td>
+                                                            <td class="text-end text-muted">@ct.PhanTramChiPhi%</td>
+                                                            <td class="text-end @(ct.TonKhoHienCo <= 0 ? "text-danger" : "text-success")">
+                                                                @Fmt.So(ct.TonKhoHienCo) @ct.DonViTinh
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

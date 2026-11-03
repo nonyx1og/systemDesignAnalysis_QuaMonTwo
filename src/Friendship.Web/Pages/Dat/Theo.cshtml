@@ -150,7 +150,10 @@
                 <dl class="theo-ck">
                     <div>
                         <dt>Nội dung chuyển khoản</dt>
-                        <dd><code class="theo-ck-noidung">@tk.Ma</code></dd>
+                        <dd style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <code class="theo-ck-noidung" id="code-ndck">@tk.Ma</code>
+                            <button type="button" class="btn-copy-code" onclick="copyText('code-ndck', this)">Sao chép</button>
+                        </dd>
                     </div>
                     @if (tk.HanBaoGia.HasValue)
                     {
@@ -164,8 +167,8 @@
 
                 <form method="post" asp-page-handler="XacNhanCoc" style="margin-top: 1.25rem; text-align: center;">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="dat-btn dat-btn-primary" style="width: 100%; padding: 0.75rem 1.25rem; font-size: 0.9375rem; font-weight: 700; background: linear-gradient(135deg, var(--dat-berry), #e63956); border-radius: 8px;">
-                        💳 Tôi đã chuyển khoản xong — Xác nhận cọc ngay
+                    <button type="submit" class="dat-btn dat-btn-primary" style="width: 100%; padding: 0.75rem 1.25rem; font-size: 0.9375rem; font-weight: 700; background: var(--dat-berry); border-radius: 8px;">
+                        Tôi đã chuyển khoản xong — Xác nhận cọc ngay
                     </button>
                     <p style="font-size: 0.75rem; color: var(--dat-text-muted); margin-top: 0.4rem;">
                         Nhấn xác nhận sau khi chuyển khoản để hệ thống ghi nhận và chuyển đơn sang bếp làm bánh.
@@ -266,7 +269,41 @@
 
             <hr class="dat-perf" />
             <p class="theo-cuong-nhan">Mã tra cứu, giữ để xem lại đơn</p>
-            <p class="theo-cuong-ma">@tk.MaTraCuu</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                <p class="theo-cuong-ma" id="code-tracuu" style="margin: 0;">@tk.MaTraCuu</p>
+                <button type="button" class="btn-copy-code" onclick="copyText('code-tracuu', this)">Sao chép</button>
+            </div>
+
+            <!-- Hướng dẫn bảo quản & vận chuyển -->
+            <details style="margin-top: 1.25rem; font-size: 0.8125rem; color: var(--dat-text-secondary); line-height: 1.5; border-top: 1px dashed var(--dat-champagne); padding-top: 0.75rem;">
+                <summary style="font-weight: 600; cursor: pointer; color: var(--dat-text-main); user-select: none;">
+                    Lưu ý bảo quản & nhận bánh
+                </summary>
+                <div style="margin-top: 0.5rem;">
+                    <p style="margin-bottom: 0.35rem;">• <strong>Bảo quản:</strong> Ngăn mát 2°C – 6°C, thưởng thức ngon nhất trong 48 giờ.</p>
+                    <p style="margin-bottom: 0.35rem;">• <strong>Vận chuyển:</strong> Để phẳng trên sàn ô tô hoặc người ngồi sau xe máy giữ hai tay.</p>
+                    <p style="margin-bottom: 0;">• <strong>Hẹn giờ:</strong> Nên lấy trước giờ tiệc 1–2 tiếng để chuẩn bị chu đáo nhất.</p>
+                </div>
+            </details>
         </aside>
     </div>
 </div>
+
+<script>
+function copyText(elemId, btn) {
+    var elem = document.getElementById(elemId);
+    if (!elem) return;
+    var txt = elem.textContent.trim();
+    navigator.clipboard.writeText(txt).then(function() {
+        var old = btn.textContent;
+        btn.textContent = 'Đã chép!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+            btn.textContent = old;
+            btn.classList.remove('copied');
+        }, 1800);
+    }).catch(function() {
+        alert('Đã sao chép: ' + txt);
+    });
+}
+</script>

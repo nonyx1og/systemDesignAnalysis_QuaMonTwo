@@ -167,6 +167,9 @@
   max-width: 100%;
   min-width: 0; /* flex item: không để canvas 400px chống đỡ; thiet-ke.js tự co canvas theo khung */
   line-height: 0;
+  background: #FFFFFF;
+  border: 1px solid var(--dat-border-subtle);
+  box-shadow: 0 4px 16px rgba(58, 27, 38, 0.06);
 }
 .dat-canvas-card,
 .dat-canvas-body {

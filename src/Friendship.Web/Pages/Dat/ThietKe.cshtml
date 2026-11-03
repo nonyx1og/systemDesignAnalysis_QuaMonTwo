@@ -154,6 +154,12 @@
                             </div>
                         }
                     </div>
+                    <div class="dat-serving-guide" style="margin-top: 0.75rem;">
+                        <strong style="color: var(--dat-text-main); display: block; margin-bottom: 0.25rem;">Gợi ý chọn cỡ theo bữa tiệc:</strong>
+                        <div>• <strong>16cm:</strong> Tiệc nhỏ gia đình, hẹn hò ấm cúng (2–4 người ăn).</div>
+                        <div>• <strong>20cm:</strong> Tiệc sinh nhật chuẩn bạn bè & gia đình (6–8 người ăn).</div>
+                        <div>• <strong>24cm / 2 tầng:</strong> Thôi nôi, liên hoan, tiệc đông người (10–16 người ăn).</div>
+                    </div>
                 </div>
 
                 <div class="dat-group" id="box-so-tang">
@@ -334,9 +340,20 @@
                 }
 
                 <div class="dat-group">
-                    <label class="dat-group-title" for="input-chu-canvas">Dòng chữ trên mặt bánh</label>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem;">
+                        <label class="dat-group-title" for="input-chu-canvas" style="margin: 0;">Dòng chữ trên mặt bánh</label>
+                        <span id="char-counter" style="font-size: 0.8125rem; font-weight: 600; color: var(--dat-text-muted);">0/30 ký tự</span>
+                    </div>
                     <input type="text" id="input-chu-canvas" class="form-control" maxlength="30" value="@Model.Input.ChuTrenBanh" placeholder="Ví dụ: Chúc mừng sinh nhật mẹ" aria-describedby="ghi-chu-chu" />
-                    <p class="dat-field-help" id="ghi-chu-chu">Tối đa 30 ký tự.</p>
+                    <div class="dat-quick-suggestions" style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--dat-text-secondary); font-weight: 600;">Gợi ý câu chúc:</span>
+                        <button type="button" class="btn-suggestion-chip" data-text="Chúc mừng sinh nhật">Chúc mừng sinh nhật</button>
+                        <button type="button" class="btn-suggestion-chip" data-text="Happy Birthday">Happy Birthday</button>
+                        <button type="button" class="btn-suggestion-chip" data-text="Kỷ niệm ngày cưới">Kỷ niệm ngày cưới</button>
+                        <button type="button" class="btn-suggestion-chip" data-text="Mừng thôi nôi bé">Mừng thôi nôi bé</button>
+                        <button type="button" class="btn-suggestion-chip" data-text="Mãi yêu gia đình">Mãi yêu gia đình</button>
+                    </div>
+                    <p class="dat-field-help" id="ghi-chu-chu" style="margin-top: 0.35rem;">Tối đa 30 ký tự. Chữ sẽ cập nhật ngay lập tức trên mặt bánh 2D & 3D.</p>
                 </div>
 
                 <div class="dat-group dat-two-col">
@@ -444,6 +461,13 @@
                     <hr class="dat-perf" aria-hidden="true" />
                     <p class="dat-stub">Mã tra cứu sẽ hiện sau khi gửi. Giữ mã để xem tiến độ và đặt cọc.</p>
                     <input type="hidden" asp-for="Input.ChuTrenBanh" />
+                </div>
+
+                <div class="dat-care-guide" style="margin-top: 1.25rem;">
+                    <strong style="color: var(--dat-text-main); display: block; margin-bottom: 0.25rem;">Lưu ý bảo quản & nhận bánh:</strong>
+                    <div>• <strong>Bảo quản mát:</strong> Giữ bánh ở 2°C – 6°C trong ngăn mát tủ lạnh, thưởng thức ngon nhất trong vòng 48h.</div>
+                    <div>• <strong>Vận chuyển:</strong> Đặt hộp bánh thăng bằng trên sàn xe ô tô hoặc người ngồi sau xe máy giữ cẩn thận.</div>
+                    <div>• <strong>Thời gian:</strong> Hẹn nhận bánh trước giờ tiệc 1–2 tiếng để bánh giữ trọn độ tươi xốp.</div>
                 </div>
 
                 <div class="dat-group dat-contact">

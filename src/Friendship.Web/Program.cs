@@ -132,6 +132,7 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy(Policies.HuyHang, p => p.RequireRole(Policies.Kho, Policies.BanHang, Policies.SanXuat));
     o.AddPolicy(Policies.DeXuatNhap, p => p.RequireRole(Policies.Kho, Policies.QuanLy));
     o.AddPolicy("TonKhoPolicy", p => p.RequireRole(Policies.Kho, Policies.QuanLy, Policies.QuanTri));
+    o.AddPolicy("GiaVonPolicy", p => p.RequireRole(Policies.Kho, Policies.SanXuat, Policies.QuanLy, Policies.QuanTri));
 });
 
 builder.Services.AddRazorPages(o =>
@@ -144,6 +145,8 @@ builder.Services.AddRazorPages(o =>
             model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(Policies.DeXuatNhap));
         else if (model.ViewEnginePath.Equals("/Kho/TonKho", StringComparison.OrdinalIgnoreCase))
             model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter("TonKhoPolicy"));
+        else if (model.ViewEnginePath.Equals("/Kho/GiaVon", StringComparison.OrdinalIgnoreCase))
+            model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter("GiaVonPolicy"));
         else
             model.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(Policies.Kho));
     });
@@ -178,6 +181,7 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 // Lỗi ngoài endpoint filter (kiểm cookie chạm CSDL, bind tham số, serialize) dưới /api vẫn trả JSON 500, không trả trang HTML.
 // Body sai định dạng (BadHttpRequestException) giữ mã 400 của nó.
 app.UseWhen(c => c.Request.Path.StartsWithSegments("/api"), b => b.UseExceptionHandler(e => e.Run(c =>

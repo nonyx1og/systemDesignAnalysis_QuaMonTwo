@@ -42,10 +42,10 @@ public static partial class DbSeeder
 
         db.NhanViens.AddRange(
             Tao("admin", "Quản trị viên", VaiTro.QUAN_TRI, "0900000001"),
-            Tao("quanly", "Trần Quản Lý", VaiTro.QUAN_LY, "0900000002"),
-            Tao("thungan", "Lê Thu Ngân", VaiTro.BAN_HANG, "0900000003"),
-            Tao("bep", "Phạm Thợ Bánh", VaiTro.SAN_XUAT, "0900000004"),
-            Tao("kho", "Hoàng Thủ Kho", VaiTro.KHO, "0900000005"));
+            Tao("quanly", "Quản lý", VaiTro.QUAN_LY, "0900000002"),
+            Tao("thungan", "Nhân viên", VaiTro.BAN_HANG, "0900000003"),
+            Tao("bep", "Thợ bánh", VaiTro.SAN_XUAT, "0900000004"),
+            Tao("kho", "Thủ kho", VaiTro.KHO, "0900000005"));
         await db.SaveChangesAsync();
     }
 

@@ -1,4 +1,4 @@
-﻿-- =============================================
+-- =============================================
 -- FRIENDSHIP BAKERY - DATABASE DATA EXPORT
 -- Exported at: 2026-11-01 23:09:22
 -- =============================================
@@ -25,10 +25,10 @@ GO
 SET IDENTITY_INSERT [NhanViens] ON;
 INSERT INTO [NhanViens] ([Id], [HoTen], [GioiTinh], [NgaySinh], [SoDienThoai], [Email], [TenDangNhap], [MatKhauHash], [VaiTro], [DangHoatDong]) VALUES
 (1, N'Quản trị viên', NULL, NULL, N'0900000001', NULL, N'admin', N'AQAAAAIAAYagAAAAENMC8lcWqQUM1IvwI7XHprqNZU+uIDlSr4a1XfyMMRfTZQS0ZPOG5pKla+ism4cK+g==', N'QUAN_TRI', 1),
-(2, N'Trần Quản Lý', NULL, NULL, N'0900000002', NULL, N'quanly', N'AQAAAAIAAYagAAAAEFlrgwNPgrd6+lW6tL5OrFJsLa1AsCAUE8dehYPZTN9+ZNa/BDmhWVBcUb5/cuWM/Q==', N'QUAN_LY', 1),
-(3, N'Lê Thu Ngân', NULL, NULL, N'0900000003', NULL, N'thungan', N'AQAAAAIAAYagAAAAEP9iJdpjcCz0y6AFP8lTvZQcqEjZzR2JJXSOCajV22EfS2Tmuy8IhRIm6GVDXl3sog==', N'BAN_HANG', 1),
-(4, N'Phạm Thợ Bánh', NULL, NULL, N'0900000004', NULL, N'bep', N'AQAAAAIAAYagAAAAEMq1rtR0dpIPuVbZmY+G45+adzzqSR7kGt4GQe0665evBLoVaLHS8HICD1UHJhzMJA==', N'SAN_XUAT', 1),
-(5, N'Hoàng Thủ Kho', NULL, NULL, N'0900000005', NULL, N'kho', N'AQAAAAIAAYagAAAAEKO5x6FHr+O+IuG1Ds2x7ZraP8TxmEGCwrI/a+U0BCXm3O3Ix/Vn9KhoVVrZeRNyTA==', N'KHO', 1);
+(2, N'Quản lý', NULL, NULL, N'0900000002', NULL, N'quanly', N'AQAAAAIAAYagAAAAEFlrgwNPgrd6+lW6tL5OrFJsLa1AsCAUE8dehYPZTN9+ZNa/BDmhWVBcUb5/cuWM/Q==', N'QUAN_LY', 1),
+(3, N'Nhân viên', NULL, NULL, N'0900000003', NULL, N'thungan', N'AQAAAAIAAYagAAAAEP9iJdpjcCz0y6AFP8lTvZQcqEjZzR2JJXSOCajV22EfS2Tmuy8IhRIm6GVDXl3sog==', N'BAN_HANG', 1),
+(4, N'Thợ bánh', NULL, NULL, N'0900000004', NULL, N'bep', N'AQAAAAIAAYagAAAAEMq1rtR0dpIPuVbZmY+G45+adzzqSR7kGt4GQe0665evBLoVaLHS8HICD1UHJhzMJA==', N'SAN_XUAT', 1),
+(5, N'Thủ kho', NULL, NULL, N'0900000005', NULL, N'kho', N'AQAAAAIAAYagAAAAEKO5x6FHr+O+IuG1Ds2x7ZraP8TxmEGCwrI/a+U0BCXm3O3Ix/Vn9KhoVVrZeRNyTA==', N'KHO', 1);
 SET IDENTITY_INSERT [NhanViens] OFF;
 GO
 

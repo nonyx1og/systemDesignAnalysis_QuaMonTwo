@@ -141,13 +141,15 @@
   --dat-container: 1200px;
   --dat-header-h: 60px;
 
-  /* 13. Chuyển động: ngắn, không nảy */
-  --dat-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
-  --dat-spring-smooth: cubic-bezier(0.2, 0, 0, 1);
-  --dat-spring-bounce: cubic-bezier(0.2, 0, 0, 1);
-  --dat-duration-fast: 150ms;
-  --dat-duration-normal: 240ms;
-  --dat-duration-slow: 360ms;
+  /* 13. Chuyển động: Emil Kowalski curve (nhanh, tự nhiên, dứt khoát) */
+  --dat-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --dat-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --dat-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dat-spring-smooth: cubic-bezier(0.23, 1, 0.32, 1);
+  --dat-spring-bounce: cubic-bezier(0.23, 1, 0.32, 1);
+  --dat-duration-fast: 140ms;
+  --dat-duration-normal: 220ms;
+  --dat-duration-slow: 320ms;
 }
 
 /* ==========================================================================
@@ -763,11 +765,24 @@ textarea.form-control {
   cursor: pointer;
   border: 1px solid transparent;
   text-decoration: none;
-  transition: background-color var(--dat-duration-fast) var(--dat-ease), color var(--dat-duration-fast) var(--dat-ease), border-color var(--dat-duration-fast) var(--dat-ease);
+  transition: transform var(--dat-duration-fast) var(--dat-ease-out),
+              background-color var(--dat-duration-fast) var(--dat-ease-out),
+              color var(--dat-duration-fast) var(--dat-ease-out),
+              border-color var(--dat-duration-fast) var(--dat-ease-out),
+              box-shadow var(--dat-duration-fast) var(--dat-ease-out);
 }
 .dat-btn:focus-visible {
   outline: none;
   box-shadow: var(--dat-shadow-focus);
+}
+.dat-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dat-btn-primary:hover:not(:disabled),
+  .dat-btn-secondary:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
 }
 .dat-btn-lg {
   min-height: 48px;
@@ -783,6 +798,7 @@ textarea.form-control {
 }
 .dat-btn-primary:active:not(:disabled) {
   background: var(--dat-accent-active);
+  transform: scale(0.98);
 }
 .dat-btn-secondary {
   background: var(--dat-bg-surface);
@@ -906,7 +922,14 @@ textarea.form-control {
   cursor: pointer;
   list-style: none;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: transform var(--dat-duration-fast) var(--dat-ease-out),
+              border-color var(--dat-duration-fast) var(--dat-ease-out),
+              color var(--dat-duration-fast) var(--dat-ease-out),
+              box-shadow var(--dat-duration-fast) var(--dat-ease-out),
+              background-color var(--dat-duration-fast) var(--dat-ease-out);
+}
+.dat-acc-dropdown > summary:active {
+  transform: scale(0.98);
 }
 .dat-acc-dropdown > summary::-webkit-details-marker {
   display: none;
@@ -931,6 +954,43 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  transform-origin: top right;
+  animation: datPopoverIn var(--dat-duration-fast) var(--dat-ease-out);
+}
+@keyframes datPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.dat-main {
+  animation: datMainFadeIn var(--dat-duration-normal) var(--dat-ease-out);
+}
+@keyframes datMainFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.dat-paper {
+  transition: transform var(--dat-duration-fast) var(--dat-ease-out),
+              box-shadow var(--dat-duration-fast) var(--dat-ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dat-main, .dat-acc-popover, .dat-toast {
+    animation: none !important;
+  }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
 .dat-acc-link {
   display: flex;
@@ -949,3 +1009,85 @@ textarea.form-control {
   color: var(--dat-berry);
 }
 
+
+/* Gợi ý lời chúc & chip tiện ích (Best practice UX) */
+.btn-suggestion-chip {
+  background: var(--dat-bg-canvas);
+  border: 1px solid var(--dat-champagne);
+  color: var(--dat-text-main);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 550;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  line-height: 1.25;
+  transition: transform var(--dat-duration-fast) var(--dat-ease-out),
+              background-color var(--dat-duration-fast) var(--dat-ease-out),
+              border-color var(--dat-duration-fast) var(--dat-ease-out),
+              color var(--dat-duration-fast) var(--dat-ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-suggestion-chip:hover {
+    background: #fff;
+    border-color: var(--dat-berry);
+    color: var(--dat-berry);
+    transform: translateY(-1px);
+  }
+}
+.btn-suggestion-chip:active {
+  transform: scale(0.96);
+}
+
+/* Nút sao chép mã thanh toán nhanh */
+.btn-copy-code {
+  background: #fff;
+  border: 1px solid var(--dat-champagne);
+  color: var(--dat-text-secondary);
+  border-radius: var(--dat-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: background-color var(--dat-duration-fast) var(--dat-ease-out),
+              color var(--dat-duration-fast) var(--dat-ease-out),
+              border-color var(--dat-duration-fast) var(--dat-ease-out),
+              transform var(--dat-duration-fast) var(--dat-ease-out);
+}
+.btn-copy-code:hover {
+  background: var(--dat-bg-canvas);
+  border-color: var(--dat-berry);
+  color: var(--dat-berry);
+}
+.btn-copy-code:active {
+  transform: scale(0.96);
+}
+.btn-copy-code.copied {
+  background: var(--dat-success-bg);
+  color: var(--dat-success);
+  border-color: var(--dat-success);
+}
+
+/* Khối hướng dẫn chọn cỡ bánh (Portion guidance) */
+.dat-serving-guide {
+  background: var(--dat-bg-canvas);
+  border-radius: var(--dat-radius-sm);
+  border: 1px solid var(--dat-border-subtle);
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--dat-text-secondary);
+  line-height: 1.55;
+}
+
+/* Khối lưu ý bảo quản & vận chuyển bánh */
+.dat-care-guide {
+  background: var(--dat-bg-surface);
+  border-radius: var(--dat-radius-sm);
+  border: 1px solid var(--dat-border-subtle);
+  padding: 0.85rem 1.15rem;
+  font-size: 0.8125rem;
+  color: var(--dat-text-secondary);
+  line-height: 1.6;
+}

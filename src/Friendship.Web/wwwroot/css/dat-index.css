@@ -21,9 +21,12 @@ body.dat-body:has(.di-moi) .dat-footer {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
+  transition: color var(--dat-duration-fast) var(--dat-ease-out),
+              text-underline-offset var(--dat-duration-fast) var(--dat-ease-out);
 }
 .di-lien-ket:hover {
   text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
   color: var(--dat-accent-hover);
 }
 
@@ -212,12 +215,27 @@ body.dat-body:has(.di-moi) .dat-footer {
   position: relative;
   display: flex;
   flex-direction: column;
+  transition: transform var(--dat-duration-fast) var(--dat-ease-out),
+              box-shadow var(--dat-duration-fast) var(--dat-ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .di-mau:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(58, 27, 38, 0.08);
+  }
+  .di-mau:hover .di-mau-hinh {
+    transform: scale(1.015);
+  }
+}
+.di-mau:active {
+  transform: scale(0.99);
 }
 .di-mau-hinh {
   background: var(--dat-bg-canvas);
   border-radius: var(--dat-radius-sm);
   padding: 1rem 1rem 0.5rem;
   margin-bottom: 1rem;
+  transition: transform var(--dat-duration-normal) var(--dat-ease-out);
 }
 .di-mau-hinh svg {
   display: block;
@@ -314,6 +332,13 @@ body.dat-body:has(.di-moi) .dat-footer {
   display: none;
 }
 /* Mũi tên ô chọn: nét đơn 2px, xoay khi mở */
+.di-hoi-ds summary {
+  transition: background-color var(--dat-duration-fast) var(--dat-ease-out),
+              color var(--dat-duration-fast) var(--dat-ease-out);
+}
+.di-hoi-ds summary:hover {
+  background-color: var(--dat-bg-muted);
+}
 .di-hoi-ds summary::after {
   content: "";
   flex: none;
@@ -322,9 +347,23 @@ body.dat-body:has(.di-moi) .dat-footer {
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--dat-duration-normal) var(--dat-ease-out);
 }
 .di-hoi-ds details[open] summary::after {
   transform: translateY(2px) rotate(-135deg);
+}
+.di-hoi-ds details[open] p {
+  animation: diFaqIn var(--dat-duration-normal) var(--dat-ease-out);
+}
+@keyframes diFaqIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .di-hoi-ds details p {
   margin: 0;

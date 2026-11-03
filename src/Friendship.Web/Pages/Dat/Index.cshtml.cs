@@ -9,7 +9,7 @@ namespace Friendship.Web.Pages.Dat;
 public record MauGoiY(
     int Id, string Ten, string MoTa, string TomTat,
     string TuKhoaCot, string? TuKhoaVien, int SoDau, bool CoAnhIn,
-    string Chu, string? TenKem)
+    string Chu, string? TenKem, int SoMacaron = 0, int SoCherry = 0, int SoSocola = 0)
 {
     /// <summary>Giá thấp nhất của mẫu trên các bánh nền đang bán; null khi danh mục chưa có đủ dữ liệu.</summary>
     public decimal? GiaTu { get; init; }
@@ -20,12 +20,20 @@ public class IndexModel(ThanhPhanService thanhPhanService, SanPhamService sanPha
 {
     static readonly MauGoiY[] Mau =
     [
-        new(1, "Dâu tây cổ điển", "Kem vani, viền kem xoắn, dâu tây tươi xếp trên mặt bánh và dòng chữ chúc.",
-            "Cốt vani, viền kem xoắn, 6 quả dâu", "Cốt vani", "Viền kem xoắn", 6, false, "Happy Day", "Kem vani"),
-        new(2, "Socola sinh nhật", "Kem socola phủ kín, viền kem xoắn và bốn quả dâu tây.",
-            "Cốt socola, viền kem xoắn, 4 quả dâu", "Cốt socola", "Viền kem xoắn", 4, false, "Happy Birthday!", "Socola"),
-        new(3, "Ảnh gia đình", "Có chỗ cho ảnh in ăn được. Bạn tải ảnh lên hoặc vẽ tay ở bước chữ và ảnh in.",
-            "Cốt vani, ảnh in ăn được", "Cốt vani", null, 0, true, "Family Love", "Trắng sữa"),
+        new(1, "Dâu tây & Macaron Hoàng Gia",
+            "Kem vani satin, viền kem sò Pháp, vương miện dâu tây đỏ mọng kết hợp bánh macaron kiểu Pháp ngọt ngào.",
+            "Cốt vani, viền kem xoắn, 4 dâu tây, 3 macaron",
+            "Cốt vani", "Viền kem xoắn", 4, false, "Happy Birthday", "Kem vani", SoMacaron: 3),
+
+        new(2, "Socola & Cherry Dạ Tiệc",
+            "Kem ganache socola đen bóng mượt, sốt socola rủ, thanh socola vát nghệ thuật, cherry ruby và dâu tây tươi.",
+            "Cốt socola, viền kem xoắn, 3 cherry, 3 socola miếng, 2 dâu tây",
+            "Cốt socola", "Viền kem xoắn", 2, false, "Happy Birthday!", "Socola", SoCherry: 3, SoSocola: 3),
+
+        new(3, "Khung Kỷ Niệm Bách Hoa",
+            "Khung ảnh in ăn được trang trọng ở trung tâm, viền kem sò ngọc trai, điểm xuyết macaron pastel và cherry tươi.",
+            "Cốt vani, viền kem xoắn, khung in ảnh, 2 macaron, 2 cherry",
+            "Cốt vani", "Viền kem xoắn", 0, true, "Family Love", "Trắng sữa", SoMacaron: 2, SoCherry: 2),
     ];
 
     public List<MauGoiY> Maus { get; private set; } = [];
@@ -72,6 +80,12 @@ public class IndexModel(ThanhPhanService thanhPhanService, SanPhamService sanPha
         if (m.TuKhoaVien is not null && Tim(NhomThanhPhan.VIEN, m.TuKhoaVien, true) is { } vien) tong += vien.GiaBan;
         if (m.SoDau > 0 && Tim(NhomThanhPhan.TOPPING, "Dâu tây", false) is { } dau)
             tong += dau.GiaBan * Math.Min(m.SoDau, dau.SoLuongToiDa);
+        if (m.SoMacaron > 0 && Tim(NhomThanhPhan.TOPPING, "Macaron", false) is { } macaron)
+            tong += macaron.GiaBan * Math.Min(m.SoMacaron, macaron.SoLuongToiDa);
+        if (m.SoCherry > 0 && Tim(NhomThanhPhan.TOPPING, "Cherry", false) is { } cherry)
+            tong += cherry.GiaBan * Math.Min(m.SoCherry, cherry.SoLuongToiDa);
+        if (m.SoSocola > 0 && Tim(NhomThanhPhan.TOPPING, "Socola", false) is { } socola)
+            tong += socola.GiaBan * Math.Min(m.SoSocola, socola.SoLuongToiDa);
         if (m.CoAnhIn && tps.FirstOrDefault(t => t.Nhom == NhomThanhPhan.IN_AN) is { } inAn) tong += inAn.GiaBan;
         return tong;
     }

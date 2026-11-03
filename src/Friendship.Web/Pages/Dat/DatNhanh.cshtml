@@ -33,7 +33,7 @@
                         @foreach (var b in Model.DanhSachBanh)
                         {
                             <option value="@b.Id" data-is-cake="@b.LaBanhKem.ToString().ToLower()" selected="@(Model.SanPhamId == b.Id)">
-                                @b.Ten (@b.KichThuoc) – @b.DonGia.ToString("N0") ₫ @(b.LaBanhKem ? "🎂 [Bánh kem]" : "")
+                                @b.Ten (@b.KichThuoc) – @b.DonGia.ToString("N0") ₫ @(b.LaBanhKem ? "[Bánh kem]" : "")
                             </option>
                         }
                     </select>
@@ -52,9 +52,16 @@
                             <span id="badgeBanhKem" style="font-size: 0.75rem; font-weight: 600; color: var(--dat-berry); margin-left: 0.25rem;">(Chỉ áp dụng cho bánh kem)</span>
                         </label>
                         <input asp-for="LoiChuc" id="inputLoiChuc" class="form-control" placeholder="Ví dụ: Happy Birthday Tuấn 20 tuổi" style="background:#fff; border-color:var(--dat-champagne);" />
+                        <div class="dat-quick-suggestions" style="margin-top: 0.45rem; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--dat-text-secondary); font-weight: 600;">Gợi ý câu chúc:</span>
+                            <button type="button" class="btn-suggestion-chip" onclick="document.getElementById('inputLoiChuc').value=this.getAttribute('data-text');">Chúc mừng sinh nhật</button>
+                            <button type="button" class="btn-suggestion-chip" onclick="document.getElementById('inputLoiChuc').value=this.getAttribute('data-text');">Happy Birthday</button>
+                            <button type="button" class="btn-suggestion-chip" onclick="document.getElementById('inputLoiChuc').value=this.getAttribute('data-text');">Kỷ niệm ngày cưới</button>
+                            <button type="button" class="btn-suggestion-chip" onclick="document.getElementById('inputLoiChuc').value=this.getAttribute('data-text');">Mừng thôi nôi bé</button>
+                        </div>
                         <span asp-validation-for="LoiChuc" class="text-danger small"></span>
                         <div id="hintKhongPhaiBanhKem" style="display: none; font-size: 0.8125rem; color: #b8332a; margin-top: 0.35rem; font-weight: 500;">
-                            ⚠️ Sản phẩm này không phải bánh kem, tiệm không hỗ trợ viết lời chúc.
+                            Sản phẩm này không phải bánh kem, tiệm không hỗ trợ viết lời chúc.
                         </div>
                     </div>
                 </div>
@@ -73,7 +80,7 @@
                     <input asp-for="NgayGioLay" type="datetime-local" class="form-control" style="background:#fff; border-color:var(--dat-champagne); padding: 0.65rem 1rem;" />
                     <span asp-validation-for="NgayGioLay" class="text-danger small"></span>
                     <small style="color: var(--dat-text-muted); display: block; margin-top: 0.25rem;">
-                        🕒 Thời gian lấy bánh nên cách ít nhất 1–2 giờ để bếp làm mới và đóng hộp cẩn thận.
+                        Thời gian lấy bánh nên cách ít nhất 1–2 giờ để bếp làm mới và đóng hộp cẩn thận.
                     </small>
                 </div>
 

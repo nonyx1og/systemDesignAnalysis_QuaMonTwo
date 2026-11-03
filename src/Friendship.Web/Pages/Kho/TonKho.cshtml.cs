@@ -1,5 +1,7 @@
+using Friendship.Domain;
 using Friendship.Domain.Entities;
 using Friendship.Infrastructure;
+using Friendship.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -147,5 +149,21 @@ public class TonKhoModel(FriendshipDb db, TimeProvider clock) : PageModel
                 lo.SanPham.AnhHienThi
             ));
         }
+    }
+
+    public async Task<IActionResult> OnPostCapNhatXaHangAsync(int loId, decimal phanTram, [FromServices] XaHangService xaHang)
+    {
+        try
+        {
+            await xaHang.ThietLapAsync([loId], phanTram);
+            TempData["ThongBao"] = phanTram > 0
+                ? $"Đã thiết lập giảm giá {phanTram}% xả hàng cho lô bánh #{loId}."
+                : $"Đã khôi phục giá niêm yết cho lô bánh #{loId}.";
+        }
+        catch (NghiepVuException ex)
+        {
+            TempData["Loi"] = ex.Message;
+        }
+        return RedirectToPage(new { Tab = "lobanh" });
     }
 }

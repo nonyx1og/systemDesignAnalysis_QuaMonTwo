@@ -40,6 +40,7 @@ public static class Icons
         ["menu"] = "<path d='M4 6.5h16M4 12h16M4 17.5h16'/>",
         ["chevron"] = "<path d='m9 6 6 6-6 6'/>",
         ["bell"] = "<path d='M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9zM10 20.5a2.2 2.2 0 0 0 4 0'/>",
+        ["calculator"] = "<rect x='4' y='2' width='16' height='20' rx='2'/><line x1='8' y1='6' x2='16' y2='6'/><line x1='16' y1='14' x2='16' y2='18'/><path d='M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01'/>",
     };
 
     public static IHtmlContent Svg(string ten, int size = 20, string? css = null) =>

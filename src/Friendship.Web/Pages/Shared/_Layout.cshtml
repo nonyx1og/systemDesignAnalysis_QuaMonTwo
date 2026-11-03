@@ -7,6 +7,7 @@
     <title>@ViewData["Title"] – FrendshipBakery</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
 </head>
 <body>
 @if (User.Identity?.IsAuthenticated == true)
@@ -40,24 +41,17 @@
                         <div class="text-subdued small">@vaiTro.TenHienThi()</div>
                     </div>
                     <div class="px-3 py-1 bg-light border-top border-bottom small text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">
-                        ⚡ Đổi tài khoản nhanh
+                        Đổi tài khoản
                     </div>
                     @foreach (var u in Db.NhanViens.Where(x => x.DangHoatDong).OrderBy(x => x.VaiTro).ToList())
                     {
                         var isCurrent = u.Id == User.NhanVienId();
-                        var icon = u.VaiTro switch {
-                            VaiTro.QUAN_TRI => "👑",
-                            VaiTro.QUAN_LY => "💼",
-                            VaiTro.BAN_HANG => "🛒",
-                            VaiTro.SAN_XUAT => "🎂",
-                            VaiTro.KHO => "📦",
-                            _ => "👤"
-                        };
+
                         <form method="post" asp-page="/Account/Switch" class="m-0">
                             <input type="hidden" name="id" value="@u.Id" />
                             <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
                             <button type="submit" class="dropdown-item d-flex justify-content-between align-items-center py-1 @(isCurrent ? "active" : "")" style="font-size: 0.8125rem;">
-                                <span>@icon @u.HoTen (@u.TenDangNhap)</span>
+                                <span>@u.HoTen <span class="text-subdued small">(@u.TenDangNhap)</span></span>
                                 <span class="badge @(isCurrent ? "bg-white text-dark" : "bg-light text-muted")" style="font-size: 0.65rem;">@u.VaiTro.TenHienThi()</span>
                             </button>
                         </form>

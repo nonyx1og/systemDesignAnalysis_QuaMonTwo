@@ -16,7 +16,7 @@
                     <div>
                         <h1 class="dat-h1" style="font-size: 1.5rem; margin: 0 0 0.25rem;">@Model.Khach.TenKhachHang</h1>
                         <p style="margin: 0; color: var(--dat-text-secondary); font-size: 0.875rem;">
-                            📞 @Model.Khach.SoDienThoai · Tham gia từ: @(Model.Khach.NgayTao?.ToString("dd/MM/yyyy") ?? "Gần đây")
+                            @Model.Khach.SoDienThoai · Tham gia từ: @(Model.Khach.NgayTao?.ToString("dd/MM/yyyy") ?? "Gần đây")
                         </p>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                 <a href="/Dat/DonHang" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">📦</span>
+                        
                         <span class="badge" style="background: var(--dat-rose-100); color: var(--dat-berry); font-weight: 700; border-radius: 12px; padding: 0.2rem 0.5rem;">@Model.SoDonHang đơn</span>
                     </div>
                     <div>
@@ -48,7 +48,7 @@
                 </a>
 
                 <a href="/Dat/Menu" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
-                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎂</div>
+                    
                     <div>
                         <strong style="color: var(--dat-text-main); font-size: 1rem; display: block;">Thực đơn & Đặt bánh</strong>
                         <span style="font-size: 0.8125rem; color: var(--dat-text-secondary);">Chọn mẫu bánh và thành phần nguyên liệu</span>
@@ -56,7 +56,7 @@
                 </a>
 
                 <a href="/Dat/ThietKe" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
-                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎨</div>
+                    
                     <div>
                         <strong style="color: var(--dat-text-main); font-size: 1rem; display: block;">Tự thiết kế bánh</strong>
                         <span style="font-size: 0.8125rem; color: var(--dat-text-secondary);">Tự chọn cốt, kem, viền và chữ chúc</span>
@@ -65,7 +65,7 @@
 
                 <a href="/Dat/GopY" class="dat-paper" style="padding: 1.25rem; text-decoration: none; border-color: var(--dat-champagne); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span style="font-size: 1.5rem;">💬</span>
+                        
                         <span class="badge" style="background: #e8f5e9; color: #2e7d32; font-weight: 700; border-radius: 12px; padding: 0.2rem 0.5rem;">@Model.SoGopY góp ý</span>
                     </div>
                     <div>
@@ -118,7 +118,7 @@
         <div style="max-width: 600px; margin: 2rem auto;">
             <div class="dat-paper" style="padding: 2.5rem 2rem; text-align: center;">
                 <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--dat-berry); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem;">
-                    👔
+                    
                 </div>
                 <h1 class="dat-h1" style="font-size: 1.75rem; margin-bottom: 0.25rem;">Chào @Model.TenNhanVien</h1>
                 <p style="color: var(--dat-text-secondary); margin-bottom: 1.5rem;">
@@ -127,20 +127,20 @@
 
                 <div style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 360px; margin: 0 auto 1.5rem;">
                     <a href="/TongQuan" class="dat-btn dat-btn-primary" style="padding: 0.75rem 1rem; font-weight: 600;">
-                        📊 Vào Bàn làm việc / Tổng quan
+                        Vào Bàn làm việc / Tổng quan
                     </a>
                     <a href="/BanHang/DonHang" class="dat-btn" style="background:#fff; border:1px solid var(--dat-champagne); padding: 0.75rem 1rem;">
-                        🛒 Quản lý bán hàng & Đơn đặt
+                        Quản lý bán hàng & Đơn đặt
                     </a>
                     <a href="/Bep/ThietKe" class="dat-btn" style="background:#fff; border:1px solid var(--dat-champagne); padding: 0.75rem 1rem;">
-                        🎂 Quản lý sản xuất & Bếp bánh
+                        Quản lý sản xuất & Bếp bánh
                     </a>
                 </div>
 
                 <form method="post" asp-page="/Account/Logout" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--dat-champagne);">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="dat-btn" style="background: none; border: 1px solid #dc3545; color: #dc3545; padding: 0.5rem 1.25rem; font-size: 0.875rem;">
-                        🚪 Đăng xuất tài khoản nhân viên
+                        Đăng xuất tài khoản nhân viên
                     </button>
                 </form>
             </div>
@@ -189,7 +189,7 @@
                 <!-- Lối vào dành cho nhân viên nội bộ -->
                 <div style="margin-top: 2rem; padding: 1rem; background: var(--dat-cream); border-radius: var(--dat-radius-sm); border: 1px solid var(--dat-champagne); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
                     <div>
-                        <strong style="font-size: 0.875rem; color: var(--dat-text-main); display: block;">🏢 Dành cho nhân viên tiệm bánh</strong>
+                        <strong style="font-size: 0.875rem; color: var(--dat-text-main); display: block;">Dành cho nhân viên tiệm bánh</strong>
                         <span style="font-size: 0.75rem; color: var(--dat-text-secondary);">Thu ngân, thợ làm bánh, quản lý kho & quản trị</span>
                     </div>
                     <a href="/Account/Login" class="dat-btn" style="background:#fff; border:1px solid var(--dat-champagne); font-size: 0.8125rem; white-space: nowrap; padding: 0.35rem 0.75rem;">

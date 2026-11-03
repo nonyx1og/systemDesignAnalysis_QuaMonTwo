@@ -10,6 +10,9 @@
         <p class="text-secondary mb-0 small">Theo dõi tồn kho nguyên liệu sản xuất và các lô bánh thành phẩm tại tiệm</p>
     </div>
     <div class="d-flex flex-wrap gap-2">
+        <a asp-page="/Kho/GiaVon" class="btn btn-outline-success btn-sm">
+            @Icons.Svg("calculator", 16) Giá vốn & Dự trù
+        </a>
         <a asp-page="/Kho/NhapKho" class="btn btn-primary btn-sm">
             @Icons.Svg("arrow-down", 16) + Nhập kho
         </a>
@@ -24,6 +27,21 @@
         </a>
     </div>
 </div>
+
+@if (TempData["ThongBao"] is string thongBao)
+{
+    <div class="alert alert-success alert-dismissible fade show small py-2 px-3 mb-3" role="alert">
+        @thongBao
+        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+}
+@if (TempData["Loi"] is string loi)
+{
+    <div class="alert alert-danger alert-dismissible fade show small py-2 px-3 mb-3" role="alert">
+        @loi
+        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+}
 
 <!-- Thống kê KPI tồn kho -->
 <div class="row g-3 mb-4">
@@ -44,12 +62,12 @@
     <div class="col-6 col-lg-3">
         <div class="stat-card">
             <div class="so text-dark">@Model.TongLoBanh</div>
-            <div class="nhan">Lô bánh thành phẩm còn tồn</div>
+            <div class="nhan">Lô bánh thành phẩm đang có</div>
         </div>
     </div>
     <div class="col-6 col-lg-3">
         <div class="stat-card">
-            <div class="so @(Model.SoLoBanhCanDate > 0 ? "text-warning" : "text-success")">
+            <div class="so @(Model.SoLoBanhCanDate > 0 ? "text-warning" : "text-muted")">
                 @Model.SoLoBanhCanDate
             </div>
             <div class="nhan">Lô bánh cận date / hết hạn</div>
@@ -58,39 +76,39 @@
 </div>
 
 <!-- Tabs & Bộ lọc tìm kiếm -->
-<div class="card-f mb-3 p-3">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <ul class="nav nav-pills" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link @(Model.Tab != "lobanh" ? "active" : "")" href="?Tab=nguyenlieu@(string.IsNullOrEmpty(Model.TuKhoa) ? "" : $"&TuKhoa={Uri.EscapeDataString(Model.TuKhoa)}")">
-                    🌾 Nguyên liệu sản xuất (@Model.TongNguyenLieu)
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(Model.Tab == "lobanh" ? "active" : "")" href="?Tab=lobanh@(string.IsNullOrEmpty(Model.TuKhoa) ? "" : $"&TuKhoa={Uri.EscapeDataString(Model.TuKhoa)}")">
-                    🎂 Bánh thành phẩm / Lô bánh (@Model.TongLoBanh)
-                </a>
-            </li>
-        </ul>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3 border-bottom pb-2">
+    <ul class="nav nav-pills gap-1">
+        <li class="nav-item">
+            <a class="nav-link @(Model.Tab == "nguyenlieu" ? "active" : "")" asp-page="/Kho/TonKho" asp-route-Tab="nguyenlieu" asp-route-TuKhoa="@Model.TuKhoa">
+                Nguyên liệu (@Model.TongNguyenLieu)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.Tab == "lobanh" ? "active" : "")" asp-page="/Kho/TonKho" asp-route-Tab="lobanh" asp-route-TuKhoa="@Model.TuKhoa">
+                Bánh thành phẩm (@Model.TongLoBanh)
+            </a>
+        </li>
+    </ul>
 
-        <form method="get" class="d-flex gap-2">
-            <input type="hidden" name="Tab" value="@Model.Tab" />
-            <input type="text" name="TuKhoa" value="@Model.TuKhoa" class="form-control form-control-sm" placeholder="Tìm kiếm theo tên..." style="width: 240px;" />
-            <button type="submit" class="btn btn-outline-primary btn-sm">Tìm</button>
-            @if (!string.IsNullOrWhiteSpace(Model.TuKhoa))
-            {
-                <a href="?Tab=@Model.Tab" class="btn btn-outline-secondary btn-sm">Xóa</a>
-            }
-        </form>
-    </div>
+    <form method="get" class="d-flex gap-2">
+        <input type="hidden" name="Tab" value="@Model.Tab" />
+        <div class="input-group input-group-sm" style="width: 250px;">
+            <input type="text" name="TuKhoa" class="form-control" placeholder="Tìm kiếm tên..." value="@Model.TuKhoa" />
+            <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.TuKhoa))
+        {
+            <a asp-page="/Kho/TonKho" asp-route-Tab="@Model.Tab" class="btn btn-outline-secondary btn-sm">Xóa</a>
+        }
+    </form>
 </div>
 
-@if (Model.Tab != "lobanh")
+@if (Model.Tab == "nguyenlieu")
 {
     <!-- Bảng tồn kho nguyên liệu -->
     @if (Model.DanhSachNguyenLieu.Count == 0)
     {
-        <div class="card-f text-center py-4 text-muted">Không tìm thấy nguyên liệu nào phù hợp.</div>
+        <div class="card-f text-center py-4 text-muted">Không tìm thấy nguyên liệu nào trong kho.</div>
     }
     else
     {
@@ -136,7 +154,7 @@
                             <td data-label="Tình trạng">
                                 @if (item.DuoiMucCanhBao)
                                 {
-                                    <span class="badge bg-danger text-white">⚠️ Dưới mức an toàn</span>
+                                    <span class="badge bg-danger text-white">Dưới mức an toàn</span>
                                 }
                                 else if (item.TonHetHan > 0)
                                 {
@@ -193,17 +211,19 @@ else
                     <tr>
                         <th>Mã lô</th>
                         <th>Sản phẩm</th>
-                        <th>Kích thước</th>
+                        <th>Quy cách</th>
                         <th class="text-end">Đơn giá</th>
-                        <th class="text-end">Tồn kho / Sản xuất</th>
-                        <th>Ngày sản xuất</th>
+                        <th class="text-end">Tồn kho / Ra lò</th>
                         <th>Hạn sử dụng</th>
                         <th>Tình trạng</th>
+                        <th class="text-end">Xử lý cận date / Xả hàng</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var lo in Model.DanhSachLoBanh)
                     {
+                        var isHetHan = lo.TinhTrang == "Hết hạn";
+                        var isCanDate = lo.TinhTrang.Contains("Cận date");
                         <tr>
                             <td data-label="Mã lô">
                                 <code>#@lo.Id</code>
@@ -214,12 +234,11 @@ else
                                     <strong class="text-dark">@lo.TenBanh</strong>
                                 </div>
                             </td>
-                            <td data-label="Kích thước">@lo.KichThuoc</td>
+                            <td data-label="Quy cách">@lo.KichThuoc</td>
                             <td data-label="Đơn giá" class="text-end">@Fmt.Tien(lo.DonGia)</td>
                             <td data-label="Tồn kho" class="text-end">
                                 <strong class="text-primary">@lo.SoLuongTon</strong> / @lo.SoLuongSanXuat
                             </td>
-                            <td data-label="Ngày SX">@Fmt.NgayGio(lo.NgaySanXuat)</td>
                             <td data-label="HSD">
                                 <strong>@Fmt.NgayGio(lo.HanSuDung)</strong>
                             </td>
@@ -228,6 +247,31 @@ else
                                 @if (lo.TyLeGiamXaHang > 0)
                                 {
                                     <span class="badge bg-danger ms-1">-@((int)(lo.TyLeGiamXaHang * 100))% xả hàng</span>
+                                }
+                            </td>
+                            <td data-label="Xử lý" class="text-end">
+                                @if (isHetHan)
+                                {
+                                    <a asp-page="/Huy/Index" class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                        Lập phiếu hủy
+                                    </a>
+                                }
+                                else if (isCanDate || lo.TyLeGiamXaHang > 0)
+                                {
+                                    <form method="post" asp-page-handler="CapNhatXaHang" class="d-inline-flex align-items-center gap-1">
+                                        <input type="hidden" name="loId" value="@lo.Id" />
+                                        <select name="phanTram" class="form-select form-select-sm py-0 px-1" style="font-size: 0.75rem; width: 95px;">
+                                            <option value="0" selected="@(lo.TyLeGiamXaHang == 0 ? "selected" : null)">Giá gốc</option>
+                                            <option value="20" selected="@(lo.TyLeGiamXaHang == 0.2m ? "selected" : null)">Giảm 20%</option>
+                                            <option value="30" selected="@(lo.TyLeGiamXaHang == 0.3m ? "selected" : null)">Giảm 30%</option>
+                                            <option value="50" selected="@(lo.TyLeGiamXaHang == 0.5m ? "selected" : null)">Giảm 50%</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">Lưu</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Bình thường</span>
                                 }
                             </td>
                         </tr>
